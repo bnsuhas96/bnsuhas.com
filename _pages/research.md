@@ -6,13 +6,9 @@ permalink: /research/
 
 I work at the intersection of **Machine Learning**, **Human-Computer Interaction**, and **Healthcare**, developing AI systems that are both clinically meaningful and privacy-preserving.
 
-## Research Highlights
+## TL;DR
 
-- **Synthetic Therapy Data**: Created "Thousand Voices of Trauma" - 3,000 synthetic PTSD therapy conversations with clinical validation
-- **Empathetic AI**: Developed TIDE dataset and fine-tuned small language models for trauma-informed, empathetic dialogue support  
-- **Automated Clinical Assessment**: Built audio-language models for automatic temporal localization of therapy fidelity elements
-- **Privacy-Preserving ML**: Pioneered federated learning approaches for depression assessment using speech data
-- **Healthcare Applications**: Cuff-less blood pressure monitoring, speech-based neurological disorder detection
+My Google Scholar profile can be viewed [here](https://scholar.google.com/citations?user=EOJDCfMAAAAJ&hl=en).
 
 ## Recognition & Fellowships
 
@@ -43,6 +39,16 @@ I was lucky to have the opportunity to work at the Indian Institute of Science i
 
 At Penn State, I have been fortunate to collaborate with researchers from different departments, including the School of EECS and the College of IST. For my [Master's thesis](https://etda.libraries.psu.edu/files/final_submissions/23854), I worked with Dr. Saeed Abdullah to explore how federated learning can be used to preserve privacy while assessing depression. I was honored to have Dr. David Miller and Dr. Jing Yang serve on my thesis committee, and our paper on this work was accepted at [ICASSP 2022](https://doi.org/10.1109/ICASSP43922.2022.9746827)!
 
+### Recent Research (Ph.D. Thesis)
+
+My doctoral research focused on **Generative Human-Centered AI for Mental Health**, developing novel approaches for PTSD therapy support:
+
+- **Synthetic Therapy Data**: Created "Thousand Voices of Trauma" - 3,000 synthetic PTSD therapy conversations with clinical validation
+- **Empathetic AI**: Developed TIDE dataset and fine-tuned small language models for trauma-informed, empathetic dialogue support  
+- **Automated Clinical Assessment**: Built audio-language models for automatic temporal localization of therapy fidelity elements
+- **Privacy-Preserving Methods**: Extended federated learning approaches for sensitive healthcare applications
+- **Healthcare Applications**: Continued work on cuff-less blood pressure monitoring and speech-based health assessment
+
 You can visit the [Talks section](/talks/) to view some of my presentations.
 
 ### Fun Stuff
@@ -52,10 +58,6 @@ My research Co-authorship distances are as follows (in no particular order):
 - Dijkstra number of [5](https://www.csauthors.net/distance/suhas-bn/edsger-w-dijkstra).
 - Erdős number of [5](https://www.csauthors.net/distance/suhas-bn/paul-erdos).
 - In the deep learning community: Andrew Ng (**3**), Yann LeCun (**3**), Geoff Hinton (**4**), and Yoshua Bengio (**4**).
-
-## TL;DR
-
-My Google Scholar profile can be viewed [here](https://scholar.google.com/citations?user=EOJDCfMAAAAJ&hl=en).
 
 ### Recent Publications & Patents
 
