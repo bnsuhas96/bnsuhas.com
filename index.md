@@ -1,29 +1,25 @@
 ---
-layout: home
-title: Home
+layout: page
+title: Research Overview
+permalink: /research-old/
 ---
 
-<div class="home-header">
-  <div class="home-intro">
-    <h1>Hey there! 👋</h1>
-    <h2>I'm Suhas</h2>
-    
-    <p class="tagline">Applied Scientist at Amazon • AI Researcher • Chelsea FC Fan</p>
-    
-    <p>I build AI systems that actually help people - from creating empathetic chatbots for PTSD therapy to using your voice to detect health conditions. When I'm not coding, you'll find me playing cricket, creating rhythms on the mridangam, or capturing landscapes through my camera.</p>
-    
-    <p>Originally from Bangalore 🇮🇳, currently in the Pacific Northwest 🏔️</p>
-  </div>
-</div>
+# Research Overview
 
-### What's New 
+I work at the intersection of **Machine Learning**, **Human-Computer Interaction**, and **Healthcare**, developing AI systems that are both clinically meaningful and privacy-preserving.
 
-- **[Jun 2025]** Started as Applied Scientist at Amazon DEX ML Team
-- **[Apr 2025]** Won 3rd Place at AI Week 2025 (3rd out of 80+ posters) 🏆
-- **[Mar 2025]** Filed US Patent for cuff-less blood pressure monitoring
+## Research Highlights
 
-### Connect With Me
+- **Synthetic Therapy Data**: Created "Thousand Voices of Trauma" - 3,000 synthetic PTSD therapy conversations with clinical validation
+- **Empathetic AI**: Developed TIDE dataset and fine-tuned small language models for trauma-informed, empathetic dialogue support  
+- **Automated Clinical Assessment**: Built audio-language models for automatic temporal localization of therapy fidelity elements
+- **Privacy-Preserving ML**: Pioneered federated learning approaches for depression assessment using speech data
+- **Healthcare Applications**: Cuff-less blood pressure monitoring, speech-based neurological disorder detection
 
-**[Resume](/assets/media/2025-01_Suhas_Technical.pdf)** • **[Research](/research/)** • **[Photography](/photography/)** • **[Stories](/stories/)**
+## Recognition & Fellowships
 
-**[LinkedIn](https://www.linkedin.com/in/bnsuhas)** • **[GitHub](https://github.com/bnsuhas96)** • **[Email](mailto:bnsuhas@bnsuhas.com)**
+- **NSF NRT LINDIV Graduate Fellowship** (2022-2023)
+- **Google CS Research Mentorship Program** (2022) 
+- **Google Developers ML Bootcamp** (2022)
+- **Penn State Graduate Student Travel Grant** ($1,000)
+- **Best Poster Awards**: AI Week 2025 (3rd place), MASC-SLL (1st place)

@@ -35,12 +35,8 @@ plugins:
 # Theme
 theme: minima
 
-# Navigation
+# Navigation  
 navigation:
-  - title: Home
-    url: /
-  - title: About
-    url: /about/
   - title: Research
     url: /research/
   - title: Stories
