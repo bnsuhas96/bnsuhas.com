@@ -5,21 +5,35 @@ permalink: /about/
 ---
 <link rel="stylesheet" href="/assets/css/style.css">
 
-Hi, I'm Suhas!
+<div class="about-header">
+  <div class="about-text">
+    <h2>Hi, I'm Suhas!</h2>
+    
+    <p>I'm an Applied Scientist at Amazon, passionate about building AI systems that actually help people. I recently wrapped up my Ph.D. in Informatics at Penn State, where I spent my time creating AI tools for mental health therapy - think synthetic therapy conversations and empathetic language models that can support PTSD treatment.</p>
+    
+    <p>What gets me excited? The intersection of technology and human wellbeing. Whether it's using speech signals to detect neurological conditions, building privacy-preserving depression assessment tools, or creating sensor networks to prevent train derailments in India, I love working on problems that matter.</p>
+  </div>
+  <div class="about-photo">
+    <img src="/assets/media/2023-02_cropped-2DC71079-18C7-4213-9F00-674EAC7D97B7.jpeg" alt="Suhas" class="profile-photo">
+  </div>
+</div>
 
-I am an Applied Scientist at Amazon with a Ph.D. in Informatics from Penn State University. My doctoral research focused on **Generative Human-Centered AI for Mental Health**, where I developed novel synthetic data generation methods, privacy-preserving techniques, and automated clinical assessment tools for PTSD therapy. My work includes creating large-scale synthetic therapy datasets, developing empathetic small language models, and building automated fidelity tracking systems for clinical interventions. [[Ph.D. Thesis]](https://etda.libraries.psu.edu/files/final_submissions/32981)
+## Beyond the Lab
 
-During my Ph.D., I interned at both Amazon and Samsung Research America, working on applied machine learning in healthcare. I also hold a Master's degree in Electrical Engineering from Penn State, with a focus on Signal Processing, where I developed privacy-preserving methods for assessing depression using speech signal processing. [[Master's Thesis]](https://etda.libraries.psu.edu/files/final_submissions/23854), [[Slides]](https://drive.google.com/file/d/1-vZb9om8xlaRn_ZGYuTDahTpYzoma6pj/view?usp=sharing)
+When I'm not coding or researching, you'll find me exploring my diverse interests:
 
-My interests include **Applied Machine Learning**, **Health Tech**, **Mobile & Ubiquitous Computing**, **Signal Processing**, **Algorithm Development**, and **Human-Centered AI**.
+- **Music**: Creating intricate rhythmic patterns on the mridangam (a South Indian percussion instrument) - I even had a performance aired on TV back in 2006!
+- **Sports**: Playing cricket and watching football (huge Chelsea fan! 💙)
+- **Photography**: Capturing landscapes and travel moments - [check out my work here](/photography/)
+- **Speedcubing**: Solving Rubik's cubes quickly because why not?
 
-I have had the opportunity to work on several exciting projects, including using sensor networks to prevent train derailments and using audio signal processing to identify neurological disorders. [You can learn more about these projects here.](/research/)
+I'm originally from Bangalore, India, and currently based in the beautiful Pacific Northwest. Always up for a good conversation about technology, research, football, or life in general!
 
-I'm originally from Bangalore, India. In my free time, I enjoy playing cricket, creating intricate rhythmic patterns on the mridangam, watching football (I'm a huge Chelsea fan!), taking landscape [photographs](/photography/), and speedcubing.
+### Let's Connect!
 
-Feel free to reach out for collaborations or to exchange ideas in tech and health.
-
-**Quick Links:** [Resume](/assets/media/2025-01_Suhas_Technical.pdf), [Google Scholar](https://scholar.google.com/citations?user=EOJDCfMAAAAJ), [E-mail](mailto:bnsuhas@bnsuhas.com), [LinkedIn](https://www.linkedin.com/in/bnsuhas), [Github](https://github.com/bnsuhas96), [Twitter](http://twitter.com/asksuhas)
+- **Work**: [Resume](/assets/media/2025-01_Suhas_Technical.pdf) • [Google Scholar](https://scholar.google.com/citations?user=EOJDCfMAAAAJ)
+- **Social**: [LinkedIn](https://www.linkedin.com/in/bnsuhas) • [GitHub](https://github.com/bnsuhas96) • [Twitter](http://twitter.com/asksuhas)
+- **Email**: [bnsuhas@bnsuhas.com](mailto:bnsuhas@bnsuhas.com)
 
 ### Recent News
 
