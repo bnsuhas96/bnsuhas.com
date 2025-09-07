@@ -8,7 +8,7 @@ permalink: /misc/
 
 ### Music
 - **Mridangam**: I enjoy creating intricate rhythmic patterns on this South Indian percussion instrument
-- Learning and practicing classical Carnatic rhythms
+- Learning and practicing classical Carnatic rhythms since I was 8 years old!
 - Had a mridangam performance aired on DD Chandana (Kannada Doordarshan) in 2006
 
 **Mridangam Performance (2006):**
@@ -37,11 +37,11 @@ permalink: /misc/
 - Originally from Bangalore, India
 - Currently based in State College, PA
 - Coffee enthusiast
-- Always up for discussing tech, research, or football!
+- Always up for discussing tech, research, cricket, or football!
 
 ## Contact & Social
 
-- **Email**: [bnsuhas@bnsuhas.com](mailto:bnsuhas@bnsuhas.com)
+- **Email**: [bnsuhas96@gmail.com](mailto:bnsuhas96@gmail.com)
 - **LinkedIn**: [/in/bnsuhas](https://www.linkedin.com/in/bnsuhas)
 - **GitHub**: [/bnsuhas96](https://github.com/bnsuhas96)
 - **Twitter**: [@asksuhas](http://twitter.com/asksuhas)

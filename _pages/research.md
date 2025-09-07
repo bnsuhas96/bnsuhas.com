@@ -6,17 +6,13 @@ permalink: /research/
 
 I work at the intersection of **Machine Learning**, **Human-Computer Interaction**, and **Healthcare**, developing AI systems that are both clinically meaningful and privacy-preserving.
 
-## TL;DR
-
-My Google Scholar profile can be viewed [here](https://scholar.google.com/citations?user=EOJDCfMAAAAJ&hl=en).
-
 ## Recognition & Fellowships
 
 - **NSF NRT LINDIV Graduate Fellowship** (2022-2023)
 - **Google CS Research Mentorship Program** (2022) 
 - **Google Developers ML Bootcamp** (2022)
 - **Penn State Graduate Student Travel Grant** ($1,000)
-- **Best Poster Awards**: AI Week 2025 (3rd place), MASC-SLL (1st place)
+- **Best Poster Awards**: AI Week 2025 (3rd place), MASC-SLL 2025 (1st place)
 
 ---
 
@@ -28,6 +24,10 @@ a) Longer Version: **TS; WM** (Too Short; Want More) and
 b) Shorter Version: **TL; DR** (Too Long; Didn't Read).
 
 Pick yours!
+
+## TL;DR
+
+My Google Scholar profile can be viewed [here](https://scholar.google.com/citations?user=EOJDCfMAAAAJ&hl=en).
 
 ## TS; WM
 
@@ -46,7 +46,7 @@ My doctoral research focused on **Generative Human-Centered AI for Mental Health
 - **Synthetic Therapy Data**: Created "Thousand Voices of Trauma" - 3,000 synthetic PTSD therapy conversations with clinical validation
 - **Empathetic AI**: Developed TIDE dataset and fine-tuned small language models for trauma-informed, empathetic dialogue support  
 - **Automated Clinical Assessment**: Built audio-language models for automatic temporal localization of therapy fidelity elements
-- **Privacy-Preserving Methods**: Extended federated learning approaches for sensitive healthcare applications
+- **Privacy-Preserving Methods**: Extended federated learning, and differential privacy approaches for sensitive healthcare applications
 - **Healthcare Applications**: Continued work on cuff-less blood pressure monitoring and speech-based health assessment
 
 You can visit the [Talks section](/talks/) to view some of my presentations.

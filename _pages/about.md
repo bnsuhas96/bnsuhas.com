@@ -9,7 +9,7 @@ permalink: /
   <div class="about-text">
     <h2>Hi, I'm Suhas!</h2>
     
-    <p>I'm an Applied Scientist at Amazon, passionate about building AI systems that actually help people. I recently wrapped up my Ph.D. in Informatics at Penn State, where I spent my time creating AI tools for mental health therapy - think synthetic therapy conversations and empathetic language models that can support PTSD treatment.</p>
+    <p>I'm an Applied Scientist at Amazon, passionate about building AI systems that actually help people. I recently wrapped up my Ph.D. in Informatics at Penn State, where I spent my time creating AI tools for mental health therapy - think synthetic therapy conversations and empathetic small language models that can support PTSD treatment.</p>
     
     <p>What gets me excited? The intersection of technology and human wellbeing. Whether it's using speech signals to detect neurological conditions, building privacy-preserving depression assessment tools, or creating sensor networks to prevent train derailments in India, I love working on problems that matter.</p>
   </div>
@@ -20,10 +20,10 @@ permalink: /
 
 ## Beyond the Lab
 
-When I'm not coding or researching, you'll find me exploring my diverse interests:
+When I'm not researching, you'll find me exploring my diverse interests:
 
 - **Music**: Creating intricate rhythmic patterns on the mridangam (a South Indian percussion instrument) - I even had a performance aired on TV back in 2006!
-- **Sports**: Playing cricket and watching football (huge Chelsea fan! 💙)
+- **Sports**: Playing cricket and watching football (huge Chelsea fan!)
 - **Photography**: Capturing landscapes and travel moments - [check out my work here](/photography/)
 - **Speedcubing**: Solving Rubik's cubes quickly because why not?
 
@@ -33,16 +33,15 @@ I'm originally from Bangalore, India, and currently based in the beautiful Pacif
 
 - **Work**: [Resume](/assets/media/2025-01_Suhas_Technical.pdf) • [Google Scholar](https://scholar.google.com/citations?user=EOJDCfMAAAAJ)
 - **Social**: [LinkedIn](https://www.linkedin.com/in/bnsuhas) • [GitHub](https://github.com/bnsuhas96) • [Twitter](http://twitter.com/asksuhas)
-- **Email**: [bnsuhas@bnsuhas.com](mailto:bnsuhas@bnsuhas.com)
+- **Email**: [bnsuhas96@gmail.com](mailto:bnsuhas96@gmail.com)
 
 ### Recent News
-
+- [Aug 2025] Two papers accepted at EMNLP 2025!
 - [Jun 2025] Started as Applied Scientist at Amazon DEX ML Team
 - [May 2025] Featured in Penn State News for 3rd place win at AI Week 2025!
 - [Apr 2025] Won 3rd Place at AI Week 2025 (3rd out of 80+ posters)
 - [Apr 2025] Won Best Poster Award at MASC-SLL (1st out of 60+ posters)
 - [Mar 2025] Filed US Patent for cuff-less blood pressure monitoring method
-- [Aug 2025] Two papers accepted at EMNLP 2025!
 - [Oct 2024] Served as a Judge, 3 Minute Thesis Competition @ Penn State
 - [Oct 2024] Awarded the College of IST Graduate Student Travel Grant ($1000)!
 - [Aug-Nov 2024] Interned at Amazon AWS Health AI as Applied Scientist Intern
