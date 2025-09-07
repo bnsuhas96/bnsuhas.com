@@ -1,0 +1,57 @@
+I"�<link rel="stylesheet" href="/assets/css/style.css" />
+
+<p>Hi, I’m Suhas!</p>
+
+<p>I am an Applied Scientist at Amazon with a Ph.D. in Informatics from Penn State University. My doctoral research focused on <strong>Generative Human-Centered AI for Mental Health</strong>, where I developed novel synthetic data generation methods, privacy-preserving techniques, and automated clinical assessment tools for PTSD therapy. My work includes creating large-scale synthetic therapy datasets, developing empathetic small language models, and building automated fidelity tracking systems for clinical interventions. <a href="https://etda.libraries.psu.edu/files/final_submissions/32981">[Ph.D. Thesis]</a></p>
+
+<p>During my Ph.D., I interned at both Amazon and Samsung Research America, working on applied machine learning in healthcare. I also hold a Master’s degree in Electrical Engineering from Penn State, with a focus on Signal Processing, where I developed privacy-preserving methods for assessing depression using speech signal processing. <a href="https://etda.libraries.psu.edu/files/final_submissions/23854">[Master’s Thesis]</a>, <a href="https://drive.google.com/file/d/1-vZb9om8xlaRn_ZGYuTDahTpYzoma6pj/view?usp=sharing">[Slides]</a></p>
+
+<p>My interests include <strong>Applied Machine Learning</strong>, <strong>Health Tech</strong>, <strong>Mobile &amp; Ubiquitous Computing</strong>, <strong>Signal Processing</strong>, <strong>Algorithm Development</strong>, and <strong>Human-Centered AI</strong>.</p>
+
+<p>I have had the opportunity to work on several exciting projects, including using sensor networks to prevent train derailments and using audio signal processing to identify neurological disorders. <a href="/research/">You can learn more about these projects here.</a></p>
+
+<p>I’m originally from Bangalore, India. In my free time, I enjoy playing cricket, creating intricate rhythmic patterns on the mridangam, watching football (I’m a huge Chelsea fan!), taking landscape <a href="/photography/">photographs</a>, and speedcubing.</p>
+
+<p>Feel free to reach out for collaborations or to exchange ideas in tech and health.</p>
+
+<p><strong>Quick Links:</strong> <a href="/assets/media/2025-01_Suhas_Technical.pdf">Resume</a>, <a href="https://scholar.google.com/citations?user=EOJDCfMAAAAJ">Google Scholar</a>, <a href="mailto:bnsuhas@bnsuhas.com">E-mail</a>, <a href="https://www.linkedin.com/in/bnsuhas">LinkedIn</a>, <a href="https://github.com/bnsuhas96">Github</a>, <a href="http://twitter.com/asksuhas">Twitter</a></p>
+
+<h3 id="recent-news">Recent News</h3>
+
+<ul>
+  <li>[Jun 2025] Started as Applied Scientist at Amazon DEX ML Team</li>
+  <li>[May 2025] Featured in Penn State News for 3rd place win at AI Week 2025!</li>
+  <li>[Apr 2025] Won 3rd Place at AI Week 2025 (3rd out of 80+ posters)</li>
+  <li>[Apr 2025] Won Best Poster Award at MASC-SLL (1st out of 60+ posters)</li>
+  <li>[Mar 2025] Filed US Patent for cuff-less blood pressure monitoring method</li>
+  <li>[Dec 2024] Two papers accepted at EMNLP 2025!</li>
+  <li>[Oct 2024] Served as a Judge, 3 Minute Thesis Competition @ Penn State</li>
+  <li>[Oct 2024] Awarded the College of IST Graduate Student Travel Grant ($1000)!</li>
+  <li>[Aug-Nov 2024] Interned at Amazon AWS Health AI as Applied Scientist Intern</li>
+  <li>[Sep 2024] Featured on ISCA-SAC Interspeech Podcast discussing my research</li>
+  <li>[June 2024] Our work on LLMs for exercise motivation accepted at INTERSPEECH 2024!</li>
+  <li>[Apr 2024] Recognized by President Bendapudi for being awarded the NSF fellowship!</li>
+  <li>[Apr 2024] Served as a Judge for the <a href="https://urfm.psu.edu/programs/undergraduate-exhibition">2024 Undergraduate Exhibition</a> @ Penn State</li>
+  <li>[Jan 2024] Became Program Committee Member for IEEE ICHI 2024 &amp; Paper Reviewer for CHI</li>
+  <li>[Dec 2023] Our work on Cuff-less BP Monitoring was accepted at ICASSP 2024!</li>
+  <li>[Nov 2023] Passed my Comprehensive Exam (Thesis Proposal)!</li>
+  <li>[May-Aug 2023] Interned at Samsung Research America developing multimodal BP monitoring</li>
+  <li>[May 2023] Our <a href="/assets/media/2023-09_bn23_interspeech.pdf">paper</a> on Differential Privacy was accepted at INTERSPEECH 2023!</li>
+  <li>[Feb 2023] Started reviewing papers for IEEE Signal Processing Letters and ACM CUI</li>
+  <li>[Sep 2022] Selected for Google CS Research Mentorship Program (2022b Cohort)!</li>
+  <li>[Jul 2022] Selected for Google Developers Machine Learning Bootcamp 2022!</li>
+  <li>[Jun 2022] Awarded the <a href="https://lindiv.la.psu.edu/trainee-cohort/">NRT LINDIV Graduate Fellowship</a> (NSF) for 2022-2023</li>
+  <li>[May 2022] Passed my Qualifying Exam!</li>
+</ul>
+
+<h3 id="affiliations">Affiliations</h3>
+
+<div class="affiliations">
+  <img src="/assets/media/Penn-State-University-Logo.png" alt="Penn State University" />
+  <img src="/assets/media/Untitled_design_-_2023-07-27T130823.909.png" alt="Amazon AWS" />
+  <img src="/assets/media/samsung-300x122.png" alt="Samsung Research America" />
+  <img src="/assets/media/3mhealth.webp" alt="3M Health Information Systems" />
+  <img src="/assets/media/IISc_Master_Seal_Black.jpg" alt="Indian Institute of Science" />
+  <img src="/assets/media/PESUniversity-logo-removebg-preview-e1662225928289-274x300.png" alt="PES University" />
+</div>
+:ET

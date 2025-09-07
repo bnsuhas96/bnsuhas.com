@@ -1,0 +1,24 @@
+I"À<p>I enjoy capturing landscapes and moments through photography. Here are some of my favorite shots:</p>
+
+<h3 id="featured-photography">Featured Photography</h3>
+
+<!-- Instagram embed placeholders - these will work when deployed -->
+<blockquote class="instagram-media" data-instgrm-captioned="" data-instgrm-permalink="https://www.instagram.com/p/" data-instgrm-version="14"></blockquote>
+
+<h3 id="more-photography">More Photography</h3>
+
+<p>To see more of my photography work, check out my Instagram:</p>
+<ul>
+  <li><strong><a href="https://www.instagram.com/suhasclix/">@suhasclix</a></strong> - Photography account</li>
+</ul>
+
+<h3 id="camera-equipment">Camera Equipment</h3>
+
+<ul>
+  <li>Primary: DSLR with various lenses</li>
+  <li>Focus: Landscape and travel photography</li>
+  <li>Favorite subjects: Mountains, cityscapes, and natural lighting</li>
+</ul>
+
+<p><em>Instagram embeds may not display in local development but will work once deployed.</em></p>
+:ET

@@ -1,0 +1,53 @@
+# Site settings
+title: Suhas
+email: bnsuhas@bnsuhas.com
+description: ""
+baseurl: ""
+url: "https://bnsuhas.com"
+
+# Author information
+author: Suhas
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+permalink: /:categories/:year/:month/:day/:title/
+
+# Collections
+collections:
+  pages:
+    output: true
+    permalink: /:name/
+
+# Exclude files
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - vendor
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Theme
+theme: minima
+
+# Navigation
+navigation:
+  - title: Home
+    url: /
+  - title: About
+    url: /about/
+  - title: Research
+    url: /research/
+  - title: Stories
+    url: /stories/
+  - title: Photography
+    url: /photography/
+  - title: Talks
+    url: /talks/
+  - title: Misc
+    url: /misc/

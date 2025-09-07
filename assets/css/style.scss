@@ -1,0 +1,163 @@
+---
+---
+
+@import "{{ site.theme }}";
+
+// Custom styles for professional look
+.home-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin: 2rem 0;
+}
+
+.link-card {
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  padding: 20px;
+  background: #fafbfc;
+  transition: box-shadow 0.2s ease;
+  
+  &:hover {
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    border-color: #0366d6;
+  }
+  
+  h3 {
+    margin: 0 0 10px 0;
+    
+    a {
+      color: #0366d6;
+      text-decoration: none;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+  
+  p {
+    margin: 0;
+    color: #586069;
+    font-size: 14px;
+  }
+}
+
+// Professional typography
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+}
+
+// Affiliations styling
+.affiliations {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 2rem 0;
+  
+  img {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+    
+    &:nth-child(1) { // Penn State
+      margin-right: 3px;
+    }
+    
+    &:nth-child(2) { // Amazon AWS  
+      margin-right: 3px;
+    }
+    
+    &:nth-child(3) { // Samsung
+      height: 35px;
+      margin-right: 15px;
+    }
+    
+    &:nth-child(4) { // 3M Health
+      margin-right: 30px;
+    }
+    
+    &:nth-child(5) { // IISc
+      margin-right: 45px;
+    }
+    
+    &:nth-child(6) { // Last one (PES University)
+      margin-right: 40px;
+    }
+  }
+}
+
+// Better spacing for content
+.page-content {
+  line-height: 1.7;
+}
+
+// Hide duplicate footer heading
+.footer-heading {
+  display: none;
+}
+
+// Improved list styling
+ul li {
+  margin-bottom: 0.5rem;
+}
+
+// Better link styling
+a {
+  color: #0366d6;
+  
+  &:hover {
+    color: #0256cc;
+  }
+}
+
+// Code and pre blocks
+code, pre {
+  background: #f6f8fa;
+  border-radius: 3px;
+}
+
+// Video container for responsive YouTube embeds
+.video-container {
+  position: relative;
+  padding-bottom: 56.25%; // 16:9 aspect ratio
+  height: 0;
+  overflow: hidden;
+  max-width: 1000px; // Bigger maximum width
+  margin: 20px auto; // Center the container
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  
+  iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+  }
+}
+
+// Make video responsive on smaller screens
+@media (max-width: 800px) {
+  .video-container {
+    max-width: 100%;
+    margin: 20px 0;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .home-links {
+    grid-template-columns: 1fr;
+  }
+  
+  .affiliations {
+    justify-content: center;
+    
+    img {
+      max-width: 120px;
+    }
+  }
+}

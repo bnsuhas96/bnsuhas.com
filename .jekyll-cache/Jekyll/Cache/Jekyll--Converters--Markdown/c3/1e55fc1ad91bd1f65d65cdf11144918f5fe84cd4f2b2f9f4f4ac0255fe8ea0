@@ -1,0 +1,75 @@
+I"L<h1 id="welcome-im-suhas-bn">Welcome! I’m Suhas BN</h1>
+
+<h2 id="applied-scientist--amazon">Applied Scientist | Amazon</h2>
+
+<p>I am an Applied Scientist at Amazon with a Ph.D. in Informatics from Penn State University. I work at the intersection of <strong>Machine Learning</strong>, <strong>Human-Computer Interaction</strong>, and <strong>Healthcare</strong>.</p>
+
+<p>My research focuses on developing AI systems that are both clinically meaningful and privacy-preserving, with applications spanning mental health, therapeutic assessment, and healthcare monitoring.</p>
+
+<h3 id="research-highlights">Research Highlights</h3>
+
+<ul>
+  <li><strong>Synthetic Therapy Data</strong>: Created “Thousand Voices of Trauma” - 3,000 synthetic PTSD therapy conversations with clinical validation</li>
+  <li><strong>Empathetic AI</strong>: Developed TIDE dataset and fine-tuned small language models for trauma-informed, empathetic dialogue support</li>
+  <li><strong>Automated Clinical Assessment</strong>: Built audio-language models for automatic temporal localization of therapy fidelity elements</li>
+  <li><strong>Privacy-Preserving ML</strong>: Pioneered federated learning approaches for depression assessment using speech data</li>
+  <li><strong>Healthcare Applications</strong>: Cuff-less blood pressure monitoring, speech-based neurological disorder detection</li>
+</ul>
+
+<h3 id="recent-news">Recent News</h3>
+
+<ul>
+  <li><strong>[Oct 2024]</strong> Awarded College of IST Graduate Student Travel Grant ($1,000)</li>
+  <li><strong>[June 2024]</strong> Paper accepted at INTERSPEECH 2024</li>
+  <li><strong>[May 2024]</strong> Joining Amazon Healthscribe as Research Intern</li>
+  <li><strong>[Apr 2024]</strong> Recognized by Penn State President for NSF Fellowship</li>
+</ul>
+
+<h3 id="recognition">Recognition</h3>
+
+<ul>
+  <li><strong>NSF NRT LINDIV Graduate Fellowship</strong> (2022-2023)</li>
+  <li><strong>Google CS Research Mentorship Program</strong> (2022)</li>
+  <li><strong>Google Developers ML Bootcamp</strong> (2022)</li>
+</ul>
+
+<hr />
+
+<h2 id="explore">Explore</h2>
+
+<div class="home-links">
+  <div class="link-card">
+    <h3><a href="/about/">About Me</a></h3>
+    <p>Learn about my background, journey, and current work</p>
+  </div>
+  
+  <div class="link-card">
+    <h3><a href="/research/">Research</a></h3>
+    <p>Publications, projects, and academic work</p>
+  </div>
+  
+  <div class="link-card">
+    <h3><a href="/talks/">Talks</a></h3>
+    <p>Conference presentations and invited talks</p>
+  </div>
+  
+  <div class="link-card">
+    <h3><a href="/photography/">Photography</a></h3>
+    <p>Landscape photography and visual work</p>
+  </div>
+</div>
+
+<hr />
+
+<table>
+  <tbody>
+    <tr>
+      <td><strong>Quick Links:</strong> <a href="/assets/media/2025-01_Suhas_Technical.pdf">Resume</a></td>
+      <td><a href="https://scholar.google.com/citations?user=EOJDCfMAAAAJ">Google Scholar</a></td>
+      <td><a href="https://www.linkedin.com/in/bnsuhas">LinkedIn</a></td>
+      <td><a href="https://github.com/bnsuhas96">GitHub</a></td>
+      <td><a href="mailto:bnsuhas@bnsuhas.com">Email</a></td>
+    </tr>
+  </tbody>
+</table>
+:ET
