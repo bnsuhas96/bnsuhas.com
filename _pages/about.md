@@ -42,7 +42,7 @@ I'm originally from Bangalore, India, and currently based in the beautiful Pacif
 - [Apr 2025] Won 3rd Place at AI Week 2025 (3rd out of 80+ posters)
 - [Apr 2025] Won Best Poster Award at MASC-SLL (1st out of 60+ posters)
 - [Mar 2025] Filed US Patent for cuff-less blood pressure monitoring method
-- [Dec 2024] Two papers accepted at EMNLP 2025!
+- [Aug 2025] Two papers accepted at EMNLP 2025!
 - [Oct 2024] Served as a Judge, 3 Minute Thesis Competition @ Penn State
 - [Oct 2024] Awarded the College of IST Graduate Student Travel Grant ($1000)!
 - [Aug-Nov 2024] Interned at Amazon AWS Health AI as Applied Scientist Intern
