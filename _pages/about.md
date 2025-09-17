@@ -31,7 +31,7 @@ I'm originally from Bangalore, India, and currently based in the beautiful Pacif
 
 ### Let's Connect!
 
-- **Work**: [Resume](/assets/media/Suhas_Technical.pdf) • [Google Scholar](https://scholar.google.com/citations?user=EOJDCfMAAAAJ)
+- **Work**: [Resume](/assets/media/2025-09_Suhas_Technical.pdf) • [Google Scholar](https://scholar.google.com/citations?user=EOJDCfMAAAAJ)
 - **Social**: [LinkedIn](https://www.linkedin.com/in/bnsuhas) • [GitHub](https://github.com/bnsuhas96) • [Twitter](http://twitter.com/asksuhas)
 - **Email**: [bnsuhas96@gmail.com](mailto:bnsuhas96@gmail.com)
 
