@@ -36,7 +36,8 @@ I'm originally from Bangalore, India, and currently based in the beautiful Pacif
 - **Email**: [bnsuhas96@gmail.com](mailto:bnsuhas96@gmail.com)
 
 ### Recent News
-- [Aug 2025] Two papers accepted at EMNLP 2025!
+- [Aug 2025] Thousand Voices of Trauma accepted at NeurIPS 2025 as a Spotlight paper!
+- [Aug 2025] Two papers accepted at EMNLP 2025 (one Oral, one Poster)!
 - [Jun 2025] Started as Applied Scientist at Amazon DEX ML Team
 - [May 2025] Featured in Penn State News for 3rd place win at AI Week 2025!
 - [Apr 2025] Won 3rd Place at AI Week 2025 (3rd out of 80+ posters)
