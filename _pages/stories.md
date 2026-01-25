@@ -8,4 +8,4 @@ permalink: /stories/
 
 - **[Just Another Story](/assets/media/2023-09_SomeStory.pdf)** (2023) A woman's perspective on an arranged marriage.
 
-- **[How To Sell A Dream In India](/assets/media/HowToSellADreamInIndia.pdf)** (2024) Work in progress. First 4 chapters available.
+- **[How To Sell A Dream In India](/assets/media/HowToSellADreamInIndia.pdf)** (2024) First 4 chapters available.
