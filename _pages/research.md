@@ -66,42 +66,42 @@ My research Co-authorship distances are as follows (in no particular order):
 
 #### Publications
 
-**2025-2026 (Submitted/In Press)**
-1. **[Submitted to ICASSP 2026]** Suhas BN, J. Alaparthi, S. Abdullah., D. Mattioli, R. Arriaga, C. Wiese, and A. Sherrill. "Fine-Tuning Large Audio-Language Models with LoRA for Precise Temporal Localization of Prolonged Exposure Therapy Elements" [(arXiv:2504.14821)](https://arxiv.org/abs/2504.14821)
+**2025-2026 (Accepted)**
+1. **[Accepted at ICASSP 2026]** Suhas BN, J. Alaparthi, S. Abdullah., D. Mattioli, R. Arriaga, C. Wiese, and A. Sherrill. "Fine-Tuning Large Audio-Language Models with LoRA for Precise Temporal Localization of Prolonged Exposure Therapy Elements" [(arXiv:2506.09707)](https://arxiv.org/abs/2506.09707)
 
-2. **[Submitted to IEEE JSTSP]** Suhas BN, T. Bhattacharjee, B. K. Yamini, N. Atchayaram, R. Yadav, D. Gope, and PK Ghosh. "Contrastive Audio-Video Pretraining for Classification of Amyotrophic Lateral Sclerosis, Parkinson's Disease, and Healthy Controls Using Smartphone Recordings" [(arXiv:2504.18903)](https://arxiv.org/abs/2504.18903)
+<!-- 2. **[Submitted to IEEE JSTSP]** Suhas BN, T. Bhattacharjee, B. K. Yamini, N. Atchayaram, R. Yadav, D. Gope, and PK Ghosh. "Contrastive Audio-Video Pretraining for Classification of Amyotrophic Lateral Sclerosis, Parkinson's Disease, and Healthy Controls Using Smartphone Recordings" [(arXiv:2504.18903)](https://arxiv.org/abs/2504.18903) -->
 
-3. **[Submitted to NeurIPS 2025]** Suhas BN, A. Sherrill, R. Arriaga, C. Wiese, and S. Abdullah. "Thousand Voices of Trauma: A Large-Scale Synthetic Dataset for Modeling Prolonged Exposure Therapy Conversations" [(arXiv:2504.13955)](https://arxiv.org/abs/2504.13955)
+2. **[Accepted at NeurIPS 2025]** Suhas BN, A. Sherrill, R. Arriaga, C. Wiese, and S. Abdullah. "Thousand Voices of Trauma: A Large-Scale Synthetic Dataset for Modeling Prolonged Exposure Therapy Conversations" [(arXiv:2504.13955)](https://arxiv.org/abs/2504.13955)
 
-4. **[Accepted at EMNLP 2025]** Suhas BN, Y. Mahajan, S. Abdullah., D. Mattioli, R. Arriaga, C. Wiese, and A. Sherrill. "The Pursuit of Empathy: Evaluating Small Language Models for PTSD Dialogue Support" [(arXiv:2505.15065)](https://arxiv.org/abs/2505.15065)
+3. **[Accepted at EMNLP 2025]** Suhas BN, Y. Mahajan, S. Abdullah., D. Mattioli, R. Arriaga, C. Wiese, and A. Sherrill. "The Pursuit of Empathy: Evaluating Small Language Models for PTSD Dialogue Support" [(Paper)](https://aclanthology.org/2025.emnlp-main.1573/) [(DOI)](https://doi.org/10.18653/v1/2025.emnlp-main.1573) [(arXiv:2505.15065)](https://arxiv.org/abs/2505.15065)
 
-5. **[Accepted at EMNLP 2025]** Suhas BN, S. Abdullah., D. Mattioli, R. Arriaga, C. Wiese, and A. Sherrill. "How Real Are Synthetic Therapy Conversations? Evaluating Fidelity in Prolonged Exposure Dialogues" [(arXiv:2504.21800)](https://arxiv.org/abs/2504.21800)
+4. **[Accepted at EMNLP 2025]** Suhas BN, S. Abdullah., D. Mattioli, R. Arriaga, C. Wiese, and A. Sherrill. "How Real Are Synthetic Therapy Conversations? Evaluating Fidelity in Prolonged Exposure Dialogues" [(Paper)](https://aclanthology.org/2025.findings-emnlp.1144/) [(DOI)](https://doi.org/10.18653/v1/2025.findings-emnlp.1144) [(arXiv:2504.21800)](https://arxiv.org/abs/2504.21800)
 
 **2025**
-6. **[INTERSPEECH 2025]** Suhas BN, JP. Cohen, HC. Shing, JC. Moriarty, L. Xu, M. Strong, J. Burnsky, J. Ofor, J.R. Mason, S. Chen, C. Shivade, S. Srinivasan. "Fact-Controlled Diagnosis of Hallucinations in Medical Text Summarization" [(Paper)](https://www.isca-speech.org/archive/interspeech_2025/) [(arXiv:2504.16789)](https://arxiv.org/abs/2504.16789)
+5. **[Accepted at INTERSPEECH 2025]** Suhas BN, JP. Cohen, HC. Shing, JC. Moriarty, L. Xu, M. Strong, J. Burnsky, J. Ofor, J.R. Mason, S. Chen, C. Shivade, S. Srinivasan. "Fact-Controlled Diagnosis of Hallucinations in Medical Text Summarization" [(Paper)](https://www.isca-archive.org/interspeech_2025/bn25_interspeech.pdf) [(arXiv:2506.00448)](https://arxiv.org/abs/2506.00448)
 
 **2024**
-7. **[INTERSPEECH 2024]** Suhas BN, A. Rebar, S. Abdullah. "Speaking of Health: Leveraging Large Language Models to assess Exercise Motivation and Behavior of Rehabilitation Patients" [(Paper)](https://www.isca-speech.org/archive/interspeech_2024/bn24_interspeech.html)
+6. **[Accepted at INTERSPEECH 2024]** Suhas BN, A. Rebar, S. Abdullah. "Speaking of Health: Leveraging Large Language Models to assess Exercise Motivation and Behavior of Rehabilitation Patients" [(Paper)](https://www.isca-speech.org/archive/interspeech_2024/bn24_interspeech.html)
 
-8. **[ICASSP 2024]** Suhas BN, R.S. Srinivasa, Y.M. Saidatta, J. Cho, C.H. Lee, C. Yang, Y. Shen, H. Jin. "End-to-End Personalized Cuff-less Blood Pressure Monitoring using ECG and PPG Signals" [(Paper)](https://ieeexplore.ieee.org/document/10447917)
+7. **[Accepted at ICASSP 2024]** Suhas BN, R.S. Srinivasa, Y.M. Saidatta, J. Cho, C.H. Lee, C. Yang, Y. Shen, H. Jin. "End-to-End Personalized Cuff-less Blood Pressure Monitoring using ECG and PPG Signals" [(Paper)](https://ieeexplore.ieee.org/document/10447917) [(DOI)](https://doi.org/10.1109/ICASSP48485.2024.10447917)
 
 **2023**
-9. **[INTERSPEECH 2023]** Suhas BN, S. Rajtmajer, S. Abdullah. "Privacy-Preserving Dementia Classification with Differential Privacy: An Exploration of the Privacy-Accuracy Tradeoff in Speech Signal Data" [(Paper)](/assets/media/2023-09_bn23_interspeech.pdf)
+8. **[Accepted at INTERSPEECH 2023]** Suhas BN, S. Rajtmajer, S. Abdullah. "Privacy-Preserving Dementia Classification with Differential Privacy: An Exploration of the Privacy-Accuracy Tradeoff in Speech Signal Data" [(Paper)](/assets/media/2023-09_bn23_interspeech.pdf)
 
-10. **[Springer Nature 2023]** HJ. Han, Suhas BN, L. Qiu, S. Abdullah. "Automatic classification of dementia using text and speech data." In Multimodal AI in Healthcare, pp. 399-407. [(Chapter)](https://link.springer.com/chapter/10.1007/978-3-031-14463-9_38)
+9. **[Accepted at Springer Nature 2023]** HJ. Han, Suhas BN, L. Qiu, S. Abdullah. "Automatic classification of dementia using text and speech data." In Multimodal AI in Healthcare, pp. 399-407. [(Chapter)](https://link.springer.com/chapter/10.1007/978-3-031-14463-9_38) [(DOI)](https://doi.org/10.1007/978-3-031-14463-9_38)
 
 **2022**
-11. **[ICASSP 2022]** Suhas BN, S. Abdullah. "Privacy Sensitive Speech Analysis using Federated Learning to assess Depression." [(Paper)](/assets/media/2022-02_ICASSP_2022.pdf)
+10. **[Accepted at ICASSP 2022]** Suhas BN, S. Abdullah. "Privacy Sensitive Speech Analysis using Federated Learning to assess Depression." [(Paper)](/assets/media/2022-02_ICASSP_2022.pdf) [(DOI)](https://doi.org/10.1109/ICASSP43922.2022.9746827)
 
 **2020**
-12. **[CogMI 2020]** Suhas BN. "Automatic bird sound detection in long range field recordings using Wavelets & Mel filter bank features". [(Paper)](https://ieeexplore.ieee.org/document/9319356) [(Code)](https://github.com/suhasbn/Bird-Sound-Detection)
+11. **[Accepted at CogMI 2020]** Suhas BN. "Automatic bird sound detection in long range field recordings using Wavelets & Mel filter bank features". [(Paper)](https://ieeexplore.ieee.org/document/9319356) [(DOI)](https://doi.org/10.1109/CogMI50398.2020.00033) [(Code)](https://github.com/suhasbn/Bird-Sound-Detection)
 
-13. **[SPCOM 2020]** Suhas BN, J. Mallela, A. Illa, B. K. Yamini, N. Atchayaram, R. Yadav, D. Gope, and PK Ghosh. "Speech task-based automatic classification of ALS and Parkinson's Disease and their severity using log Mel spectrograms." [(Paper)](https://ieeexplore.ieee.org/document/9179503) [(Code)](https://github.com/suhasbn/ALS-PD-Classification)
+12. **[Accepted at SPCOM 2020]** Suhas BN, J. Mallela, A. Illa, B. K. Yamini, N. Atchayaram, R. Yadav, D. Gope, and PK Ghosh. "Speech task-based automatic classification of ALS and Parkinson's Disease and their severity using log Mel spectrograms." [(Paper)](https://ieeexplore.ieee.org/document/9179503) [(DOI)](https://doi.org/10.1109/SPCOM50965.2020.9179503) [(Code)](https://github.com/suhasbn/ALS-PD-Classification)
 
-14. **[ICASSP 2020]** Mallela, J, A Illa, Suhas BN, S. Udupa, Y. Belur, N. Atchayaram, R. Yadav, P. Reddy, D. Gope, and PK Ghosh. "Voice-based classification of patients with Amyotrophic Lateral Sclerosis, Parkinson's Disease and Healthy Controls with CNN-LSTM using transfer learning." [(Paper)](https://ieeexplore.ieee.org/document/9053682)
+13. **[Accepted at ICASSP 2020]** Mallela, J, A Illa, Suhas BN, S. Udupa, Y. Belur, N. Atchayaram, R. Yadav, P. Reddy, D. Gope, and PK Ghosh. "Voice-based classification of patients with Amyotrophic Lateral Sclerosis, Parkinson's Disease and Healthy Controls with CNN-LSTM using transfer learning." [(Paper)](https://ieeexplore.ieee.org/document/9053682) [(DOI)](https://doi.org/10.1109/ICASSP40776.2020.9053682)
 
 **2019**
-15. **[INTERSPEECH 2019]** Suhas BN, D. Patel, NR Koluguri, Y. Belur, P. Reddy, A. Nalini, R. Yadav, D. Gope, and PK Ghosh. "Comparison of Speech Tasks and Recording Devices for Voice-Based Automatic Classification of Healthy Subjects and Patients with Amyotrophic Lateral Sclerosis." [(Paper)](https://www.isca-speech.org/archive/Interspeech_2019/abstracts/1285.html)
+14. **[Accepted at INTERSPEECH 2019]** Suhas BN, D. Patel, NR Koluguri, Y. Belur, P. Reddy, A. Nalini, R. Yadav, D. Gope, and PK Ghosh. "Comparison of Speech Tasks and Recording Devices for Voice-Based Automatic Classification of Healthy Subjects and Patients with Amyotrophic Lateral Sclerosis." [(Paper)](https://www.isca-speech.org/archive/Interspeech_2019/abstracts/1285.html)
 
 **2018**
-16. **[IC4 2018]** Suhas BN, S. Bhagavat, V. Vimalanand, and P. Suresh. "Wireless Sensor Networks Based Monitoring of Railway Tracks." [(Paper)](https://doi.org/10.1109/CETIC4.2018.8531029)
+15. **[Accepted at IC4 2018]** Suhas BN, S. Bhagavat, V. Vimalanand, and P. Suresh. "Wireless Sensor Networks Based Monitoring of Railway Tracks." [(Paper)](https://doi.org/10.1109/CETIC4.2018.8531029) [(DOI)](https://doi.org/10.1109/CETIC4.2018.8531029)
