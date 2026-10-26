@@ -13,7 +13,7 @@ permalink: /
     <p>My work sits at the intersection of machine learning, signal processing, and human wellbeing, from using speech signals to detect neurological conditions and building privacy-preserving depression assessment tools to creating sensor networks to prevent train derailments in India.</p>
 
     <p class="connect-links">
-      <a href="/assets/media/Suhas_CV.pdf" target="_blank" rel="noopener">Resume / CV</a> &middot;
+      <a href="/assets/media/Suhas_CV.pdf" target="_blank" rel="noopener">Curriculum Vitae</a> &middot;
       <a href="https://scholar.google.com/citations?user=EOJDCfMAAAAJ" target="_blank" rel="noopener">Google Scholar</a> &middot;
       <a href="https://www.linkedin.com/in/bnsuhas" target="_blank" rel="noopener">LinkedIn</a> &middot;
       <a href="https://github.com/bnsuhas96" target="_blank" rel="noopener">GitHub</a> &middot;
