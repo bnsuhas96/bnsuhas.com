@@ -19,12 +19,21 @@ collections:
     output: true
     permalink: /:name/
 
+# Header navigation pages
+header_pages:
+  - _pages/stories.md
+  - _pages/photography.md
+
 # Exclude files
 exclude:
   - Gemfile
   - Gemfile.lock
   - README.md
   - vendor
+  - _attachments
+  - _nav_menu_items
+  - _s-custom-csss
+  - bnsuhas.com
 
 # Plugins
 plugins:
@@ -35,15 +44,13 @@ plugins:
 # Theme
 theme: minima
 
-# Navigation  
+# Navigation
 navigation:
   - title: Research
-    url: /research/
+    url: /#research
+  - title: Talks
+    url: /#talks
   - title: Stories
     url: /stories/
   - title: Photography
     url: /photography/
-  - title: Talks
-    url: /talks/
-  - title: Misc
-    url: /misc/
