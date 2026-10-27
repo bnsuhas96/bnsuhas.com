@@ -27,12 +27,12 @@ permalink: /
 </div>
 
 <div class="affiliations" aria-label="Affiliations">
-  <img src="/assets/media/Penn-State-University-Logo.png" alt="Penn State University">
-  <img src="/assets/media/Untitled_design_-_2023-07-27T130823.909.png" alt="Amazon AWS">
-  <img src="/assets/media/samsung-300x122.png" alt="Samsung Research America">
-  <img src="/assets/media/3mhealth.webp" alt="3M Health Information Systems">
-  <img src="/assets/media/IISc_Master_Seal_Black.jpg" alt="Indian Institute of Science">
-  <img src="/assets/media/PESUniversity-logo-removebg-preview-e1662225928289-274x300.png" alt="PES University">
+  <img src="/assets/media/Penn-State-University-Logo.png" alt="Penn State University" title="Penn State University">
+  <img src="/assets/media/Untitled_design_-_2023-07-27T130823.909.png" alt="Amazon AWS" title="Amazon Web Services">
+  <img src="/assets/media/samsung-300x122.png" alt="Samsung Research America" title="Samsung Research America">
+  <img src="/assets/media/3mhealth.webp" alt="3M Health Information Systems" title="3M Health Information Systems">
+  <img src="/assets/media/IISc_Master_Seal_Black.jpg" alt="Indian Institute of Science" title="Indian Institute of Science">
+  <img src="/assets/media/PESUniversity-logo-removebg-preview-e1662225928289-274x300.png" alt="PES University" title="PES University">
 </div>
 
 <h2 id="news">Recent News</h2>

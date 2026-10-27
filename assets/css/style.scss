@@ -328,59 +328,42 @@ ul li, ol li {
 }
 
 /* ==========================================================================
-   Affiliations Logo Bar (Original Sizes & Proportions, No Bounding Box)
+   Affiliations Logo Grid (3 per row, 2 rows)
    ========================================================================== */
 .affiliations {
-  display: flex;
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem 2rem;
   align-items: center;
-  justify-content: flex-start;
-  margin: 1.75rem 0 2.25rem 0;
+  justify-items: center;
+  max-width: 540px;
+  margin: 2rem 0 2.5rem 0;
 
   img {
-    height: 50px;
-    width: auto;
+    display: block;
+    height: 56px;
+    width: 100%;
+    max-width: 160px;
     object-fit: contain;
+    transform-origin: center;
 
-    &:nth-child(1) { // Penn State
-      margin-right: 3px;
-    }
-
-    &:nth-child(2) { // Amazon AWS
-      margin-right: 3px;
-    }
-
-    &:nth-child(3) { // Samsung
-      height: 35px;
-      margin-right: 15px;
-    }
-
-    &:nth-child(4) { // 3M Health
-      margin-right: 30px;
-    }
-
-    &:nth-child(5) { // IISc
-      margin-right: 45px;
-    }
-
-    &:nth-child(6) { // PES University
-      margin-right: 40px;
-    }
+    // Each source file carries a different amount of built-in padding,
+    // so nudge the visual weight of each mark toward the same optical size.
+    &:nth-child(1) { transform: scale(1.4); }   // Penn State (wide wordmark)
+    &:nth-child(2) { transform: scale(1.55); }  // Amazon AWS (lots of padding)
+    &:nth-child(3) { transform: scale(0.95); }  // Samsung Research
+    &:nth-child(4) { transform: scale(1.45); }  // 3M Health Information Systems
+    &:nth-child(5) { transform: scale(1.05); }  // IISc seal
+    &:nth-child(6) { transform: scale(1.15); }  // PES University
   }
 
   @media (max-width: 768px) {
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    gap: 14px 20px;
+    max-width: none;
+    gap: 1.1rem 1.25rem;
+    margin: 1.75rem 0 2rem 0;
 
     img {
-      height: 40px;
-      max-width: 110px;
-      margin-right: 0 !important;
-
-      &:nth-child(3) {
-        height: 28px;
-      }
+      height: 44px;
     }
   }
 }
