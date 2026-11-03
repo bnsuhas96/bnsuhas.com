@@ -452,13 +452,31 @@
 
     @media (max-width: 560px) {
       .guest-card {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 8px;
-        padding: 11px 12px;
+        padding: 9px 10px;
+        gap: 6px;
+      }
+      .serial-pill {
+        min-width: 24px;
+        font-size: 0.74rem;
+      }
+      .guest-name {
+        font-size: 0.86rem;
+      }
+      .guest-members {
+        font-size: 0.75rem;
       }
       .guest-actions {
-        justify-content: flex-end;
+        gap: 4px;
+      }
+      .btn-secondary-quiet {
+        height: 26px;
+        padding: 0 6px;
+        font-size: 0.72rem;
+      }
+      .btn-primary-locate {
+        height: 26px;
+        padding: 0 8px;
+        font-size: 0.73rem;
       }
     }
 
@@ -625,12 +643,42 @@
       color: var(--text);
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 2px 8px;
-      font-size: 0.74rem;
+      padding: 2px 7px;
+      font-size: 0.72rem;
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
       flex-shrink: 0;
+    }
+    .map-layer-pill.active-pill {
+      background: #ecfdf5;
+      color: #065f46;
+      border-color: #a7f3d0;
+    }
+
+    /* Clean Circular Numbered Pins for All Saved Locations (Zero Road Clutter) */
+    .saved-house-dot {
+      min-width: 26px;
+      height: 26px;
+      padding: 0 5px;
+      border-radius: 999px;
+      background: #059669;
+      color: #ffffff;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.35);
+      font-size: 0.72rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.12s ease;
+    }
+    .saved-house-dot:hover {
+      transform: scale(1.12);
+      background: #047857;
     }
 
     /* True Google-Maps-Style Teardrop Pin Marker with Name Below Pin */
@@ -686,9 +734,9 @@
     .sheet-footer {
       position: absolute;
       bottom: 22px;
-      left: 16px;
-      right: 16px;
-      max-width: 380px;
+      left: 12px;
+      right: 12px;
+      max-width: 460px;
       margin: 0 auto;
       z-index: 600;
       pointer-events: none;
@@ -696,17 +744,32 @@
 
     .sheet-footer-actions {
       display: flex;
+      gap: 8px;
       pointer-events: auto;
+    }
+
+    .btn-pick-family-map {
+      min-height: 44px;
+      padding: 0 14px;
+      background: rgba(255, 255, 255, 0.98);
+      color: var(--text);
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
     }
 
     .btn-save-location {
       flex: 1;
-      min-height: 46px;
+      min-height: 44px;
       background: #111827;
       color: #ffffff;
       border: none;
       border-radius: 999px;
-      font-size: 0.92rem;
+      font-size: 0.9rem;
       font-weight: 600;
       cursor: pointer;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
@@ -884,7 +947,10 @@
       <div class="header-meta">
         <div class="mode-switcher" role="tablist">
           <button class="mode-btn active" id="tabBtnChecklist" onclick="switchMainView('checklist')">
-            Directory (<span id="badgeRemainingCount">248</span>)
+            List (<span id="badgeRemainingCount">248</span>)
+          </button>
+          <button class="mode-btn" id="tabBtnMap" onclick="openMapOverviewAndMark()">
+            Map (<span id="badgeMapCount">0</span>)
           </button>
           <button class="mode-btn" id="tabBtnTrips" onclick="switchMainView('trips')">
             Routes (<span id="badgePinnedCount">0</span>)
@@ -994,20 +1060,31 @@
       </div>
       <div class="map-floating-subbar">
         <div style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-          <span class="sheet-person-title" id="sheetPersonName">#1 Latha &amp; Chandrashekar</span>
+          <span class="sheet-person-title" id="sheetPersonName" style="cursor:pointer;" onclick="openAssignFamilyToPinDialog()">#1 Latha &amp; Chandrashekar</span>
           <span class="sheet-person-sub" id="sheetPersonSub"></span>
           <span style="color:var(--text-muted);margin:0 4px;">·</span>
-          <span id="sheetStatusHint">Drag red pin to exact street</span>
+          <span id="sheetStatusHint">Tap street or drag red pin</span>
         </div>
-        <button class="map-layer-pill" id="btnLayerToggle" onclick="toggleSatelliteLayer()">
-          Clean Roads
-        </button>
+        <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
+          <button class="map-layer-pill active-pill" id="btnToggleAllPins" onclick="toggleShowAllSavedPins()">
+            All Pins (0)
+          </button>
+          <button class="map-layer-pill" id="btnFitAllPins" onclick="fitMapToAllSavedPins()">
+            Fit All
+          </button>
+          <button class="map-layer-pill" id="btnLayerToggle" onclick="toggleSatelliteLayer()">
+            Clean Roads
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- Floating Bottom Save Pill -->
+    <!-- Floating Bottom Save & Direct Family Picker Pill -->
     <div class="sheet-footer">
       <div class="sheet-footer-actions">
+        <button class="btn-pick-family-map" id="btnPickFamilyMap" onclick="openAssignFamilyToPinDialog()">
+          Pick Family ▾
+        </button>
         <button class="btn-save-location" id="btnSavePin" onclick="saveCurrentFamilyPin()">
           Save Location
         </button>
@@ -1017,9 +1094,9 @@
 </div>
 
 <!-- ============================================================================
-     DIALOG MODAL (Same House Picker & Cloud Sync / Export Settings)
+     DIALOG MODAL (Same House Picker, Map Family Picker & Cloud Sync / Export)
      ============================================================================ -->
-<div class="sheet-backdrop" id="dialogBackdrop" role="dialog" aria-modal="true">
+<div class="sheet-backdrop" id="dialogBackdrop" role="dialog" aria-modal="true" style="z-index:1500;">
   <div class="dialog-sheet">
     <div class="sheet-header">
       <h2 class="sheet-person-title" id="dialogTitle">Select Option</h2>
@@ -1613,21 +1690,21 @@
 
           ${a ? `
             <div class="guest-actions">
-              <button class="btn-secondary-quiet" onclick="openSameHouseDialog(${f.id})">${isGrouped ? `Group (${groupFamilies.length})` : 'Same House'}</button>
+              <button class="btn-secondary-quiet" onclick="openSameHouseDialog(${f.id})">${isGrouped ? `Group (${groupFamilies.length})` : 'Group'}</button>
               <button class="btn-secondary-quiet" onclick="openLocationSheet(${f.id})">Edit</button>
               ${isPinned ? `<a class="btn-secondary-quiet" href="https://www.google.com/maps/search/?api=1&query=${a.lat},${a.lng}" target="_blank" rel="noopener">Maps ↗</a>` : ''}
               <button class="btn-secondary-quiet" style="color:var(--danger);" onclick="clearFamilyLocation(${f.id})">Clear</button>
             </div>
           ` : `
             <div class="guest-actions">
-              <button class="btn-secondary-quiet" onclick="openSameHouseDialog(${f.id})">
-                ${isGrouped ? `Group (${groupFamilies.length})` : 'Same House'}
+              <button class="btn-secondary-quiet" onclick="openSameHouseDialog(${f.id})" title="Tag Same House">
+                ${isGrouped ? `Group (${groupFamilies.length})` : 'Group'}
               </button>
-              <button class="btn-secondary-quiet" onclick="markFamilyOutOfTown(${f.id})">
-                Out of Town
+              <button class="btn-secondary-quiet" onclick="markFamilyOutOfTown(${f.id})" title="Mark Out of Town">
+                Out
               </button>
               <button class="btn-primary-locate" onclick="openLocationSheet(${f.id})">
-                ${isGrouped ? `Locate (${groupFamilies.length}) ›` : 'Locate ›'}
+                ${isGrouped ? `Pin (${groupFamilies.length}) ›` : 'Pin ›'}
               </button>
             </div>
           `}
@@ -1637,16 +1714,19 @@
   }
 
   // ============================================================================
-  // FULL-SCREEN NATIVE-STYLE GOOGLE MAP (Floating Top Bar & Single Active Pin)
+  // FULL-SCREEN NATIVE-STYLE GOOGLE MAP (All Saved Pins + Direct Map Marking)
   // ============================================================================
   let googleCleanRoadLayer = null;
   let mapLayerMode = 0; // 0 = Landmarks & Roads, 1 = Clean Roads Only, 2 = Satellite
+  let showAllSavedPins = true;
+  let mapOpenedFromOverview = false;
+  let mapFamilyPickerQuery = '';
 
   function ensureSheetMapInitialized() {
     if (map) return;
     map = L.map('map', {
       center: [appState.home.lat, appState.home.lng],
-      zoom: 16,
+      zoom: 15,
       zoomControl: false
     });
     L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -1700,7 +1780,7 @@
     }
   }
 
-  function openLocationSheet(familyId) {
+  function updateSheetFamilyUI(familyId) {
     const fam = FAMILIES.find(f => f.id === familyId);
     if (!fam) return;
     currentSheetFamilyId = familyId;
@@ -1710,7 +1790,7 @@
       ? ` + ${housemates.map(h => '#' + h.id + ' ' + h.title).join(', ')}`
       : '';
 
-    document.getElementById('sheetPersonName').textContent = `#${fam.id} ${fam.title}${groupSuffix}`;
+    document.getElementById('sheetPersonName').textContent = `#${fam.id} ${fam.title}${groupSuffix} ▾`;
     document.getElementById('sheetPersonSub').textContent = housemates.length
       ? `Same House (${housemates.length + 1})`
       : `Category ${fam.cat}`;
@@ -1718,15 +1798,53 @@
     const saveBtn = document.getElementById('btnSavePin');
     if (saveBtn) {
       saveBtn.textContent = housemates.length
-        ? `Save Location (${housemates.length + 1} Families)`
-        : 'Save Location';
+        ? `Save #${fam.id} (+${housemates.length})`
+        : `Save #${fam.id} Location`;
     }
+  }
+
+  function openMapOverviewAndMark() {
+    mapOpenedFromOverview = true;
+    showAllSavedPins = true;
+
+    // Pick next unmapped family (or #1 if all are mapped) as the ready-to-mark active pin
+    const nextUnmapped = FAMILIES.find(f => !appState.assignments[f.id]) || FAMILIES[0];
+    updateSheetFamilyUI(nextUnmapped.id);
+
+    const existing = appState.assignments[nextUnmapped.id];
+    sheetAutoReverseNote = existing && existing.note ? existing.note : '';
+    document.getElementById('landmarkSearchInput').value = existing && existing.note ? existing.note : '';
+    document.getElementById('sheetStatusHint').textContent =
+      'All marked houses shown in green · Tap any street to mark';
+
+    document.getElementById('locationSheetBackdrop').classList.add('open');
+    ensureSheetMapInitialized();
+
+    setTimeout(() => {
+      map.invalidateSize();
+      renderNeighborReferencePins(currentSheetFamilyId);
+      const pinnedCount = getUniqueSavedHouseGroups().length;
+      if (pinnedCount > 0) {
+        fitMapToAllSavedPins();
+      } else {
+        map.setView([appState.home.lat, appState.home.lng], 15);
+      }
+      const c = map.getCenter();
+      placeOrMoveActiveSheetPin(c.lat, c.lng, false);
+    }, 80);
+  }
+
+  function openLocationSheet(familyId, keepOverviewFlag) {
+    const fam = FAMILIES.find(f => f.id === familyId);
+    if (!fam) return;
+    if (!keepOverviewFlag) mapOpenedFromOverview = false;
+    updateSheetFamilyUI(familyId);
 
     const existing = appState.assignments[familyId];
     sheetAutoReverseNote = existing && existing.note ? existing.note : '';
     document.getElementById('landmarkSearchInput').value = existing && existing.note ? existing.note : '';
     document.getElementById('sheetStatusHint').textContent =
-      'Drag red pin to exact street';
+      'Tap street or drag red pin';
 
     document.getElementById('locationSheetBackdrop').classList.add('open');
     ensureSheetMapInitialized();
@@ -1739,7 +1857,6 @@
         map.setView([existing.lat, existing.lng], 18);
         placeOrMoveActiveSheetPin(existing.lat, existing.lng, false);
       } else {
-        // Place initial draggable pin at current map center so they can immediately drag or search
         const c = map.getCenter();
         placeOrMoveActiveSheetPin(c.lat, c.lng, false);
       }
@@ -1750,15 +1867,192 @@
     stopSpeechRecognition();
     document.getElementById('locationSheetBackdrop').classList.remove('open');
     currentSheetFamilyId = null;
+    mapOpenedFromOverview = false;
   }
 
   function renderVisibleLandmarks() {
     if (landmarkMarkersLayer) landmarkMarkersLayer.clearLayers();
   }
 
+  function getUniqueSavedHouseGroups(excludeFamilyId) {
+    const excludedGroup = excludeFamilyId ? new Set(getHouseGroupIds(excludeFamilyId)) : new Set();
+    const seenPrimary = new Set();
+    const savedGroups = [];
+
+    FAMILIES.forEach(f => {
+      const groupIds = getHouseGroupIds(f.id);
+      const primaryId = groupIds[0];
+      if (seenPrimary.has(primaryId)) return;
+      seenPrimary.add(primaryId);
+      if (excludedGroup.has(primaryId)) return;
+
+      const a = appState.assignments[primaryId];
+      if (!a || a.status !== 'pinned') return;
+
+      const groupFamilies = groupIds.map(id => FAMILIES.find(x => x.id === id)).filter(Boolean);
+      savedGroups.push({
+        primaryId,
+        groupIds,
+        groupFamilies,
+        lat: a.lat,
+        lng: a.lng,
+        note: a.note || ''
+      });
+    });
+    return savedGroups;
+  }
+
+  function toggleShowAllSavedPins() {
+    showAllSavedPins = !showAllSavedPins;
+    renderNeighborReferencePins(currentSheetFamilyId);
+  }
+
+  function fitMapToAllSavedPins() {
+    if (!map) return;
+    const allSaved = getUniqueSavedHouseGroups(null);
+    if (!allSaved.length) {
+      map.setView([appState.home.lat, appState.home.lng], 15);
+      return;
+    }
+    if (allSaved.length === 1) {
+      map.setView([allSaved[0].lat, allSaved[0].lng], 17);
+      return;
+    }
+    const bounds = L.latLngBounds(allSaved.map(g => [g.lat, g.lng]));
+    map.fitBounds(bounds, { padding: [80, 60], maxZoom: 17 });
+  }
+
   function renderNeighborReferencePins(excludeFamilyId) {
-    // Keep the map 100% uncluttered: show ONLY the 1 active house pin currently being located!
-    if (neighborMarkersLayer) neighborMarkersLayer.clearLayers();
+    if (!neighborMarkersLayer) return;
+    neighborMarkersLayer.clearLayers();
+
+    const allSavedCount = getUniqueSavedHouseGroups(null).length;
+    const toggleBtn = document.getElementById('btnToggleAllPins');
+    if (toggleBtn) {
+      toggleBtn.textContent = showAllSavedPins ? `All Pins (${allSavedCount})` : `Show Pins (${allSavedCount})`;
+      toggleBtn.classList.toggle('active-pill', showAllSavedPins);
+    }
+
+    if (!showAllSavedPins) return;
+
+    const savedGroups = getUniqueSavedHouseGroups(excludeFamilyId);
+    savedGroups.forEach(g => {
+      const badgeLabel = g.groupFamilies.length > 1
+        ? `#${g.primaryId}+`
+        : `#${g.primaryId}`;
+      const names = g.groupFamilies.map(gf => `#${gf.id} ${escapeHtml(gf.title)}`).join(' + ');
+      const dotIcon = L.divIcon({
+        className: '',
+        html: `<div class="saved-house-dot" title="${names}">${badgeLabel}</div>`,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
+      });
+
+      const marker = L.marker([g.lat, g.lng], {
+        icon: dotIcon,
+        zIndexOffset: 200
+      }).addTo(neighborMarkersLayer);
+
+      const popupHtml = `
+        <div style="font-family:var(--font-sans);min-width:190px;padding:2px;">
+          <div style="font-weight:700;font-size:0.86rem;color:#111827;margin-bottom:2px;">${names}</div>
+          ${g.note ? `<div style="font-size:0.76rem;color:#059669;margin-bottom:6px;">${escapeHtml(g.note)}</div>` : ''}
+          <div style="display:flex;gap:6px;">
+            <button onclick="openLocationSheet(${g.primaryId}, true)" style="height:26px;padding:0 8px;border:1px solid #d1d5db;border-radius:5px;background:#fff;font-size:0.74rem;font-weight:600;cursor:pointer;">
+              Edit Pin
+            </button>
+            <button onclick="openSameHouseDialog(${g.primaryId})" style="height:26px;padding:0 8px;border:1px solid #d1d5db;border-radius:5px;background:#fff;font-size:0.74rem;font-weight:600;cursor:pointer;">
+              Same House
+            </button>
+          </div>
+        </div>
+      `;
+      marker.bindPopup(popupHtml, { closeButton: false, offset: [0, -8] });
+    });
+  }
+
+  function openAssignFamilyToPinDialog() {
+    mapFamilyPickerQuery = '';
+    document.getElementById('dialogTitle').textContent = 'Choose Family to Mark on Map';
+    const body = document.getElementById('dialogBody');
+    body.innerHTML = `
+      <div class="search-wrap">
+        <input
+          type="search"
+          id="mapFamilySearchInput"
+          class="input-clean"
+          placeholder="Search family name or # (e.g. Shubha, 18)..."
+          oninput="handleMapFamilySearch(this.value)"
+        />
+      </div>
+      <div id="mapFamilyCandidateList" style="display:flex;flex-direction:column;gap:6px;max-height:54dvh;overflow-y:auto;"></div>
+    `;
+    renderMapFamilyCandidateList();
+    document.getElementById('dialogBackdrop').classList.add('open');
+  }
+
+  function handleMapFamilySearch(val) {
+    mapFamilyPickerQuery = (val || '').trim().toLowerCase();
+    renderMapFamilyCandidateList();
+  }
+
+  function renderMapFamilyCandidateList() {
+    const listEl = document.getElementById('mapFamilyCandidateList');
+    if (!listEl) return;
+
+    const seenPrimary = new Set();
+    const groups = [];
+    FAMILIES.forEach(f => {
+      const gids = getHouseGroupIds(f.id);
+      const pid = gids[0];
+      if (seenPrimary.has(pid)) return;
+      seenPrimary.add(pid);
+      groups.push(gids.map(id => FAMILIES.find(x => x.id === id)).filter(Boolean));
+    });
+
+    const filtered = groups.filter(gf => {
+      if (!mapFamilyPickerQuery) return true;
+      const hay = gf.map(x => `${x.id} #${x.id} ${x.title} ${x.others || ''} ${x.cat}`).join(' ').toLowerCase();
+      return hay.includes(mapFamilyPickerQuery);
+    });
+
+    // Show unmapped families first so marking on map is fast
+    filtered.sort((a, b) => {
+      const aDone = appState.assignments[a[0].id] ? 1 : 0;
+      const bDone = appState.assignments[b[0].id] ? 1 : 0;
+      if (aDone !== bDone) return aDone - bDone;
+      return a[0].id - b[0].id;
+    });
+
+    listEl.innerHTML = filtered.slice(0, 80).map(gf => {
+      const f = gf[0];
+      const a = appState.assignments[f.id];
+      const names = gf.map(x => `#${x.id} ${escapeHtml(x.title)}`).join(' + ');
+      return `
+        <div class="same-house-Candidate" style="cursor:pointer;" onclick="selectFamilyForMapPin(${f.id})">
+          <div style="min-width:0;flex:1;">
+            <div style="font-weight:600;font-size:0.88rem;color:var(--text);">
+              ${names} <span class="row-cat-tag">${f.cat}</span>
+            </div>
+            ${a ? `<div style="font-size:0.76rem;color:#059669;">✓ Located (${escapeHtml(a.note || 'Pinned')})</div>` : `<div style="font-size:0.76rem;color:var(--text-muted);">To Locate</div>`}
+          </div>
+          <button class="btn-primary-locate" style="height:28px;padding:0 10px;">Select</button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function selectFamilyForMapPin(familyId) {
+    closeDialogModal();
+    updateSheetFamilyUI(familyId);
+    renderNeighborReferencePins(familyId);
+    const existing = appState.assignments[familyId];
+    if (existing && existing.status === 'pinned') {
+      map.setView([existing.lat, existing.lng], 18);
+      placeOrMoveActiveSheetPin(existing.lat, existing.lng, false);
+    } else if (sheetPinCoords) {
+      placeOrMoveActiveSheetPin(sheetPinCoords.lat, sheetPinCoords.lng, false);
+    }
   }
 
   function placeOrMoveActiveSheetPin(lat, lng, reverseGeocodeIfEmpty) {
@@ -2112,11 +2406,28 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
       };
     });
 
-    closeLocationSheet();
     const toast = groupIds.length > 1
       ? `Saved location for #${fam.id} ${fam.title} (+ ${groupIds.length - 1} in Same House)`
       : `Saved location for #${fam.id} ${fam.title}`;
-    saveState(toast);
+
+    if (mapOpenedFromOverview) {
+      saveState(toast);
+      const nextUnmapped = FAMILIES.find(f => !appState.assignments[f.id]);
+      if (nextUnmapped) {
+        updateSheetFamilyUI(nextUnmapped.id);
+        sheetAutoReverseNote = '';
+        document.getElementById('landmarkSearchInput').value = '';
+        document.getElementById('sheetStatusHint').textContent =
+          `Saved #${fam.id} · Now marking #${nextUnmapped.id} (or tap Pick Family)`;
+        renderNeighborReferencePins(nextUnmapped.id);
+        placeOrMoveActiveSheetPin(sheetPinCoords.lat, sheetPinCoords.lng, false);
+      } else {
+        renderNeighborReferencePins(null);
+      }
+    } else {
+      closeLocationSheet();
+      saveState(toast);
+    }
   }
 
   // ============================================================================
@@ -2765,6 +3076,8 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
     document.getElementById('progressStatText').textContent = `${done}/${total}`;
     document.getElementById('badgeRemainingCount').textContent = rem;
     document.getElementById('badgePinnedCount').textContent = pinned;
+    const mapBadge = document.getElementById('badgeMapCount');
+    if (mapBadge) mapBadge.textContent = pinned;
     document.getElementById('countTodo').textContent = rem;
     document.getElementById('countDone').textContent = done;
 
@@ -2772,6 +3085,9 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
     renderChecklist();
     if (document.getElementById('viewTrips').classList.contains('active')) {
       renderTripsView();
+    }
+    if (document.getElementById('locationSheetBackdrop').classList.contains('open')) {
+      renderNeighborReferencePins(currentSheetFamilyId);
     }
   }
 
