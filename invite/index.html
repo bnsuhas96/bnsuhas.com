@@ -2197,11 +2197,18 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
 
   function clearFamilyLocation(familyId) {
     const fam = FAMILIES.find(f => f.id === familyId);
+    const groupIds = getHouseGroupIds(familyId);
+    const now = Date.now();
     recordUndoSnapshot();
     appState.deletedAt = appState.deletedAt || {};
-    appState.deletedAt[familyId] = Date.now();
-    delete appState.assignments[familyId];
-    saveState(`Moved #${fam ? fam.id : familyId} back to Remaining`);
+    groupIds.forEach(gid => {
+      appState.deletedAt[gid] = now;
+      delete appState.assignments[gid];
+    });
+    const toast = groupIds.length > 1
+      ? `Moved #${fam ? fam.id : familyId} (+ ${groupIds.length - 1} in Same House) back to Remaining`
+      : `Moved #${fam ? fam.id : familyId} back to Remaining`;
+    saveState(toast);
   }
 
   function openSameHouseDialog(familyId) {
@@ -2740,8 +2747,8 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
   function exportCSV() {
     const headers = [
       'Sl. No.', 'Category', 'Family Name', 'Name 1', 'Name 2', 'Other Members',
-      'Shirt Stickers', 'Lady Stickers', 'Status', 'Directions / Landmark Note',
-      'Latitude', 'Longitude', 'Google Maps Link'
+      'Same House With', 'Shirt Stickers', 'Lady Stickers', 'Status',
+      'Directions / Landmark Note', 'Latitude', 'Longitude', 'Google Maps Link'
     ];
     const rows = [headers];
     FAMILIES.forEach(f => {
@@ -2750,10 +2757,11 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
       const lat = a && a.lat ? a.lat : '';
       const lng = a && a.lng ? a.lng : '';
       const link = lat && lng ? `https://www.google.com/maps?q=${lat},${lng}` : '';
+      const sameHouseStr = getHousemates(f.id).map(h => `#${h.id} ${h.title}`).join('; ');
       rows.push([
         f.id, f.cat, f.title, f.name1, f.name2, f.others,
-        f.shirts, f.ladyStickers, status, a && a.note ? a.note : '',
-        lat, lng, link
+        sameHouseStr, f.shirts, f.ladyStickers, status,
+        a && a.note ? a.note : '', lat, lng, link
       ]);
     });
 
@@ -2780,9 +2788,14 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
     reader.onload = e => {
       try {
         const data = JSON.parse(e.target.result);
-        if (data && data.assignments) {
+        if (data && (data.assignments || data.houseGroups)) {
           recordUndoSnapshot();
-          appState.assignments = Object.assign({}, appState.assignments, data.assignments);
+          if (data.assignments) {
+            appState.assignments = Object.assign({}, appState.assignments, data.assignments);
+          }
+          if (data.houseGroups) {
+            appState.houseGroups = Object.assign({}, appState.houseGroups || {}, data.houseGroups);
+          }
           closeDialogModal();
           saveState('Backup merged');
         }
