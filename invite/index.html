@@ -834,8 +834,8 @@
     .dialog-sheet {
       background: var(--surface);
       width: 100%;
-      max-width: 520px;
-      max-height: 85dvh;
+      max-width: 540px;
+      max-height: 88dvh;
       border-radius: 18px 18px 0 0;
       display: flex;
       flex-direction: column;
@@ -847,6 +847,33 @@
         border-radius: 16px;
         margin: auto;
       }
+    }
+
+    .same-house-banner {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: var(--radius-md);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 0.86rem;
+      color: #1e3a8a;
+    }
+    .same-house-banner strong {
+      font-weight: 700;
+    }
+    .same-house-Candidate {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: var(--surface);
     }
 
     /* Undo Snackbar */
@@ -1189,11 +1216,15 @@
   // Application State
   let appState = {
     assignments: {}, // familyId -> { status: 'pinned'|'out_of_town', lat, lng, note, updatedAt }
+    houseGroups: {}, // familyId -> { groupId: string|null, updatedAt: number } (pre-map or post-map Same House grouping)
     deletedAt: {},   // familyId -> timestamp (prevents cloud sync resurrection after unmap/undo)
     home: { lat: 12.9345, lng: 77.5790, label: 'Our Home (Start)' },
     routeCategoryFilter: 'ALL',
     maxStopsPerTrip: 9
   };
+
+  let sameHouseActiveTargetId = null;
+  let sameHouseSearchQuery = '';
 
   let aiConfig = {
     geminiApiKey: '',
@@ -1309,9 +1340,10 @@
   }
 
   function mergeRemoteStateObject(remote) {
-    if (!remote || !remote.assignments) return;
+    if (!remote) return;
     let changed = false;
     appState.deletedAt = appState.deletedAt || {};
+    appState.houseGroups = appState.houseGroups || {};
     if (remote.deletedAt) {
       Object.keys(remote.deletedAt).forEach(id => {
         const rDel = remote.deletedAt[id] || 0;
@@ -1325,15 +1357,27 @@
         }
       });
     }
-    Object.keys(remote.assignments).forEach(id => {
-      const rItem = remote.assignments[id];
-      const lItem = appState.assignments[id];
-      const delTs = (appState.deletedAt && appState.deletedAt[id]) || 0;
-      if ((rItem.updatedAt || 0) > delTs && (!lItem || (rItem.updatedAt || 0) > (lItem.updatedAt || 0))) {
-        appState.assignments[id] = rItem;
-        changed = true;
-      }
-    });
+    if (remote.assignments) {
+      Object.keys(remote.assignments).forEach(id => {
+        const rItem = remote.assignments[id];
+        const lItem = appState.assignments[id];
+        const delTs = (appState.deletedAt && appState.deletedAt[id]) || 0;
+        if ((rItem.updatedAt || 0) > delTs && (!lItem || (rItem.updatedAt || 0) > (lItem.updatedAt || 0))) {
+          appState.assignments[id] = rItem;
+          changed = true;
+        }
+      });
+    }
+    if (remote.houseGroups) {
+      Object.keys(remote.houseGroups).forEach(id => {
+        const rG = remote.houseGroups[id];
+        const lG = appState.houseGroups[id];
+        if (rG && (!lG || (rG.updatedAt || 0) > (lG.updatedAt || 0))) {
+          appState.houseGroups[id] = rG;
+          changed = true;
+        }
+      });
+    }
     if (changed) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
       renderAll();
@@ -1435,6 +1479,7 @@
   function recordUndoSnapshot() {
     undoHistory.push(JSON.stringify({
       assignments: appState.assignments,
+      houseGroups: appState.houseGroups || {},
       deletedAt: appState.deletedAt || {}
     }));
     if (undoHistory.length > 30) undoHistory.shift();
@@ -1455,8 +1500,47 @@
       delete appState.deletedAt[id];
     });
     appState.assignments = prev.assignments;
+
+    // Restore houseGroups with bumped timestamps so cloud sync preserves the undo
+    const nextGroups = {};
+    const prevGroups = prev.houseGroups || {};
+    Object.keys(appState.houseGroups || {}).forEach(id => {
+      if (!prevGroups[id]) {
+        nextGroups[id] = { groupId: null, updatedAt: now };
+      }
+    });
+    Object.keys(prevGroups).forEach(id => {
+      nextGroups[id] = { groupId: prevGroups[id].groupId || null, updatedAt: now };
+    });
+    appState.houseGroups = nextGroups;
+
     hideSnackbar();
     saveState('Last action undone');
+  }
+
+  // ============================================================================
+  // SAME-HOUSE GROUPING HELPERS (Pre-Map & Post-Map Equivalence Groups)
+  // ============================================================================
+  function getHouseGroupIds(familyId) {
+    const numId = Number(familyId);
+    const groups = appState.houseGroups || {};
+    const entry = groups[numId];
+    const gid = entry && entry.groupId ? entry.groupId : null;
+    if (!gid) return [numId];
+
+    const members = Object.keys(groups)
+      .map(k => Number(k))
+      .filter(k => groups[k] && groups[k].groupId === gid);
+
+    if (!members.includes(numId)) members.push(numId);
+    members.sort((a, b) => a - b);
+    return members;
+  }
+
+  function getHousemates(familyId) {
+    const numId = Number(familyId);
+    const ids = getHouseGroupIds(numId).filter(id => id !== numId);
+    return ids.map(id => FAMILIES.find(f => f.id === id)).filter(Boolean);
   }
 
   // ============================================================================
@@ -1543,6 +1627,8 @@
       const a = appState.assignments[f.id];
       const isPinned = a && a.status === 'pinned';
       const isOut = a && a.status === 'out_of_town';
+      const housemates = getHousemates(f.id);
+      const housematesText = housemates.map(hm => `#${hm.id} ${escapeHtml(hm.title)}`).join(', ');
 
       return `
         <article class="guest-card ${a ? 'completed' : ''}">
@@ -1551,6 +1637,7 @@
               <div class="guest-meta-line">
                 <span class="serial-pill">#${f.id}</span>
                 <span>Category ${f.cat}</span>
+                ${housemates.length ? `<span style="color:#1d4ed8;font-weight:700;">• Same House (${housemates.length + 1} families)</span>` : ''}
                 ${isPinned ? `<span style="color:var(--primary);font-weight:700;">• Location Saved</span>` : ''}
                 ${isOut ? `<span style="color:var(--text-muted);font-weight:700;">• Out of Town</span>` : ''}
               </div>
@@ -1558,6 +1645,17 @@
               ${f.others ? `<div class="guest-members">With: ${escapeHtml(f.others)}</div>` : ''}
             </div>
           </div>
+
+          ${housemates.length ? `
+            <div class="same-house-banner">
+              <div>
+                <strong>Same House with:</strong> ${housematesText}
+              </div>
+              <button class="btn-secondary-quiet" style="min-height:34px;padding:4px 10px;font-size:0.8rem;" onclick="openSameHouseDialog(${f.id})">
+                Edit House Group
+              </button>
+            </div>
+          ` : ''}
 
           ${a ? `
             <div class="saved-location-box">
@@ -1570,13 +1668,14 @@
             </div>
             <div class="guest-actions">
               <button class="btn-secondary-quiet" onclick="openLocationSheet(${f.id})">Edit Location</button>
+              <button class="btn-secondary-quiet" onclick="openSameHouseDialog(${f.id})">Same House As...</button>
               ${isPinned ? `<a class="btn-secondary-quiet" href="https://www.google.com/maps/search/?api=1&query=${a.lat},${a.lng}" target="_blank" rel="noopener">View in Google Maps</a>` : ''}
               <button class="btn-secondary-quiet" style="color:var(--danger);" onclick="clearFamilyLocation(${f.id})">Move to Remaining</button>
             </div>
           ` : `
             <div class="guest-actions">
               <button class="btn-primary-locate" onclick="openLocationSheet(${f.id})">
-                Locate House
+                ${housemates.length ? `Locate House (${housemates.length + 1} Families)` : 'Locate House'}
               </button>
               <button class="btn-secondary-quiet" onclick="openSameHouseDialog(${f.id})">
                 Same House As...
@@ -1646,10 +1745,22 @@
     if (!fam) return;
     currentSheetFamilyId = familyId;
 
-    document.getElementById('sheetPersonName').textContent = `#${fam.id} ${fam.title}`;
-    document.getElementById('sheetPersonSub').textContent = fam.others
-      ? `Category ${fam.cat} • With ${fam.others}`
-      : `Category ${fam.cat}`;
+    const housemates = getHousemates(familyId);
+    const groupSuffix = housemates.length
+      ? ` (+ ${housemates.map(h => '#' + h.id + ' ' + h.title).join(', ')})`
+      : '';
+
+    document.getElementById('sheetPersonName').textContent = `#${fam.id} ${fam.title}${groupSuffix}`;
+    document.getElementById('sheetPersonSub').textContent = housemates.length
+      ? `Same House Group (${housemates.length + 1} families will be located together) • Category ${fam.cat}`
+      : (fam.others ? `Category ${fam.cat} • With ${fam.others}` : `Category ${fam.cat}`);
+
+    const saveBtn = document.getElementById('btnSavePin');
+    if (saveBtn) {
+      saveBtn.textContent = housemates.length
+        ? `Save Location for All ${housemates.length + 1} Families`
+        : 'Save Location';
+    }
 
     const existing = appState.assignments[familyId];
     sheetAutoReverseNote = existing && existing.note ? existing.note : '';
@@ -1691,8 +1802,9 @@
     if (!neighborMarkersLayer) return;
     neighborMarkersLayer.clearLayers();
 
+    const activeGroup = getHouseGroupIds(excludeFamilyId);
     FAMILIES.forEach(f => {
-      if (f.id === excludeFamilyId) return;
+      if (activeGroup.includes(f.id)) return;
       const a = appState.assignments[f.id];
       if (!a || a.status !== 'pinned') return;
       const icon = L.divIcon({
@@ -1712,7 +1824,9 @@
     };
 
     const fam = FAMILIES.find(f => f.id === currentSheetFamilyId);
-    const shortTitle = fam ? `#${fam.id} ${fam.title.split('&')[0].trim()}` : 'House Pin';
+    const housemates = currentSheetFamilyId ? getHousemates(currentSheetFamilyId) : [];
+    const baseTitle = fam ? `#${fam.id} ${fam.title.split('&')[0].trim()}` : 'House Pin';
+    const shortTitle = housemates.length ? `${baseTitle} (+${housemates.length})` : baseTitle;
 
     if (activePinMarker) {
       map.removeLayer(activePinMarker);
@@ -2039,35 +2153,49 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
     if (!currentSheetFamilyId || !sheetPinCoords) return;
     const fam = FAMILIES.find(f => f.id === currentSheetFamilyId);
     const note = (document.getElementById('landmarkSearchInput').value || sheetAutoReverseNote || '').trim();
+    const groupIds = getHouseGroupIds(currentSheetFamilyId);
+    const now = Date.now();
 
     recordUndoSnapshot();
-    if (appState.deletedAt) delete appState.deletedAt[currentSheetFamilyId];
-    appState.assignments[currentSheetFamilyId] = {
-      status: 'pinned',
-      lat: sheetPinCoords.lat,
-      lng: sheetPinCoords.lng,
-      note: note,
-      updatedAt: Date.now()
-    };
+    groupIds.forEach(gid => {
+      if (appState.deletedAt) delete appState.deletedAt[gid];
+      appState.assignments[gid] = {
+        status: 'pinned',
+        lat: sheetPinCoords.lat,
+        lng: sheetPinCoords.lng,
+        note: note,
+        updatedAt: now
+      };
+    });
 
     closeLocationSheet();
-    saveState(`Saved location for #${fam.id} ${fam.title}`);
+    const toast = groupIds.length > 1
+      ? `Saved location for #${fam.id} ${fam.title} (+ ${groupIds.length - 1} in Same House)`
+      : `Saved location for #${fam.id} ${fam.title}`;
+    saveState(toast);
   }
 
   // ============================================================================
-  // SHORTCUT DISPOSITIONS: SAME HOUSE & OUT OF TOWN
+  // SHORTCUT DISPOSITIONS: PRE-MAP & POST-MAP SAME HOUSE GROUPING & OUT OF TOWN
   // ============================================================================
   function markFamilyOutOfTown(familyId) {
     const fam = FAMILIES.find(f => f.id === familyId);
     if (!fam) return;
+    const groupIds = getHouseGroupIds(familyId);
+    const now = Date.now();
     recordUndoSnapshot();
-    if (appState.deletedAt) delete appState.deletedAt[familyId];
-    appState.assignments[familyId] = {
-      status: 'out_of_town',
-      note: 'Out of town / No local house visit',
-      updatedAt: Date.now()
-    };
-    saveState(`Marked #${fam.id} ${fam.title} as Out of Town`);
+    groupIds.forEach(gid => {
+      if (appState.deletedAt) delete appState.deletedAt[gid];
+      appState.assignments[gid] = {
+        status: 'out_of_town',
+        note: 'Out of town / No local house visit',
+        updatedAt: now
+      };
+    });
+    const toast = groupIds.length > 1
+      ? `Marked #${fam.id} ${fam.title} (+ ${groupIds.length - 1} in Same House) as Out of Town`
+      : `Marked #${fam.id} ${fam.title} as Out of Town`;
+    saveState(toast);
   }
 
   function clearFamilyLocation(familyId) {
@@ -2081,58 +2209,219 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
 
   function openSameHouseDialog(familyId) {
     const fam = FAMILIES.find(f => f.id === familyId);
-    const pinnedList = FAMILIES.filter(f => {
-      const a = appState.assignments[f.id];
-      return a && a.status === 'pinned' && f.id !== familyId;
-    });
+    if (!fam) return;
+    sameHouseActiveTargetId = familyId;
+    sameHouseSearchQuery = '';
 
-    document.getElementById('dialogTitle').textContent = `Same House for #${fam.id} ${fam.title}`;
+    document.getElementById('dialogTitle').textContent = `Tag Same House: #${fam.id} ${fam.title}`;
     const body = document.getElementById('dialogBody');
 
-    if (!pinnedList.length) {
-      body.innerHTML = `
-        <div style="padding:16px 4px;color:var(--text-secondary);">
-          No houses have been pinned yet. Locate the first relative's house on the map, and then you can link any joint-family members to that same house in one tap.
-        </div>`;
-    } else {
-      body.innerHTML = `
-        <div style="font-size:0.92rem;color:var(--text-secondary);">
-          Select an already-located relative below who lives in the exact same house:
-        </div>
-        ${pinnedList.map(pf => {
-          const a = appState.assignments[pf.id];
-          return `
-            <div style="border:1px solid var(--border);border-radius:var(--radius-md);padding:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
-              <div>
-                <div style="font-weight:700;color:var(--text);">#${pf.id} ${escapeHtml(pf.title)}</div>
-                ${a.note ? `<div style="font-size:0.85rem;color:var(--text-secondary);">${escapeHtml(a.note)}</div>` : ''}
-              </div>
-              <button class="btn-icon-text" style="background:var(--primary);color:#fff;border-color:var(--primary);" onclick="linkSameHouse(${familyId}, ${pf.id})">
-                Use This House
-              </button>
-            </div>
-          `;
-        }).join('')}
-      `;
-    }
+    body.innerHTML = `
+      <div style="font-size:0.9rem;color:var(--text-secondary);line-height:1.45;">
+        Tag relatives who live in the <strong>exact same house</strong> (even before locating on the map). Once grouped, locating any one of them on the map automatically locates all of them together.
+      </div>
+
+      <div id="sameHouseCurrentGroupSection"></div>
+
+      <div class="search-wrap" style="margin-top:2px;">
+        <input
+          type="search"
+          id="sameHouseSearchInput"
+          class="input-clean"
+          placeholder="Search any relative by name, family member, or #serial..."
+          oninput="handleSameHouseSearch(this.value)"
+        />
+      </div>
+
+      <div id="sameHouseCandidateList" style="display:flex;flex-direction:column;gap:8px;max-height:46dvh;overflow-y:auto;padding-right:2px;"></div>
+
+      <div style="padding-top:6px;display:flex;justify-content:flex-end;">
+        <button class="btn-save-location" style="min-height:44px;font-size:0.95rem;" onclick="closeDialogModal()">
+          Done
+        </button>
+      </div>
+    `;
+
+    renderSameHouseDialogContent();
     document.getElementById('dialogBackdrop').classList.add('open');
   }
 
+  function handleSameHouseSearch(val) {
+    sameHouseSearchQuery = (val || '').trim().toLowerCase();
+    renderSameHouseDialogContent();
+  }
+
+  function renderSameHouseDialogContent() {
+    const targetId = sameHouseActiveTargetId;
+    if (!targetId) return;
+    const targetFam = FAMILIES.find(f => f.id === targetId);
+    const housemates = getHousemates(targetId);
+
+    const groupSec = document.getElementById('sameHouseCurrentGroupSection');
+    if (groupSec) {
+      if (housemates.length > 0) {
+        groupSec.innerHTML = `
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--radius-md);padding:10px 12px;display:flex;flex-direction:column;gap:8px;">
+            <div style="font-size:0.84rem;font-weight:700;color:#1e3a8a;">
+              Currently Grouped in This House (${housemates.length + 1} Families):
+            </div>
+            <div style="font-size:0.88rem;font-weight:700;color:var(--text);">
+              • #${targetFam.id} ${escapeHtml(targetFam.title)} <span style="color:var(--text-muted);font-weight:500;">(This card)</span>
+            </div>
+            ${housemates.map(hm => `
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:#ffffff;border:1px solid #dbeafe;border-radius:8px;padding:6px 10px;">
+                <div style="font-size:0.88rem;font-weight:700;color:var(--text);">
+                  #${hm.id} ${escapeHtml(hm.title)}
+                </div>
+                <button class="btn-secondary-quiet" style="min-height:30px;padding:2px 8px;font-size:0.78rem;color:var(--danger);" onclick="unlinkSameHouseMember(${targetId}, ${hm.id})">
+                  Unlink
+                </button>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else {
+        groupSec.innerHTML = '';
+      }
+    }
+
+    const listEl = document.getElementById('sameHouseCandidateList');
+    if (!listEl) return;
+
+    const currentGroupIds = getHouseGroupIds(targetId);
+    const q = sameHouseSearchQuery;
+
+    let candidates = FAMILIES.filter(f => !currentGroupIds.includes(f.id));
+    if (q) {
+      candidates = candidates.filter(f => {
+        const a = appState.assignments[f.id];
+        const hay = `${f.id} #${f.id} ${f.title} ${f.others || ''} ${f.cat} ${a && a.note ? a.note : ''}`.toLowerCase();
+        return hay.includes(q);
+      });
+    } else {
+      // Without search query, show already-pinned families first, then same-category families, so both pre-map & post-map tagging are effortless
+      candidates.sort((a, b) => {
+        const aPinned = appState.assignments[a.id] && appState.assignments[a.id].status === 'pinned' ? 1 : 0;
+        const bPinned = appState.assignments[b.id] && appState.assignments[b.id].status === 'pinned' ? 1 : 0;
+        if (aPinned !== bPinned) return bPinned - aPinned;
+        const aSameCat = targetFam && a.cat === targetFam.cat ? 1 : 0;
+        const bSameCat = targetFam && b.cat === targetFam.cat ? 1 : 0;
+        if (aSameCat !== bSameCat) return bSameCat - aSameCat;
+        return a.id - b.id;
+      });
+    }
+
+    const visibleCandidates = candidates.slice(0, 60);
+    if (!visibleCandidates.length) {
+      listEl.innerHTML = `
+        <div style="padding:18px 8px;text-align:center;color:var(--text-secondary);font-size:0.9rem;">
+          No matching relatives found for "${escapeHtml(q)}".
+        </div>`;
+      return;
+    }
+
+    listEl.innerHTML = visibleCandidates.map(cf => {
+      const a = appState.assignments[cf.id];
+      const isPinned = a && a.status === 'pinned';
+      const cfHousemates = getHousemates(cf.id);
+      return `
+        <div class="same-house-Candidate">
+          <div style="min-width:0;flex:1;">
+            <div style="font-weight:700;color:var(--text);font-size:0.94rem;">
+              #${cf.id} ${escapeHtml(cf.title)}
+              <span style="font-size:0.78rem;font-weight:600;color:var(--text-muted);margin-left:4px;">(${cf.cat})</span>
+            </div>
+            ${cf.others ? `<div style="font-size:0.82rem;color:var(--text-secondary);">With: ${escapeHtml(cf.others)}</div>` : ''}
+            ${isPinned
+              ? `<div style="font-size:0.8rem;color:var(--primary);font-weight:600;margin-top:2px;">Located: ${escapeHtml(a.note || 'Pinned on map')}</div>`
+              : `<div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">Not located on map yet — will be located together</div>`
+            }
+            ${cfHousemates.length ? `<div style="font-size:0.78rem;color:#1d4ed8;font-weight:600;">Already grouped with ${cfHousemates.map(h => '#' + h.id).join(', ')}</div>` : ''}
+          </div>
+          <button
+            class="btn-icon-text"
+            style="background:var(--primary);color:#fff;border-color:var(--primary);flex-shrink:0;font-size:0.86rem;padding:6px 12px;"
+            onclick="linkSameHouse(${targetId}, ${cf.id})"
+          >
+            + Same House
+          </button>
+        </div>
+      `;
+    }).join('');
+  }
+
   function linkSameHouse(targetId, sourceId) {
-    const src = appState.assignments[sourceId];
-    if (!src) return;
-    const fam = FAMILIES.find(f => f.id === targetId);
+    const groupA = getHouseGroupIds(targetId);
+    const groupB = getHouseGroupIds(sourceId);
+    const combined = Array.from(new Set([...groupA, ...groupB])).sort((a, b) => a - b);
+    const canonicalGroupId = 'H_' + combined[0];
+    const now = Date.now();
+
     recordUndoSnapshot();
-    if (appState.deletedAt) delete appState.deletedAt[targetId];
-    appState.assignments[targetId] = {
-      status: 'pinned',
-      lat: src.lat,
-      lng: src.lng,
-      note: src.note || `Same house as #${sourceId}`,
-      updatedAt: Date.now()
-    };
-    closeDialogModal();
-    saveState(`Linked #${fam.id} ${fam.title} to #${sourceId}'s house`);
+    appState.houseGroups = appState.houseGroups || {};
+    combined.forEach(id => {
+      appState.houseGroups[id] = {
+        groupId: canonicalGroupId,
+        updatedAt: now
+      };
+    });
+
+    // Check if any member of the combined group already has a saved assignment (pinned or out_of_town)
+    let sharedAssignment = null;
+    for (const id of combined) {
+      const a = appState.assignments[id];
+      if (a && (!sharedAssignment || (a.updatedAt || 0) > (sharedAssignment.updatedAt || 0))) {
+        sharedAssignment = a;
+      }
+    }
+
+    // If any member was already located, propagate that location to every member of the Same House group
+    if (sharedAssignment) {
+      combined.forEach(id => {
+        if (appState.deletedAt) delete appState.deletedAt[id];
+        appState.assignments[id] = Object.assign({}, sharedAssignment, {
+          updatedAt: now
+        });
+      });
+    }
+
+    const famA = FAMILIES.find(f => f.id === targetId);
+    const famB = FAMILIES.find(f => f.id === sourceId);
+    const toast = sharedAssignment
+      ? `Grouped #${famA.id} & #${famB.id} in Same House (Location applied)`
+      : `Grouped #${famA.id} & #${famB.id} in Same House (Will locate together)`;
+
+    saveState(toast);
+    if (document.getElementById('dialogBackdrop').classList.contains('open') && sameHouseActiveTargetId) {
+      renderSameHouseDialogContent();
+    }
+  }
+
+  function unlinkSameHouseMember(targetId, memberIdToRemove) {
+    const currentGroup = getHouseGroupIds(targetId);
+    const remaining = currentGroup.filter(id => id !== Number(memberIdToRemove));
+    const now = Date.now();
+
+    recordUndoSnapshot();
+    appState.houseGroups = appState.houseGroups || {};
+    appState.houseGroups[memberIdToRemove] = { groupId: null, updatedAt: now };
+
+    if (remaining.length <= 1) {
+      remaining.forEach(id => {
+        appState.houseGroups[id] = { groupId: null, updatedAt: now };
+      });
+    } else {
+      const newCanonical = 'H_' + Math.min(...remaining);
+      remaining.forEach(id => {
+        appState.houseGroups[id] = { groupId: newCanonical, updatedAt: now };
+      });
+    }
+
+    const removedFam = FAMILIES.find(f => f.id === Number(memberIdToRemove));
+    saveState(`Unlinked #${removedFam ? removedFam.id + ' ' + removedFam.title : memberIdToRemove} from Same House group`);
+    if (document.getElementById('dialogBackdrop').classList.contains('open') && sameHouseActiveTargetId) {
+      renderSameHouseDialogContent();
+    }
   }
 
   function closeDialogModal() {
