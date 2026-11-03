@@ -1651,9 +1651,6 @@
               <div>
                 <strong>Same House with:</strong> ${housematesText}
               </div>
-              <button class="btn-secondary-quiet" style="min-height:34px;padding:4px 10px;font-size:0.8rem;" onclick="openSameHouseDialog(${f.id})">
-                Edit House Group
-              </button>
             </div>
           ` : ''}
 
@@ -1668,7 +1665,7 @@
             </div>
             <div class="guest-actions">
               <button class="btn-secondary-quiet" onclick="openLocationSheet(${f.id})">Edit Location</button>
-              <button class="btn-secondary-quiet" onclick="openSameHouseDialog(${f.id})">Same House As...</button>
+              <button class="btn-secondary-quiet" onclick="openSameHouseDialog(${f.id})">${housemates.length ? 'Edit Same House' : 'Same House As...'}</button>
               ${isPinned ? `<a class="btn-secondary-quiet" href="https://www.google.com/maps/search/?api=1&query=${a.lat},${a.lng}" target="_blank" rel="noopener">View in Google Maps</a>` : ''}
               <button class="btn-secondary-quiet" style="color:var(--danger);" onclick="clearFamilyLocation(${f.id})">Move to Remaining</button>
             </div>
@@ -1678,7 +1675,7 @@
                 ${housemates.length ? `Locate House (${housemates.length + 1} Families)` : 'Locate House'}
               </button>
               <button class="btn-secondary-quiet" onclick="openSameHouseDialog(${f.id})">
-                Same House As...
+                ${housemates.length ? 'Edit Same House' : 'Same House As...'}
               </button>
               <button class="btn-secondary-quiet" onclick="markFamilyOutOfTown(${f.id})">
                 Out of Town
