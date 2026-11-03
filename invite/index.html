@@ -1,0 +1,2557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Invitation Address & Route Planner</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-subtle: #f1f5f9;
+      --text: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --primary: #0f766e;
+      --primary-hover: #115e59;
+      --primary-soft: #f0fdfa;
+      --accent-blue: #1d4ed8;
+      --accent-blue-soft: #eff6ff;
+      --danger: #b91c1c;
+      --danger-soft: #fef2f2;
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* App Container */
+    .app-container {
+      max-width: 760px;
+      margin: 0 auto;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+    }
+
+    /* Sticky Top Header: Calm, High-Contrast, Minimal */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 16px 12px 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .header-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.015em;
+      margin: 0;
+    }
+
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sync-indicator {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--primary);
+      background: var(--primary-soft);
+      border: 1px solid #99f6e4;
+      padding: 4px 9px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .btn-icon-text {
+      background: var(--surface);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 7px 12px;
+      min-height: 38px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-icon-text:hover {
+      background: var(--surface-subtle);
+    }
+
+    /* Progress Bar Row */
+    .progress-row {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .progress-bar-bg {
+      flex: 1;
+      height: 8px;
+      background: var(--surface-subtle);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--primary);
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    .progress-stat {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    /* Primary Mode Switcher (2 Clean Views: Checklist vs. Trips & Routes) */
+    .mode-switcher {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--surface-subtle);
+      padding: 4px;
+      border-radius: var(--radius-md);
+      margin-top: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .mode-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 10px 12px;
+      min-height: 44px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .mode-btn.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Checklist Filter Controls */
+    .filter-panel {
+      padding: 14px 16px 10px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .search-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-clean {
+      width: 100%;
+      min-height: 48px;
+      padding: 11px 40px 11px 14px;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text);
+      background: var(--surface);
+      border: 1.5px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+    .input-clean:focus {
+      border-color: var(--primary);
+    }
+
+    .btn-clear-input {
+      position: absolute;
+      right: 8px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: var(--surface-subtle);
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .filter-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .status-tabs {
+      display: inline-flex;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .status-tab {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      padding: 8px 13px;
+      min-height: 40px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-right: 1px solid var(--border);
+    }
+    .status-tab:last-child {
+      border-right: none;
+    }
+    .status-tab.active {
+      background: var(--text);
+      color: #ffffff;
+    }
+
+    /* Category Pills */
+    .cat-strip {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+      max-width: 100%;
+    }
+    .cat-strip::-webkit-scrollbar {
+      display: none;
+    }
+
+    .cat-btn {
+      border: 1px solid var(--border-strong);
+      background: var(--surface);
+      color: var(--text-secondary);
+      border-radius: 999px;
+      padding: 7px 14px;
+      min-height: 38px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .cat-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    /* Checklist Container */
+    .checklist-body {
+      padding: 12px 16px 88px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    /* Individual Family Row Card (Zero Clutter — Name, Household, Clear Action) */
+    .guest-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+    .guest-card.completed {
+      border-left: 4px solid var(--primary);
+    }
+
+    .guest-main {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .guest-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .guest-meta-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .serial-pill {
+      color: var(--text);
+      font-weight: 700;
+      background: var(--surface-subtle);
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    .guest-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .guest-members {
+      font-size: 0.94rem;
+      color: var(--text-secondary);
+    }
+
+    .saved-location-box {
+      background: var(--surface-subtle);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      font-size: 0.92rem;
+      color: var(--text);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    /* Action Buttons on Card */
+    .guest-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary-locate {
+      flex: 1.5;
+      min-width: 160px;
+      min-height: 48px;
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-primary-locate:active {
+      background: var(--primary-hover);
+    }
+
+    .btn-secondary-quiet {
+      flex: 1;
+      min-width: 115px;
+      min-height: 48px;
+      background: var(--surface);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      text-decoration: none;
+    }
+    .btn-secondary-quiet:hover {
+      background: var(--surface-subtle);
+    }
+
+    /* ==========================================================================
+       FOCUSED FULL-SCREEN LOCATION SHEET (Opens when a Family Row is tapped)
+       ========================================================================== */
+    .sheet-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .sheet-backdrop.open {
+      display: flex;
+    }
+
+    .location-sheet {
+      background: var(--surface);
+      width: 100%;
+      max-width: 760px;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    @media (min-width: 768px) {
+      .location-sheet {
+        height: 92dvh;
+        border-radius: 18px;
+        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+      }
+    }
+
+    /* Sheet Header: Shows ONLY the target family being mapped */
+    .sheet-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    .sheet-person-title {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0;
+    }
+
+    .sheet-person-sub {
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    /* Step 1 inside Sheet: Speak or Type Landmark */
+    .sheet-search-panel {
+      padding: 12px 16px;
+      background: var(--surface-subtle);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .voice-search-bar {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .btn-mic {
+      background: #0f172a;
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 0 16px;
+      min-height: 48px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    @media (max-width: 430px) {
+      .btn-mic {
+        padding: 0 12px;
+        font-size: 0.88rem;
+      }
+      .btn-find {
+        padding: 0 12px;
+        font-size: 0.9rem;
+      }
+    }
+    .btn-mic.listening {
+      background: var(--danger);
+      animation: pulseMic 1.2s infinite;
+    }
+
+    @keyframes pulseMic {
+      0% { box-shadow: 0 0 0 0 rgba(185, 28, 28, 0.45); }
+      70% { box-shadow: 0 0 0 12px rgba(185, 28, 28, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(185, 28, 28, 0); }
+    }
+
+    .btn-find {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 0 16px;
+      min-height: 48px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .helper-caption {
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Map Canvas Area inside Sheet */
+    .sheet-map-wrap {
+      position: relative;
+      flex: 1 1 0%;
+      width: 100%;
+      min-height: 240px;
+      overflow: hidden;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* Subtle Map Layer Switcher */
+    .map-layer-pill {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 500;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 8px 12px;
+      min-height: 40px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      box-shadow: var(--shadow-md);
+      cursor: pointer;
+    }
+
+    /* Clean Instruction Pill on Map */
+    .map-drag-hint {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 138px;
+      z-index: 500;
+      background: rgba(15, 23, 42, 0.86);
+      color: #ffffff;
+      padding: 8px 12px;
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      font-weight: 500;
+      pointer-events: none;
+    }
+
+    /* True Google-Maps-Style Teardrop Pin Marker with Name Below Pin */
+    .house-pin-wrap {
+      position: relative;
+      width: 48px;
+      height: 64px;
+      cursor: grab;
+      user-select: none;
+    }
+    .house-pin-wrap:active {
+      cursor: grabbing;
+    }
+    .house-pin-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 48px;
+      height: 64px;
+      filter: drop-shadow(0 4px 8px rgba(15, 23, 42, 0.4));
+    }
+    .house-pin-label {
+      position: absolute;
+      top: 59px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #991b1b;
+      font-size: 0.88rem;
+      font-weight: 800;
+      white-space: nowrap;
+      letter-spacing: -0.01em;
+      text-shadow:
+        -2px -2px 0 #ffffff,
+         2px -2px 0 #ffffff,
+        -2px  2px 0 #ffffff,
+         2px  2px 0 #ffffff,
+         0px  2px 5px rgba(255, 255, 255, 0.98);
+      pointer-events: none;
+    }
+
+    /* Nearby Landmark Badges (Hotels, Temples, Bakeries, Hospitals, Circles) */
+    .landmark-pin {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255, 255, 255, 0.96);
+      color: #1e293b;
+      border: 1.5px solid #d97706;
+      border-left: 4px solid #d97706;
+      border-radius: 6px;
+      padding: 3px 7px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      white-space: nowrap;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+      cursor: pointer;
+      transform: translate(-50%, -50%);
+    }
+    .landmark-pin.type-hotel {
+      border-color: #d97706;
+      border-left-color: #d97706;
+      color: #92400e;
+    }
+    .landmark-pin.type-hospital {
+      border-color: #0284c7;
+      border-left-color: #0284c7;
+      color: #075985;
+    }
+    .landmark-pin.type-temple, .landmark-pin.type-circle {
+      border-color: #7c3aed;
+      border-left-color: #7c3aed;
+      color: #5b21b6;
+    }
+    .landmark-pin.type-bakery {
+      border-color: #ea580c;
+      border-left-color: #ea580c;
+      color: #9a3412;
+    }
+    .landmark-pin-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+    }
+
+    .neighbor-pin {
+      background: #0f766e;
+      color: #ffffff;
+      border: 2px solid #ffffff;
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      white-space: nowrap;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
+      transform: translate(-50%, -50%);
+    }
+
+    /* Sheet Footer: Directions Note + Save CTA */
+    .sheet-footer {
+      padding: 12px 16px 16px 16px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .sheet-footer-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-save-location {
+      flex: 1;
+      min-height: 52px;
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-save-location:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    /* ==========================================================================
+       VIEW 2: TRIPS, ROUTES & CAR PACKING MANIFEST (Output View)
+       ========================================================================== */
+    .trips-view {
+      display: none;
+      padding: 16px 16px 88px 16px;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .trips-view.active {
+      display: flex;
+    }
+
+    .summary-banner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .trip-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .trip-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+    }
+
+    .trip-title {
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0;
+    }
+
+    .packing-manifest {
+      background: #f8fafc;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .stop-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .stop-item:last-child {
+      border-bottom: none;
+    }
+
+    .stop-index {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--text);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* Simple Dialog Modal (Same House / Settings) */
+    .dialog-sheet {
+      background: var(--surface);
+      width: 100%;
+      max-width: 520px;
+      max-height: 85dvh;
+      border-radius: 18px 18px 0 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      margin-top: auto;
+    }
+    @media (min-width: 640px) {
+      .dialog-sheet {
+        border-radius: 16px;
+        margin: auto;
+      }
+    }
+
+    /* Undo Snackbar */
+    .snackbar {
+      position: fixed;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0f172a;
+      color: #ffffff;
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      font-size: 0.95rem;
+      font-weight: 500;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.25);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      gap: 14px;
+      max-width: 92vw;
+    }
+    .snackbar.show {
+      display: inline-flex;
+    }
+    .snackbar-undo {
+      background: transparent;
+      border: none;
+      color: #5eead4;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Sticky Minimal Header -->
+  <header class="app-header">
+    <div class="header-top">
+      <h1 class="header-title">Invitation Address List</h1>
+      <div class="header-meta">
+        <span class="sync-indicator" id="syncBadge">Saved</span>
+        <button class="btn-icon-text" onclick="openSettingsModal()">Settings &amp; Export</button>
+      </div>
+    </div>
+
+    <div class="progress-row">
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-stat" id="progressStatText">0 of 248 completed</div>
+    </div>
+
+    <div class="mode-switcher" role="tablist">
+      <button class="mode-btn active" id="tabBtnChecklist" onclick="switchMainView('checklist')">
+        Family Checklist (<span id="badgeRemainingCount">248</span> left)
+      </button>
+      <button class="mode-btn" id="tabBtnTrips" onclick="switchMainView('trips')">
+        Routes &amp; Packing (<span id="badgePinnedCount">0</span>)
+      </button>
+    </div>
+  </header>
+
+  <!-- VIEW 1: CLEAN CHECKLIST (Primary Process View) -->
+  <main id="viewChecklist">
+    <section class="filter-panel" aria-label="Filter Families">
+      <div class="search-wrap">
+        <input
+          type="text"
+          id="checklistSearch"
+          class="input-clean"
+          placeholder="Search name or number (e.g. Chandrashekar, 14)..."
+          oninput="handleChecklistSearch()"
+        />
+        <button class="btn-clear-input" id="btnClearChecklistSearch" onclick="clearChecklistSearch()" aria-label="Clear search">✕</button>
+      </div>
+
+      <div class="filter-row">
+        <div class="status-tabs" role="group" aria-label="Completion status">
+          <button class="status-tab active" id="statusBtnTodo" onclick="setStatusFilter('todo')">
+            To Locate (<span id="countTodo">248</span>)
+          </button>
+          <button class="status-tab" id="statusBtnDone" onclick="setStatusFilter('done')">
+            Completed (<span id="countDone">0</span>)
+          </button>
+          <button class="status-tab" id="statusBtnAll" onclick="setStatusFilter('all')">
+            All (248)
+          </button>
+        </div>
+      </div>
+
+      <div class="cat-strip" id="categoryStrip" role="group" aria-label="Categories"></div>
+    </section>
+
+    <section class="checklist-body" id="checklistContainer" aria-live="polite"></section>
+  </main>
+
+  <!-- VIEW 2: AUTO-GROUPED TRIPS, GOOGLE MAPS LINKS & PACKING MANIFEST (Output View) -->
+  <main class="trips-view" id="viewTrips">
+    <div class="summary-banner">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div>
+          <div style="font-weight:700;font-size:1.05rem;">Optimized Invitation Trips</div>
+          <div style="font-size:0.9rem;color:var(--text-secondary);">
+            Houses are ordered along the shortest driving loop and grouped into Google Maps multi-stop trips (up to 9 stops per trip), complete with your spoken directions and gift sticker numbers.
+          </div>
+        </div>
+        <button class="btn-icon-text" onclick="exportCSV()">Download Master CSV</button>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding-top:4px;">
+        <label style="font-size:0.9rem;font-weight:600;color:var(--text-secondary);">Filter Category:</label>
+        <select id="tripCatSelect" onchange="setTripCategoryFilter(this.value)" style="min-height:40px;padding:6px 10px;border-radius:8px;border:1px solid var(--border-strong);font-size:0.92rem;font-weight:600;background:#fff;">
+          <option value="ALL">All Categories</option>
+          <option value="C-1">Category C-1</option>
+          <option value="C-2">Category C-2</option>
+          <option value="C-3">Category C-3</option>
+          <option value="C-4">Category C-4</option>
+          <option value="C-5">Category C-5</option>
+          <option value="C-6">Category C-6</option>
+        </select>
+
+        <label style="font-size:0.9rem;font-weight:600;color:var(--text-secondary);">Stops per Trip:</label>
+        <select id="tripSizeSelect" onchange="setTripSize(this.value)" style="min-height:40px;padding:6px 10px;border-radius:8px;border:1px solid var(--border-strong);font-size:0.92rem;font-weight:600;background:#fff;">
+          <option value="6">6 Houses</option>
+          <option value="8">8 Houses</option>
+          <option value="9" selected>9 Houses (Google Maps Max)</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="tripsListContainer" style="display:flex;flex-direction:column;gap:16px;"></div>
+  </main>
+</div>
+
+<!-- ============================================================================
+     FOCUSED LOCATION SHEET (Opens for 1 Specific Family at a Time)
+     ============================================================================ -->
+<div class="sheet-backdrop" id="locationSheetBackdrop" role="dialog" aria-modal="true">
+  <div class="location-sheet">
+    <div class="sheet-header">
+      <div>
+        <h2 class="sheet-person-title" id="sheetPersonName">#1 Latha &amp; Chandrashekar</h2>
+        <p class="sheet-person-sub" id="sheetPersonSub">Category C-1</p>
+      </div>
+      <button class="btn-icon-text" onclick="closeLocationSheet()">Cancel</button>
+    </div>
+
+    <!-- Step 1: Speak or Type Landmark / Area -->
+    <div class="sheet-search-panel">
+      <div class="voice-search-bar">
+        <button class="btn-mic" id="btnMic" onclick="toggleSpeechRecognition()">
+          <span id="micBtnLabel">Speak Landmark</span>
+        </button>
+        <div class="search-wrap" style="flex:1;">
+          <input
+            type="text"
+            id="landmarkSearchInput"
+            class="input-clean"
+            style="min-height:48px;"
+            placeholder="Or type landmark (e.g. Seetha Circle, Jayanagar 4th Block)..."
+            onkeydown="if(event.key==='Enter') findLandmarkOnMap()"
+          />
+        </div>
+        <button class="btn-find" id="btnFindLandmark" onclick="findLandmarkOnMap()">Find</button>
+      </div>
+      <div class="helper-caption">
+        <span id="sheetStatusHint">Say or type a nearby circle, temple, or cross-road, then drag the pin to the exact street.</span>
+      </div>
+    </div>
+
+    <!-- Step 2: Interactive Google Map with Built-in Landmarks & Single Draggable Pin -->
+    <div class="sheet-map-wrap">
+      <div id="map"></div>
+      <button class="map-layer-pill" id="btnLayerToggle" onclick="toggleSatelliteLayer()">
+        Satellite View
+      </button>
+    </div>
+
+    <!-- Step 3: Single Clean Save Button -->
+    <div class="sheet-footer">
+      <div class="sheet-footer-actions">
+        <button class="btn-save-location" id="btnSavePin" onclick="saveCurrentFamilyPin()">
+          Save Location
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================================
+     DIALOG MODAL (Same House Picker & Cloud Sync / Export Settings)
+     ============================================================================ -->
+<div class="sheet-backdrop" id="dialogBackdrop" role="dialog" aria-modal="true">
+  <div class="dialog-sheet">
+    <div class="sheet-header">
+      <h2 class="sheet-person-title" id="dialogTitle">Select Option</h2>
+      <button class="btn-icon-text" onclick="closeDialogModal()">Close</button>
+    </div>
+    <div id="dialogBody" style="padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;"></div>
+  </div>
+</div>
+
+<!-- ============================================================================
+     PASSCODE LOCK OVERLAY (Protects bnsuhas.com/invite from random visitors)
+     ============================================================================ -->
+<div class="sheet-backdrop" id="passcodeGateOverlay" role="dialog" aria-modal="true" style="background:#f8fafc;z-index:2000;">
+  <div class="dialog-sheet" style="max-width:420px;padding:24px;gap:14px;">
+    <h2 class="sheet-person-title" style="font-size:1.25rem;">Family Invitation Planner</h2>
+    <p style="margin:0;font-size:0.95rem;color:var(--text-secondary);">
+      Enter the family passcode shared on WhatsApp to open the invitation list.
+    </p>
+    <input
+      type="password"
+      id="gatePasscodeInput"
+      class="input-clean"
+      placeholder="Enter Family Passcode"
+      onkeydown="if(event.key==='Enter') unlockWithGatePasscode()"
+    />
+    <div id="gateErrorText" style="color:var(--danger);font-size:0.86rem;font-weight:600;display:none;">
+      Incorrect passcode. Please use the link shared in the family WhatsApp group.
+    </div>
+    <button class="btn-save-location" onclick="unlockWithGatePasscode()">
+      Open Invitation List
+    </button>
+  </div>
+</div>
+
+<!-- Undo Snackbar -->
+<div class="snackbar" id="snackbar" role="status">
+  <span id="snackbarText">Location saved</span>
+  <button class="snackbar-undo" id="snackbarUndoBtn" onclick="undoLastChange()">Undo</button>
+</div>
+
+<script>
+  const FAMILIES = [{"id": 1, "cat": "C-1", "title": "Latha & Chandrashekar", "name1": "Latha", "name2": "Chandrashekar", "others": "Ashwin, Tejas, Sathyanarayana Murthy", "shirts": "S-1: SRI. CHANDRASHEKAR | S-1/2: SRI. ASHWIN | S-1/3: SRI. TEJAS | S-1/4: SRI. SATHYANARAYANA MURTHY", "ladyStickers": "SMT. LATHA"}, {"id": 2, "cat": "C-1", "title": "Shubha & Seetharam", "name1": "Shubha", "name2": "Seetharam", "others": "", "shirts": "S-2: SRI. DR. K. SEETHARAM", "ladyStickers": "SMT. SHUBHA"}, {"id": 3, "cat": "C-1", "title": "Sakshee & Amogh", "name1": "Sakshee", "name2": "Amogh", "others": "", "shirts": "S-3: SRI. AMOGH", "ladyStickers": "SAKSHEE"}, {"id": 4, "cat": "C-1", "title": "Nalini & Krishna", "name1": "Nalini", "name2": "Krishna", "others": "", "shirts": "S-4: SRI. KRISHNA K.", "ladyStickers": "SMT. NALINI"}, {"id": 5, "cat": "C-1", "title": "Aprathi & Koushik", "name1": "Aprathi", "name2": "Koushik", "others": "", "shirts": "S-5: SRI. KOUSHIK", "ladyStickers": "SMT. APRATHI"}, {"id": 6, "cat": "C-1", "title": "Anchita", "name1": "Anchita", "name2": "", "others": "", "shirts": "", "ladyStickers": "ANCHITA"}, {"id": 7, "cat": "C-1", "title": "Anuradha & Sridhara", "name1": "Anuradha", "name2": "Sridhara", "others": "SharvaRohith", "shirts": "S-7: SRI. DR. M K SRIDHARAN | S-7/2: SRI. SHARVAROHITH", "ladyStickers": "SMT. ANURADHA"}, {"id": 8, "cat": "C-1", "title": "Parvathi & B R Ravi", "name1": "Parvathi", "name2": "B R Ravi", "others": "SaiKarun", "shirts": "S-8: SRI. B R RAVI | S-8/2: SRI. SAIKARUN", "ladyStickers": "SMT. PARVATHI"}, {"id": 9, "cat": "C-1", "title": "Bhavani & Abhilash", "name1": "Bhavani", "name2": "Abhilash", "others": "", "shirts": "S-9: SRI. ABHILASH", "ladyStickers": "SMT. BHAVANI"}, {"id": 10, "cat": "C-1", "title": "Savithri & HS Sastry", "name1": "Savithri", "name2": "HS Sastry", "others": "", "shirts": "S-10: SRI. HS SASTRY", "ladyStickers": "SMT. SAVITHRI"}, {"id": 11, "cat": "C-1", "title": "Savitha & Harsha", "name1": "Savitha", "name2": "Harsha", "others": "", "shirts": "S-11: SRI. HARSHA", "ladyStickers": "SMT. SAVITHA, ANANYA, ANARGHYA"}, {"id": 12, "cat": "C-1", "title": "Malathi", "name1": "Malathi", "name2": "", "others": "", "shirts": "", "ladyStickers": "SMT. MALATHI"}, {"id": 13, "cat": "C-1", "title": "Dr Sindhu & Dr Murali", "name1": "Dr Sindhu", "name2": "Dr Murali", "others": "Shreyas", "shirts": "S-13: SRI. DR. MURALI | S-13/2: SRI. SHREYAS", "ladyStickers": "SMT. DR. SINDHU"}, {"id": 14, "cat": "C-1", "title": "Usha & Mohan", "name1": "Usha", "name2": "Mohan", "others": "", "shirts": "S-14: SRI. MOHAN", "ladyStickers": "SMT. USHA"}, {"id": 15, "cat": "C-1", "title": "Bhargavi & Ashwin", "name1": "Bhargavi", "name2": "Ashwin", "others": "", "shirts": "S-15: SRI. ASHWIN", "ladyStickers": "SMT. BHARGAVI"}, {"id": 16, "cat": "C-2", "title": "Lakshmi Kamala & M Srihari", "name1": "Lakshmi Kamala", "name2": "M Srihari", "others": "", "shirts": "S-16: SRI. M SRIHARI", "ladyStickers": "SMT. LAKSHMI KAMALA"}, {"id": 17, "cat": "C-2", "title": "Shakuntala Atthe", "name1": "Shakuntala Atthe", "name2": "", "others": "", "shirts": "", "ladyStickers": "SMT. SHAKUNTALA ATTHE"}, {"id": 18, "cat": "C-2", "title": "Sujatha & SMM", "name1": "Sujatha", "name2": "SMM", "others": "", "shirts": "S-18: SRI. S. MURALI MOHAN", "ladyStickers": "SMT. SUJATHA"}, {"id": 19, "cat": "C-2", "title": "Radhalakshmi", "name1": "Radhalakshmi", "name2": "", "others": "", "shirts": "", "ladyStickers": "SMT. RADHALAKSHMI"}, {"id": 20, "cat": "C-2", "title": "Padma & Dr Balasubramanyam", "name1": "Padma", "name2": "Dr Balasubramanyam", "others": "", "shirts": "S-20: SRI. DR. BALASUBRAMANYAM", "ladyStickers": "SMT. PADMA"}, {"id": 21, "cat": "C-2", "title": "Dinamani", "name1": "Dinamani", "name2": "", "others": "", "shirts": "", "ladyStickers": "SMT. DINAMANI"}, {"id": 22, "cat": "C-2", "title": "Lalitha Sastry", "name1": "Lalitha Sastry", "name2": "", "others": "", "shirts": "", "ladyStickers": "SMT. LALITHA SASTRY"}, {"id": 23, "cat": "C-2", "title": "Anuradha Atthe", "name1": "Anuradha Atthe", "name2": "", "others": "", "shirts": "", "ladyStickers": "SMT. ANURADHA ATTHE"}, {"id": 24, "cat": "C-2", "title": "Lalitha Pinnamma", "name1": "Lalitha Pinnamma", "name2": "", "others": "", "shirts": "", "ladyStickers": "SMT. LALITHA PINNAMMA"}, {"id": 25, "cat": "C-2", "title": "MK Lakshmana Sastry", "name1": "", "name2": "MK Lakshmana Sastry", "others": "", "shirts": "S-25: SRI. MK LAKSHMANA SASTRY", "ladyStickers": ""}, {"id": 26, "cat": "C-2", "title": "M S Ramachandra", "name1": "", "name2": "M S Ramachandra", "others": "", "shirts": "S-26: SRI. M S RAMACHANDRA", "ladyStickers": ""}, {"id": 27, "cat": "C-2", "title": "Smt & Sri Dr B S Srinath", "name1": "Smt & Sri Dr B S Srinath", "name2": "", "others": "", "shirts": "S-27: SRI. DR. B S SRINATH", "ladyStickers": "SMT. DR. B S SRINATH"}, {"id": 28, "cat": "C-2", "title": "Smt & Sri Dr HSN", "name1": "Smt & Sri Dr HSN", "name2": "", "others": "", "shirts": "S-28: SRI. DR. HSN", "ladyStickers": "SMT. DR. HSN"}, {"id": 29, "cat": "C-2", "title": "Smt & Sri Ramamohan & Ramamohan", "name1": "Smt & Sri Ramamohan", "name2": "Ramamohan", "others": "Vishnu", "shirts": "S-29: SRI. RAMAMOHAN | S-29/2: SRI. VISHNU", "ladyStickers": "SMT. RAMAMOHAN"}, {"id": 30, "cat": "C-3", "title": "Pallavi & Gurudutt", "name1": "Pallavi", "name2": "Gurudutt", "others": "Prajwal, Ujwal", "shirts": "S-30: SRI. GURUDUTT | S-30/2: SRI. PRAJWAL | S-30/3: SRI. UJWAL", "ladyStickers": ""}, {"id": 31, "cat": "C-3", "title": "Smt & Sri Sanath Kumar", "name1": "Smt & Sri Sanath Kumar", "name2": "", "others": "Sanath's Father", "shirts": "S-31: SRI. SANATH KUMAR | S-31/2: SRI. SANATH'S FATHER", "ladyStickers": ""}, {"id": 32, "cat": "C-3", "title": "Smt.Vinay Simha & Vinay Simha", "name1": "Smt.Vinay Simha", "name2": "Vinay Simha", "others": "Ganesha's Mother", "shirts": "S-32: SRI. VINAY SIMHA", "ladyStickers": ""}, {"id": 33, "cat": "C-3", "title": "Jagadisha", "name1": "", "name2": "Jagadisha", "others": "", "shirts": "S-33: SRI. JAGADISHA", "ladyStickers": ""}, {"id": 34, "cat": "C-3", "title": "Rajani & Sanjeev", "name1": "Rajani", "name2": "Sanjeev", "others": "", "shirts": "S-34: SRI. SANJEEV", "ladyStickers": ""}, {"id": 35, "cat": "C-3", "title": "Babu", "name1": "", "name2": "Babu", "others": "", "shirts": "S-35: SRI. BABU", "ladyStickers": ""}, {"id": 36, "cat": "C-3", "title": "Satisha", "name1": "", "name2": "Satisha", "others": "", "shirts": "S-36: SRI. SATISHA", "ladyStickers": ""}, {"id": 37, "cat": "C-3", "title": "Sandya & Anil Kulkarni", "name1": "Sandya", "name2": "Anil Kulkarni", "others": "", "shirts": "S-37: SRI. ANIL KULKARNI", "ladyStickers": ""}, {"id": 38, "cat": "C-3", "title": "Rashmi & Udaya", "name1": "Rashmi", "name2": "Udaya", "others": "", "shirts": "S-38: SRI. UDAYA", "ladyStickers": ""}, {"id": 39, "cat": "C-3", "title": "Bhavani Harsha & Harsha", "name1": "Bhavani Harsha", "name2": "Harsha", "others": "", "shirts": "S-39: SRI. HARSHA", "ladyStickers": ""}, {"id": 40, "cat": "C-3", "title": "Vijayamma", "name1": "Vijayamma", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 41, "cat": "C-3", "title": "PrabhaPrakash & Prakash", "name1": "PrabhaPrakash", "name2": "Prakash", "others": "", "shirts": "S-41: SRI. PRAKASH", "ladyStickers": ""}, {"id": 42, "cat": "C-3", "title": "Kalyani & Mr Kalyani", "name1": "Kalyani", "name2": "Mr Kalyani", "others": "", "shirts": "S-42: SRI. MR. KALYANI", "ladyStickers": ""}, {"id": 43, "cat": "C-3", "title": "Latha & VijayRamkumar", "name1": "Latha", "name2": "VijayRamkumar", "others": "Aravind, Sumedha", "shirts": "S-43: SRI. VIJAYRAMKUMAR | S-43/2: SRI. ARAVIND", "ladyStickers": ""}, {"id": 44, "cat": "C-3", "title": "Ramya & Sathyanarayana", "name1": "Ramya", "name2": "Sathyanarayana", "others": "", "shirts": "S-44: SRI. SATHYANARAYANA", "ladyStickers": ""}, {"id": 45, "cat": "C-3", "title": "Aswini & Adithya", "name1": "Aswini", "name2": "Adithya", "others": "", "shirts": "S-45: SRI. ADITHYA", "ladyStickers": ""}, {"id": 46, "cat": "C-3", "title": "Rajeswari & Anantha", "name1": "Rajeswari", "name2": "Anantha", "others": "Varidhi", "shirts": "S-46: SRI. ANANTHA", "ladyStickers": ""}, {"id": 47, "cat": "C-3", "title": "Nagasri & Gurprasad Harihara", "name1": "Nagasri", "name2": "Gurprasad Harihara", "others": "", "shirts": "S-47: SRI. GURPRASAD HARIHARA", "ladyStickers": ""}, {"id": 48, "cat": "C-3", "title": "Rajeshwari & Rajaram", "name1": "Rajeshwari", "name2": "Rajaram", "others": "", "shirts": "S-48: SRI. RAJARAM", "ladyStickers": ""}, {"id": 49, "cat": "C-3", "title": "Jyothi & Raghuram", "name1": "Jyothi", "name2": "Raghuram", "others": "", "shirts": "S-49: SRI. RAGHURAM", "ladyStickers": ""}, {"id": 50, "cat": "C-3", "title": "Lalitha & Ekantharam", "name1": "Lalitha", "name2": "Ekantharam", "others": "", "shirts": "S-50: SRI. EKANTHARAM", "ladyStickers": ""}, {"id": 51, "cat": "C-3", "title": "Lavanya & Subramanyam", "name1": "Lavanya", "name2": "Subramanyam", "others": "", "shirts": "S-51: SRI. SUBRAMANYAM", "ladyStickers": ""}, {"id": 52, "cat": "C-3", "title": "Padmashri & Dr Narahari", "name1": "Padmashri", "name2": "Dr Narahari", "others": "", "shirts": "S-52: SRI. DR. NARAHARI", "ladyStickers": ""}, {"id": 53, "cat": "C-3", "title": "Sridevi & Dr Naganand", "name1": "Sridevi", "name2": "Dr Naganand", "others": "", "shirts": "S-53: SRI. DR. NAGANAND", "ladyStickers": ""}, {"id": 54, "cat": "C-3", "title": "Lakshmi Sadgurumurthy", "name1": "Lakshmi Sadgurumurthy", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 55, "cat": "C-3", "title": "Nandini & Guruprasad", "name1": "Nandini", "name2": "Guruprasad", "others": "", "shirts": "S-55: SRI. GURUPRASAD", "ladyStickers": ""}, {"id": 56, "cat": "C-3", "title": "Geetha & Venkatesh", "name1": "Geetha", "name2": "Venkatesh", "others": "", "shirts": "S-56: SRI. VENKATESH", "ladyStickers": ""}, {"id": 57, "cat": "C-3", "title": "Leela Ananth", "name1": "Leela Ananth", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 58, "cat": "C-3", "title": "Dr Chandrika & Dr Anand", "name1": "Dr Chandrika", "name2": "Dr Anand", "others": "Chandrika's Mother", "shirts": "S-58: SRI. DR. ANAND", "ladyStickers": ""}, {"id": 59, "cat": "C-3", "title": "Srimathi & Kishore", "name1": "Srimathi", "name2": "Kishore", "others": "", "shirts": "S-59: SRI. KISHORE", "ladyStickers": ""}, {"id": 60, "cat": "C-3", "title": "Savithri & Rajasekhar", "name1": "Savithri", "name2": "Rajasekhar", "others": "", "shirts": "S-60: SRI. RAJASEKHAR", "ladyStickers": ""}, {"id": 61, "cat": "C-3", "title": "Meera & Nagabhushan", "name1": "Meera", "name2": "Nagabhushan", "others": "", "shirts": "S-61: SRI. NAGABHUSHAN", "ladyStickers": ""}, {"id": 62, "cat": "C-3", "title": "Anuradha & Ashok", "name1": "Anuradha", "name2": "Ashok", "others": "", "shirts": "S-62: SRI. ASHOK", "ladyStickers": ""}, {"id": 63, "cat": "C-3", "title": "Rekha & Srinivasa Sastry", "name1": "Rekha", "name2": "Srinivasa Sastry", "others": "", "shirts": "S-63: SRI. SRINIVASA SASTRY", "ladyStickers": ""}, {"id": 64, "cat": "C-3", "title": "Kamala & Krishna", "name1": "Kamala", "name2": "Krishna", "others": "Sudhanva, Sudhanva-1", "shirts": "S-64: SRI. KRISHNA | S-64/2: SRI. SUDHANVA | S-64/3: SRI. SUDHANVA-1", "ladyStickers": ""}, {"id": 65, "cat": "C-3", "title": "Jayashree M R & Srinath", "name1": "Jayashree M R", "name2": "Srinath", "others": "Prajwal", "shirts": "S-65: SRI. SRINATH | S-65/2: SRI. PRAJWAL", "ladyStickers": ""}, {"id": 66, "cat": "C-3", "title": "Pragathi & Subramanya", "name1": "Pragathi", "name2": "Subramanya", "others": "", "shirts": "S-66: SRI. SUBRAMANYA", "ladyStickers": ""}, {"id": 67, "cat": "C-3", "title": "Dr Padmashree & Dr Sridhar", "name1": "Dr Padmashree", "name2": "Dr Sridhar", "others": "Dr Sahishnu, Rasagna", "shirts": "S-67: SRI. DR. SRIDHAR | S-67/2: SRI. DR. SAHISHNU", "ladyStickers": ""}, {"id": 68, "cat": "C-3", "title": "Roopa & Shashidhar", "name1": "Roopa", "name2": "Shashidhar", "others": "", "shirts": "S-68: SRI. SHASHIDHAR", "ladyStickers": ""}, {"id": 69, "cat": "C-3", "title": "Vidyavathi & Raghavendra", "name1": "Vidyavathi", "name2": "Raghavendra", "others": "", "shirts": "S-69: SRI. RAGHAVENDRA", "ladyStickers": ""}, {"id": 70, "cat": "C-3", "title": "Sumathi & Chandrasekhar", "name1": "Sumathi", "name2": "Chandrasekhar", "others": "", "shirts": "S-70: SRI. CHANDRASEKHAR", "ladyStickers": ""}, {"id": 71, "cat": "C-3", "title": "Susheela & Srinath", "name1": "Susheela", "name2": "Srinath", "others": "SusheelaSon", "shirts": "S-71: SRI. SRINATH | S-71/2: SRI. SUSHEELA'S SON", "ladyStickers": ""}, {"id": 72, "cat": "C-3", "title": "Mamatha & Suresh", "name1": "Mamatha", "name2": "Suresh", "others": "Dr Sujith", "shirts": "S-72: SRI. SURESH | S-72/2: SRI. DR. SUJITH", "ladyStickers": ""}, {"id": 73, "cat": "C-3", "title": "Nagamani & Purushothama", "name1": "Nagamani", "name2": "Purushothama", "others": "", "shirts": "S-73: SRI. PURUSHOTHAMA", "ladyStickers": ""}, {"id": 74, "cat": "C-3", "title": "Savithri Pinna & Nagaraj", "name1": "Savithri Pinna", "name2": "Nagaraj", "others": "", "shirts": "S-74: SRI. NAGARAJ", "ladyStickers": ""}, {"id": 75, "cat": "C-3", "title": "Suchitra & Krishnaprasad", "name1": "Suchitra", "name2": "Krishnaprasad", "others": "", "shirts": "S-75: SRI. KRISHNAPRASAD", "ladyStickers": ""}, {"id": 76, "cat": "C-3", "title": "Dr Sridevi & Dr Seetharam Sargur", "name1": "Dr Sridevi", "name2": "Dr Seetharam Sargur", "others": "Dr Amrutha, Aditya Sriram", "shirts": "S-76: SRI. DR. SEETHARAM SARGUR | S-76/2: SRI. ADITYA SRIRAM", "ladyStickers": ""}, {"id": 77, "cat": "C-3", "title": "Latha & Ravishankar", "name1": "Latha", "name2": "Ravishankar", "others": "Jothsna", "shirts": "S-77: SRI. RAVISHANKAR", "ladyStickers": ""}, {"id": 78, "cat": "C-3", "title": "Manjula Raghunath", "name1": "Manjula Raghunath", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 79, "cat": "C-3", "title": "Padma & Prakash", "name1": "Padma", "name2": "Prakash", "others": "", "shirts": "S-79: SRI. PRAKASH", "ladyStickers": ""}, {"id": 80, "cat": "C-3", "title": "Shyalaja & Srinivas", "name1": "Shyalaja", "name2": "Srinivas", "others": "Rajesh Kashyap, Pavan Kashyap", "shirts": "S-80: SRI. SRINIVAS | S-80/2: SRI. RAJESH KASHYAP | S-80/3: SRI. PAVAN KASHYAP", "ladyStickers": ""}, {"id": 81, "cat": "C-3", "title": "BhagyaLakshmi", "name1": "BhagyaLakshmi", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 82, "cat": "C-3", "title": "Vijaya & B R SrinivasaMurthy", "name1": "Vijaya", "name2": "B R SrinivasaMurthy", "others": "", "shirts": "S-82: SRI. B R SRINIVASAMURTHY", "ladyStickers": ""}, {"id": 83, "cat": "C-3", "title": "Lakshmi & Nandakumar", "name1": "Lakshmi", "name2": "Nandakumar", "others": "", "shirts": "S-83: SRI. NANDAKUMAR", "ladyStickers": ""}, {"id": 84, "cat": "C-3", "title": "Shyla & Gurudutt", "name1": "Shyla", "name2": "Gurudutt", "others": "Vaibhav", "shirts": "S-84: SRI. GURUDUTT | S-84/2: SRI. VAIBHAV", "ladyStickers": ""}, {"id": 85, "cat": "C-3", "title": "Geetha Balasubramanyam", "name1": "Geetha Balasubramanyam", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 86, "cat": "C-3", "title": "Archana & Guruprasad", "name1": "Archana", "name2": "Guruprasad", "others": "", "shirts": "S-86: SRI. GURUPRASAD", "ladyStickers": ""}, {"id": 87, "cat": "C-3", "title": "Vanaja & Krishnamurthy", "name1": "Vanaja", "name2": "Krishnamurthy", "others": "", "shirts": "S-87: SRI. KRISHNAMURTHY", "ladyStickers": ""}, {"id": 88, "cat": "C-3", "title": "Latha & Srinivas", "name1": "Latha", "name2": "Srinivas", "others": "", "shirts": "S-88: SRI. SRINIVAS", "ladyStickers": ""}, {"id": 89, "cat": "C-3", "title": "Sumithra & Nagaraja", "name1": "Sumithra", "name2": "Nagaraja", "others": "", "shirts": "S-89: SRI. NAGARAJA", "ladyStickers": ""}, {"id": 90, "cat": "C-3", "title": "Smt KBN & KBN", "name1": "Smt KBN", "name2": "KBN", "others": "", "shirts": "S-90: SRI. KBN", "ladyStickers": ""}, {"id": 91, "cat": "C-3", "title": "Rashmi & Shesha", "name1": "Rashmi", "name2": "Shesha", "others": "", "shirts": "S-91: SRI. SHESHA", "ladyStickers": ""}, {"id": 92, "cat": "C-3", "title": "Shanthi", "name1": "Shanthi", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 93, "cat": "C-3", "title": "Vidushi Savithri & Vidwan Srinivasa Murthy", "name1": "Vidushi Savithri", "name2": "Vidwan Srinivasa Murthy", "others": "", "shirts": "S-93: SRI. VIDWAN SRINIVASA MURTHY", "ladyStickers": ""}, {"id": 94, "cat": "C-3", "title": "Sulochana Madam", "name1": "Sulochana Madam", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 95, "cat": "C-3", "title": "Meena and Family & HNLN Simha", "name1": "Meena and Family", "name2": "HNLN Simha", "others": "", "shirts": "S-95: SRI. HNLN SIMHA", "ladyStickers": ""}, {"id": 96, "cat": "C-3", "title": "Smt Madhava Murthy & Madhava Murthy", "name1": "Smt Madhava Murthy", "name2": "Madhava Murthy", "others": "", "shirts": "S-96: SRI. MADHAVA MURTHY", "ladyStickers": ""}, {"id": 97, "cat": "C-3", "title": "Smt SundarRaman & SundarRaman", "name1": "Smt SundarRaman", "name2": "SundarRaman", "others": "", "shirts": "S-97: SRI. SUNDARRAMAN", "ladyStickers": ""}, {"id": 98, "cat": "C-3", "title": "Varalakshmi & Shivaraj", "name1": "Varalakshmi", "name2": "Shivaraj", "others": "", "shirts": "S-98: SRI. SHIVARAJ", "ladyStickers": ""}, {"id": 99, "cat": "C-3", "title": "Tamilarasi", "name1": "Tamilarasi", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 100, "cat": "C-3", "title": "Sunitha", "name1": "Sunitha", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 101, "cat": "C-3", "title": "smt Mallikarjuna & Mallikarjuna", "name1": "smt Mallikarjuna", "name2": "Mallikarjuna", "others": "", "shirts": "S-101: SRI. MALLIKARJUNA", "ladyStickers": ""}, {"id": 102, "cat": "C-4", "title": "Vani Chikkamma & Ramanna Chikkappa", "name1": "Vani Chikkamma", "name2": "Ramanna Chikkappa", "others": "", "shirts": "S-102: SRI. RAMANNA", "ladyStickers": ""}, {"id": 103, "cat": "C-4", "title": "Veena & Madhukar", "name1": "Veena", "name2": "Madhukar", "others": "", "shirts": "S-103: SRI. MADHUKAR", "ladyStickers": ""}, {"id": 104, "cat": "C-4", "title": "Geetha & Aravind", "name1": "Geetha", "name2": "Aravind", "others": "", "shirts": "S-104: SRI. ARAVIND", "ladyStickers": ""}, {"id": 105, "cat": "C-4", "title": "Dr Jyothi & Dr Rajiv", "name1": "Dr Jyothi", "name2": "Dr Rajiv", "others": "", "shirts": "S-105: SRI. DR. RAJIV", "ladyStickers": ""}, {"id": 106, "cat": "C-4", "title": "Parimala & Simhadri Chikkappa", "name1": "Parimala", "name2": "Simhadri Chikkappa", "others": "", "shirts": "S-106: SRI. SIMHADRI", "ladyStickers": ""}, {"id": 107, "cat": "C-4", "title": "Suma", "name1": "Suma", "name2": "?", "others": "", "shirts": "S-107: SRI. SUMA'S HUSBAND", "ladyStickers": ""}, {"id": 108, "cat": "C-4", "title": "Shuba & Dr Anand", "name1": "Shuba", "name2": "Dr Anand", "others": "", "shirts": "S-108: SRI. DR. ANAND", "ladyStickers": ""}, {"id": 109, "cat": "C-4", "title": "Sudha & Nataraj", "name1": "Sudha", "name2": "Nataraj", "others": "", "shirts": "S-109: SRI. NATARAJ", "ladyStickers": ""}, {"id": 110, "cat": "C-4", "title": "Aparna & Sathish", "name1": "Aparna", "name2": "Sathish", "others": "", "shirts": "S-110: SRI. SATHISH", "ladyStickers": ""}, {"id": 111, "cat": "C-4", "title": "Raghuram C S & Ranjini", "name1": "Raghuram C S", "name2": "Ranjini", "others": "", "shirts": "S-111: SRI. RAGHURAM C S", "ladyStickers": ""}, {"id": 112, "cat": "C-4", "title": "Savithri Chikkamma", "name1": "Savithri Chikkamma", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 113, "cat": "C-4", "title": "Smt & Sri Giridhar", "name1": "Smt & Sri Giridhar", "name2": "", "others": "", "shirts": "S-113: SRI. GIRIDHAR", "ladyStickers": ""}, {"id": 114, "cat": "C-4", "title": "Dakshayini", "name1": "Dakshayini", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 115, "cat": "C-4", "title": "Prabha Hospete", "name1": "Prabha Hospete", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 116, "cat": "C-4", "title": "Bharati & Ramanath", "name1": "Bharati", "name2": "Ramanath", "others": "", "shirts": "S-116: SRI. RAMANATH", "ladyStickers": ""}, {"id": 117, "cat": "C-4", "title": "Mallika & Mr Mallika?", "name1": "Mallika", "name2": "Mr Mallika?", "others": "", "shirts": "S-117: SRI. MR. MALLIKA", "ladyStickers": ""}, {"id": 118, "cat": "C-4", "title": "Bhaswati & Srikanth", "name1": "Bhaswati", "name2": "Srikanth", "others": "Srikanth's mother", "shirts": "S-118: SRI. SRIKANTH", "ladyStickers": ""}, {"id": 119, "cat": "C-4", "title": "Gauthami", "name1": "Gauthami", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 120, "cat": "C-4", "title": "Neeharika & Vamsikrishna", "name1": "Neeharika", "name2": "Vamsikrishna", "others": "", "shirts": "S-120: SRI. VAMSIKRISHNA", "ladyStickers": ""}, {"id": 121, "cat": "C-4", "title": "Nirmala & Shatananda Sharma", "name1": "Nirmala", "name2": "Shatananda Sharma", "others": "", "shirts": "S-121: SRI. SHATANANDA SHARMA", "ladyStickers": ""}, {"id": 122, "cat": "C-4", "title": "Vimala & Ramana", "name1": "Vimala", "name2": "Ramana", "others": "", "shirts": "S-122: SRI. RAMANA", "ladyStickers": ""}, {"id": 123, "cat": "C-4", "title": "Shyamala akka", "name1": "Shyamala akka", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 124, "cat": "C-4", "title": "Mahati", "name1": "Mahati", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 125, "cat": "C-4", "title": "Smt & Sri Ravi ( Rajaram)", "name1": "Smt & Sri Ravi ( Rajaram)", "name2": "", "others": "", "shirts": "S-125: SRI. RAVI ( RAJARAM)", "ladyStickers": ""}, {"id": 126, "cat": "C-4", "title": "Smt & Sri Chetan (Rajaram)", "name1": "Smt & Sri Chetan (Rajaram)", "name2": "", "others": "", "shirts": "S-126: SRI. CHETAN (RAJARAM)", "ladyStickers": ""}, {"id": 127, "cat": "C-4", "title": "Smt & Sri Raghuram's son", "name1": "Smt & Sri Raghuram's son", "name2": "", "others": "", "shirts": "S-127: SRI. RAGHURAM'S SON", "ladyStickers": ""}, {"id": 128, "cat": "C-4", "title": "Smt & Sri  Raghuram's daughter", "name1": "Smt & Sri  Raghuram's daughter", "name2": "", "others": "", "shirts": "S-128: SRI. RAGHURAM'S SON-IN-LAW", "ladyStickers": ""}, {"id": 129, "cat": "C-4", "title": "Smt & Sri Ekantharam's son1", "name1": "Smt & Sri Ekantharam's son1", "name2": "", "others": "", "shirts": "S-129: SRI. EKANTHARAM'S SON", "ladyStickers": ""}, {"id": 130, "cat": "C-4", "title": "Pooja & Naveen", "name1": "Pooja", "name2": "Naveen", "others": "", "shirts": "S-130: SRI. NAVEEN", "ladyStickers": ""}, {"id": 131, "cat": "C-4", "title": "Anagha", "name1": "Anagha", "name2": "?", "others": "", "shirts": "S-131: SRI. ANAGHA'S HUSBAND", "ladyStickers": ""}, {"id": 132, "cat": "C-4", "title": "Smt & Sri Ajay & Ajay", "name1": "Smt & Sri Ajay", "name2": "Ajay", "others": "", "shirts": "S-132: SRI. AJAY", "ladyStickers": ""}, {"id": 133, "cat": "C-4", "title": "Smt & Sri Girisha & Girisha", "name1": "Smt & Sri Girisha", "name2": "Girisha", "others": "", "shirts": "S-133: SRI. GIRISHA", "ladyStickers": ""}, {"id": 134, "cat": "C-4", "title": "Smt & Sri Harisha & Harisha", "name1": "Smt & Sri Harisha", "name2": "Harisha", "others": "", "shirts": "S-134: SRI. HARISHA", "ladyStickers": ""}, {"id": 135, "cat": "C-4", "title": "Dr Amrutha", "name1": "Dr Amrutha", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 136, "cat": "C-4", "title": "Jyothsna", "name1": "Jyothsna", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 137, "cat": "C-4", "title": "Suparna & Viswanath (Kiran)", "name1": "Suparna", "name2": "Viswanath (Kiran)", "others": "", "shirts": "S-137: SRI. VISWANATH (KIRAN)", "ladyStickers": ""}, {"id": 138, "cat": "C-4", "title": "Sowmya (Raghu's daughter) & Harish", "name1": "Sowmya (Raghu's daughter)", "name2": "Harish", "others": "", "shirts": "S-138: SRI. HARISH", "ladyStickers": ""}, {"id": 139, "cat": "C-4", "title": "Suma ( Padma's daughter ) & Nagesh", "name1": "Suma ( Padma's daughter )", "name2": "Nagesh", "others": "", "shirts": "S-139: SRI. NAGESH", "ladyStickers": ""}, {"id": 140, "cat": "C-4", "title": "Ramya & Krishna(Padma's Son)", "name1": "Ramya", "name2": "Krishna(Padma's Son)", "others": "", "shirts": "S-140: SRI. KRISHNA (PADMA'S SON)", "ladyStickers": ""}, {"id": 141, "cat": "C-4", "title": "Gayatri & Raghunandan", "name1": "Gayatri", "name2": "Raghunandan", "others": "", "shirts": "S-141: SRI. RAGHUNANDAN", "ladyStickers": ""}, {"id": 142, "cat": "C-4", "title": "Seetha & Ramaprasad", "name1": "Seetha", "name2": "Ramaprasad", "others": "", "shirts": "S-142: SRI. RAMAPRASAD", "ladyStickers": ""}, {"id": 143, "cat": "C-4", "title": "Smt. Vidyashankar & Vidyashankar", "name1": "Smt. Vidyashankar", "name2": "Vidyashankar", "others": "", "shirts": "S-143: SRI. VIDYASHANKAR", "ladyStickers": ""}, {"id": 144, "cat": "C-4", "title": "Smt Akshay & Akshay", "name1": "Smt Akshay", "name2": "Akshay", "others": "", "shirts": "S-144: SRI. AKSHAY", "ladyStickers": ""}, {"id": 145, "cat": "C-4", "title": "Usha ( Geetha's daughter ) Husband", "name1": "Usha ( Geetha's daughter ) Husband", "name2": "", "others": "", "shirts": "S-145: SRI. USHA'S HUSBAND", "ladyStickers": ""}, {"id": 146, "cat": "C-4", "title": "Geetha's elder daughter + Husband", "name1": "Geetha's elder daughter + Husband", "name2": "", "others": "", "shirts": "S-146: SRI. GEETHA'S SON-IN-LAW", "ladyStickers": ""}, {"id": 147, "cat": "C-4", "title": "Smt Raghu & Raghu", "name1": "Smt Raghu", "name2": "Raghu", "others": "", "shirts": "S-147: SRI. RAGHU", "ladyStickers": ""}, {"id": 148, "cat": "C-4", "title": "Latha's daughter & Latha's Son-in-Law", "name1": "Latha's daughter", "name2": "Latha's Son-in-Law", "others": "", "shirts": "S-148: SRI. LATHA'S SON-IN-LAW", "ladyStickers": ""}, {"id": 149, "cat": "C-4", "title": "Smt & Sri Malur Nagaraja Sastry", "name1": "Smt & Sri Malur Nagaraja Sastry", "name2": "", "others": "", "shirts": "S-149: SRI. MALUR NAGARAJA SASTRY", "ladyStickers": ""}, {"id": 150, "cat": "C-4", "title": "Smt & Sri Malur Manjunatha Sastry", "name1": "Smt & Sri Malur Manjunatha Sastry", "name2": "", "others": "", "shirts": "S-150: SRI. MALUR MANJUNATHA SASTRY", "ladyStickers": ""}, {"id": 151, "cat": "C-4", "title": "Rajamma Thyagi", "name1": "Rajamma Thyagi", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 152, "cat": "C-4", "title": "Praveen Subramanyam's mother", "name1": "Praveen Subramanyam's mother", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 153, "cat": "C-4", "title": "Srikanth's mother", "name1": "Srikanth's mother", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 154, "cat": "C-4", "title": "Smt & Sri Ramaswamy", "name1": "Smt & Sri Ramaswamy", "name2": "", "others": "", "shirts": "S-154: SRI. RAMASWAMY", "ladyStickers": ""}, {"id": 155, "cat": "C-4", "title": "Maami", "name1": "Maami", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 156, "cat": "C-4", "title": "Lalithamma Garu", "name1": "Lalithamma Garu", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 157, "cat": "C-4", "title": "Parimala & Raghunath", "name1": "Parimala", "name2": "Raghunath", "others": "", "shirts": "S-157: SRI. RAGHUNATH", "ladyStickers": ""}, {"id": 158, "cat": "C-4", "title": "Padma & V Shrinivasan", "name1": "Padma", "name2": "V Shrinivasan", "others": "", "shirts": "S-158: SRI. V SHRINIVASAN", "ladyStickers": ""}, {"id": 159, "cat": "C-4", "title": "Madhulatha & Raj Kaujalagi", "name1": "Madhulatha", "name2": "Raj Kaujalagi", "others": "", "shirts": "S-159: SRI. RAJ KAUJALAGI", "ladyStickers": ""}, {"id": 160, "cat": "C-4", "title": "Shanthala", "name1": "Shanthala", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 161, "cat": "C-4", "title": "Srimathi & Kishor", "name1": "Srimathi", "name2": "Kishor", "others": "Kishor's Mother", "shirts": "S-161: SRI. KISHOR", "ladyStickers": ""}, {"id": 162, "cat": "C-4", "title": "Smt & Sri RaghuSwamy", "name1": "Smt & Sri RaghuSwamy", "name2": "", "others": "", "shirts": "S-162: SRI. RAGHUSWAMY", "ladyStickers": ""}, {"id": 163, "cat": "C-4", "title": "Smt & Sri Manjunath Yoga", "name1": "Smt & Sri Manjunath Yoga", "name2": "", "others": "", "shirts": "S-163: SRI. MANJUNATH YOGA", "ladyStickers": ""}, {"id": 164, "cat": "C-4", "title": "Shaila & Ramapriya", "name1": "Shaila", "name2": "Ramapriya", "others": "", "shirts": "S-164: SRI. RAMAPRIYA", "ladyStickers": ""}, {"id": 165, "cat": "C-6", "title": "Chandrika & Raghavendra", "name1": "Chandrika", "name2": "Raghavendra", "others": "", "shirts": "S-165: SRI. RAGHAVENDRA", "ladyStickers": ""}, {"id": 166, "cat": "C-6", "title": "Savithri Viswanath", "name1": "Savithri Viswanath", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 167, "cat": "C-6", "title": "Smt & Sri Gurudutt", "name1": "Smt & Sri Gurudutt", "name2": "", "others": "", "shirts": "S-167: SRI. GURUDUTT", "ladyStickers": ""}, {"id": 168, "cat": "C-6", "title": "Smt & Sri Ramesh", "name1": "Smt & Sri Ramesh", "name2": "", "others": "", "shirts": "S-168: SRI. RAMESH", "ladyStickers": ""}, {"id": 169, "cat": "C-6", "title": "Vasumathi", "name1": "Vasumathi", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 170, "cat": "C-6", "title": "Smt & Sri Balasubramanya", "name1": "Smt & Sri Balasubramanya", "name2": "", "others": "", "shirts": "S-170: SRI. BALASUBRAMANYA", "ladyStickers": ""}, {"id": 171, "cat": "C-6", "title": "Asha & Asha's Husband", "name1": "Asha", "name2": "Asha's Husband", "others": "", "shirts": "S-171: SRI. ASHA'S HUSBAND", "ladyStickers": ""}, {"id": 172, "cat": "C-6", "title": "Geetha & Shankaramurthy", "name1": "Geetha", "name2": "Shankaramurthy", "others": "", "shirts": "S-172: SRI. SHANKARAMURTHY", "ladyStickers": ""}, {"id": 173, "cat": "C-6", "title": "Shailaja & Ravikumar", "name1": "Shailaja", "name2": "Ravikumar", "others": "", "shirts": "S-173: SRI. RAVIKUMAR", "ladyStickers": ""}, {"id": 174, "cat": "C-6", "title": "Varalakshmi & Seshadri", "name1": "Varalakshmi", "name2": "Seshadri", "others": "", "shirts": "S-174: SRI. SESHADRI", "ladyStickers": ""}, {"id": 175, "cat": "C-6", "title": "Savitha's Mother", "name1": "Savitha's Mother", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 176, "cat": "C-6", "title": "Smt & Sri Savitha's Brother", "name1": "Smt & Sri Savitha's Brother", "name2": "?", "others": "", "shirts": "S-176: SRI. SAVITHA'S BROTHER", "ladyStickers": ""}, {"id": 177, "cat": "C-6", "title": "Sujattha & Venkatesh Prasad", "name1": "Sujattha", "name2": "Venkatesh Prasad", "others": "", "shirts": "S-177: SRI. VENKATESH PRASAD", "ladyStickers": ""}, {"id": 178, "cat": "C-6", "title": "Smt & Sri Malur Srinivasa Sastry", "name1": "Smt & Sri Malur Srinivasa Sastry", "name2": "", "others": "", "shirts": "S-178: SRI. MALUR SRINIVASA SASTRY", "ladyStickers": ""}, {"id": 179, "cat": "C-6", "title": "Smt & Sri Malur Venkatesha", "name1": "Smt & Sri Malur Venkatesha", "name2": "", "others": "", "shirts": "S-179: SRI. MALUR VENKATESHA", "ladyStickers": ""}, {"id": 180, "cat": "C-6", "title": "Rajalakshmi & Seetharama Sastry", "name1": "Rajalakshmi", "name2": "Seetharama Sastry", "others": "", "shirts": "S-180: SRI. SEETHARAMA SASTRY", "ladyStickers": ""}, {"id": 181, "cat": "C-6", "title": "Leela & Leela's Husband", "name1": "Leela", "name2": "Leela's Husband", "others": "", "shirts": "S-181: SRI. LEELA'S HUSBAND", "ladyStickers": ""}, {"id": 182, "cat": "C-6", "title": "Padmini & Padmini's Husband", "name1": "Padmini", "name2": "Padmini's Husband", "others": "", "shirts": "S-182: SRI. PADMINI'S HUSBAND", "ladyStickers": ""}, {"id": 183, "cat": "C-6", "title": "Bharati & Bharati's Husband", "name1": "Bharati", "name2": "Bharati's Husband", "others": "", "shirts": "S-183: SRI. BHARATI'S HUSBAND", "ladyStickers": ""}, {"id": 184, "cat": "C-6", "title": "Veena & Veena's Husband", "name1": "Veena", "name2": "Veena's Husband", "others": "", "shirts": "S-184: SRI. VEENA'S HUSBAND", "ladyStickers": ""}, {"id": 185, "cat": "C-6", "title": "Smt & Sri Venkatesh", "name1": "Smt & Sri Venkatesh", "name2": "", "others": "", "shirts": "S-185: SRI. VENKATESH", "ladyStickers": ""}, {"id": 186, "cat": "C-6", "title": "Smt & Sri Raghu", "name1": "Smt & Sri Raghu", "name2": "", "others": "", "shirts": "S-186: SRI. RAGHU", "ladyStickers": ""}, {"id": 187, "cat": "C-6", "title": "Dr B S Nagaraja", "name1": "", "name2": "Dr B S Nagaraja", "others": "", "shirts": "S-187: SRI. DR. B S NAGARAJA", "ladyStickers": ""}, {"id": 188, "cat": "C-6", "title": "Smt & Sri  Srikanta", "name1": "Smt & Sri  Srikanta", "name2": "", "others": "", "shirts": "S-188: SRI. SRIKANTA", "ladyStickers": ""}, {"id": 189, "cat": "C-6", "title": "B S Uma & B S Uma's Husband", "name1": "B S Uma", "name2": "B S Uma's Husband", "others": "", "shirts": "S-189: SRI. B S UMA'S HUSBAND", "ladyStickers": ""}, {"id": 190, "cat": "C-6", "title": "Smt & Sri B S Anantha", "name1": "Smt & Sri B S Anantha", "name2": "", "others": "", "shirts": "S-190: SRI. B S ANANTHA", "ladyStickers": ""}, {"id": 191, "cat": "C-6", "title": "Champavva", "name1": "Champavva", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 192, "cat": "C-6", "title": "Uma", "name1": "Uma", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 193, "cat": "C-6", "title": "Dakshayini & Bhaskar", "name1": "Dakshayini", "name2": "Bhaskar", "others": "", "shirts": "S-193: SRI. BHASKAR", "ladyStickers": ""}, {"id": 194, "cat": "C-6", "title": "Lakshmi & Ramanth", "name1": "Lakshmi", "name2": "Ramanth", "others": "", "shirts": "S-194: SRI. RAMANTH", "ladyStickers": ""}, {"id": 195, "cat": "C-6", "title": "Pushpa & Pushpa's Husband", "name1": "Pushpa", "name2": "Pushpa's Husband", "others": "", "shirts": "S-195: SRI. PUSHPA'S HUSBAND", "ladyStickers": ""}, {"id": 196, "cat": "C-6", "title": "Nandini", "name1": "Nandini", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 197, "cat": "C-6", "title": "Supraja & Karthik", "name1": "Supraja", "name2": "Karthik", "others": "", "shirts": "S-197: SRI. KARTHIK", "ladyStickers": ""}, {"id": 198, "cat": "C-6", "title": "Smt & Sri  B S Ananth", "name1": "Smt & Sri  B S Ananth", "name2": "", "others": "", "shirts": "S-198: SRI. B S ANANTH", "ladyStickers": ""}, {"id": 199, "cat": "C-6", "title": "B S Archana & BSS Son-in-Law", "name1": "B S Archana", "name2": "BSS Son-in-Law", "others": "", "shirts": "S-199: SRI. BSS SON-IN-LAW", "ladyStickers": ""}, {"id": 200, "cat": "C-6", "title": "Smt & Sri Vallish", "name1": "Smt & Sri Vallish", "name2": "", "others": "", "shirts": "S-200: SRI. VALLISH", "ladyStickers": ""}, {"id": 201, "cat": "C-6", "title": "Ashwini & Karthik", "name1": "Ashwini", "name2": "Karthik", "others": "", "shirts": "S-201: SRI. KARTHIK", "ladyStickers": ""}, {"id": 202, "cat": "C-6", "title": "Rammohan's mother", "name1": "Rammohan's mother", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 203, "cat": "C-6", "title": "Rammohan's daughter Roopa & Rammohan's Son-in-Law", "name1": "Rammohan's daughter Roopa", "name2": "Rammohan's Son-in-Law", "others": "", "shirts": "S-203: SRI. RAMMOHAN'S SON-IN-LAW", "ladyStickers": ""}, {"id": 204, "cat": "C-6", "title": "Smt & Sri Praveen Subramanyam", "name1": "Smt & Sri Praveen Subramanyam", "name2": "", "others": "", "shirts": "S-204: SRI. PRAVEEN SUBRAMANYAM", "ladyStickers": ""}, {"id": 205, "cat": "C-6", "title": "Smt & Sri Manjunath Google", "name1": "Smt & Sri Manjunath Google", "name2": "", "others": "", "shirts": "S-205: SRI. MANJUNATH GOOGLE", "ladyStickers": ""}, {"id": 206, "cat": "C-6", "title": "Monisha & Kush Desai", "name1": "Monisha", "name2": "Kush Desai", "others": "", "shirts": "S-206: SRI. KUSH DESAI", "ladyStickers": ""}, {"id": 207, "cat": "C-6", "title": "Smt & Sri Raghavendra Rao", "name1": "Smt & Sri Raghavendra Rao", "name2": "", "others": "", "shirts": "S-207: SRI. RAGHAVENDRA RAO", "ladyStickers": ""}, {"id": 208, "cat": "C-6", "title": "Smt & Sri Srikanth", "name1": "Smt & Sri Srikanth", "name2": "", "others": "", "shirts": "S-208: SRI. SRIKANTH", "ladyStickers": ""}, {"id": 209, "cat": "C-6", "title": "Smt & Sri Shashikanth", "name1": "Smt & Sri Shashikanth", "name2": "", "others": "", "shirts": "S-209: SRI. SHASHIKANTH", "ladyStickers": ""}, {"id": 210, "cat": "C-6", "title": "Smt & Sri  Abhinandan", "name1": "Smt & Sri  Abhinandan", "name2": "", "others": "", "shirts": "S-210: SRI. ABHINANDAN", "ladyStickers": ""}, {"id": 211, "cat": "C-6", "title": "Jayashri & Ramamurthy", "name1": "Jayashri", "name2": "Ramamurthy", "others": "", "shirts": "S-211: SRI. RAMAMURTHY", "ladyStickers": ""}, {"id": 212, "cat": "C-6", "title": "Smt & Sri VinaySharva", "name1": "Smt & Sri VinaySharva", "name2": "", "others": "", "shirts": "S-212: SRI. VINAYSHARVA", "ladyStickers": ""}, {"id": 213, "cat": "C-6", "title": "Shubha & Sreenath", "name1": "Shubha", "name2": "Sreenath", "others": "", "shirts": "S-213: SRI. SREENATH", "ladyStickers": ""}, {"id": 214, "cat": "C-6", "title": "Sarala Mohan", "name1": "Sarala Mohan", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 215, "cat": "C-6", "title": "Sneha & Ravi", "name1": "Sneha", "name2": "Ravi", "others": "", "shirts": "S-215: SRI. RAVI", "ladyStickers": ""}, {"id": 216, "cat": "C-6", "title": "Smt & Sri Hanumantha Rao", "name1": "Smt & Sri Hanumantha Rao", "name2": "", "others": "", "shirts": "S-216: SRI. HANUMANTHA RAO", "ladyStickers": ""}, {"id": 217, "cat": "C-6", "title": "Smt & Sri Abhinav Ramanand", "name1": "Smt & Sri Abhinav Ramanand", "name2": "", "others": "", "shirts": "S-217: SRI. ABHINAV RAMANAND", "ladyStickers": ""}, {"id": 218, "cat": "C-6", "title": "Seetha", "name1": "Seetha", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 219, "cat": "C-6", "title": "Smt & Sri Kiran", "name1": "Smt & Sri Kiran", "name2": "", "others": "", "shirts": "S-219: SRI. KIRAN", "ladyStickers": ""}, {"id": 220, "cat": "C-6", "title": "Vasudha & Venkatesh", "name1": "Vasudha", "name2": "Venkatesh", "others": "", "shirts": "S-220: SRI. VENKATESH", "ladyStickers": ""}, {"id": 221, "cat": "C-6", "title": "Smt & Sri Anooru AK Sharma", "name1": "Smt & Sri Anooru AK Sharma", "name2": "", "others": "", "shirts": "S-221: SRI. ANOORU AK SHARMA", "ladyStickers": ""}, {"id": 222, "cat": "C-6", "title": "Smt & Sri Daattatreya Sharma", "name1": "Smt & Sri Daattatreya Sharma", "name2": "", "others": "", "shirts": "S-222: SRI. DAATTATREYA SHARMA", "ladyStickers": ""}, {"id": 223, "cat": "C-6", "title": "Jayashri & Rahul", "name1": "Jayashri", "name2": "Rahul", "others": "", "shirts": "S-223: SRI. RAHUL", "ladyStickers": ""}, {"id": 224, "cat": "C-6", "title": "Smt & Sri Vidwan Shankar", "name1": "Smt & Sri Vidwan Shankar", "name2": "", "others": "", "shirts": "S-224: SRI. VIDWAN SHANKAR", "ladyStickers": ""}, {"id": 225, "cat": "C-6", "title": "Jyoti Manohar & Manohar", "name1": "Jyoti Manohar", "name2": "Manohar", "others": "", "shirts": "S-225: SRI. MANOHAR", "ladyStickers": ""}, {"id": 226, "cat": "C-6", "title": "Indu & Manohar's brother", "name1": "Indu", "name2": "Manohar's brother", "others": "", "shirts": "S-226: SRI. MANOHAR'S BROTHER", "ladyStickers": ""}, {"id": 227, "cat": "C-6", "title": "Manohar's Parents", "name1": "Manohar's Parents", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 228, "cat": "C-6", "title": "Smt & Sri T V Ambarish", "name1": "Smt & Sri T V Ambarish", "name2": "", "others": "", "shirts": "S-228: SRI. T V AMBARISH", "ladyStickers": ""}, {"id": 229, "cat": "C-6", "title": "Vijayalakshmi & Girish", "name1": "Vijayalakshmi", "name2": "Girish", "others": "", "shirts": "S-229: SRI. GIRISH", "ladyStickers": ""}, {"id": 230, "cat": "C-6", "title": "Lakshmi Updhyaya & SN Upadhyaya", "name1": "Lakshmi Updhyaya", "name2": "SN Upadhyaya", "others": "", "shirts": "S-230: SRI. SN UPADHYAYA", "ladyStickers": ""}, {"id": 231, "cat": "C-6", "title": "Mangala & Madhav Khare", "name1": "Mangala", "name2": "Madhav Khare", "others": "", "shirts": "S-231: SRI. MADHAV KHARE", "ladyStickers": ""}, {"id": 232, "cat": "C-6", "title": "Anitha & Anil Keste", "name1": "Anitha", "name2": "Anil Keste", "others": "", "shirts": "S-232: SRI. ANIL KESTE", "ladyStickers": ""}, {"id": 233, "cat": "C-6", "title": "Nalini L and T", "name1": "Nalini L and T", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 234, "cat": "C-6", "title": "Smt & Sri B Parameshwar", "name1": "Smt & Sri B Parameshwar", "name2": "", "others": "", "shirts": "S-234: SRI. B PARAMESHWAR", "ladyStickers": ""}, {"id": 235, "cat": "C-6", "title": "Smt & Sri M S Mohan", "name1": "Smt & Sri M S Mohan", "name2": "", "others": "", "shirts": "S-235: SRI. M S MOHAN", "ladyStickers": ""}, {"id": 236, "cat": "C-6", "title": "Smt & Sri Shyamasundar", "name1": "Smt & Sri Shyamasundar", "name2": "", "others": "", "shirts": "S-236: SRI. SHYAMASUNDAR", "ladyStickers": ""}, {"id": 237, "cat": "C-6", "title": "Lakshmi Yoga", "name1": "Lakshmi Yoga", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 238, "cat": "C-6", "title": "Shailaja Yoga", "name1": "Shailaja Yoga", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 239, "cat": "C-5", "title": "RavindraKudupu", "name1": "", "name2": "RavindraKudupu", "others": "", "shirts": "S-239: SRI. RAVINDRAKUDUPU", "ladyStickers": ""}, {"id": 240, "cat": "C-5", "title": "Divyalatha & VasudevaRao", "name1": "Divyalatha", "name2": "VasudevaRao", "others": "", "shirts": "S-240: SRI. VASUDEVARAO", "ladyStickers": ""}, {"id": 241, "cat": "C-5", "title": "Usha & Udaykumar", "name1": "Usha", "name2": "Udaykumar", "others": "", "shirts": "S-241: SRI. UDAYKUMAR", "ladyStickers": ""}, {"id": 242, "cat": "C-5", "title": "Sowmya & RK-2", "name1": "Sowmya", "name2": "RK-2", "others": "", "shirts": "S-242: SRI. RK-2 (SOWMYA)", "ladyStickers": ""}, {"id": 243, "cat": "C-5", "title": "Geetha doddamma & Doddappa(nikitha)", "name1": "Geetha doddamma", "name2": "Doddappa(nikitha)", "others": "", "shirts": "S-243: SRI. DODDAPPA (NIKITHA)", "ladyStickers": ""}, {"id": 244, "cat": "C-5", "title": "Chikkamma(nikitha) & Chikkappa(nikitha)", "name1": "Chikkamma(nikitha)", "name2": "Chikkappa(nikitha)", "others": "", "shirts": "S-244: SRI. CHIKKAPPA (NIKITHA)", "ladyStickers": ""}, {"id": 245, "cat": "C-5", "title": "Atte(Nikitha) & Mava(Nikitha)", "name1": "Atte(Nikitha)", "name2": "Mava(Nikitha)", "others": "", "shirts": "S-245: SRI. MAVA (NIKITHA)", "ladyStickers": ""}, {"id": 246, "cat": "C-5", "title": "Ammamma", "name1": "Ammamma", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 247, "cat": "C-5", "title": "Ajji", "name1": "Ajji", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}, {"id": 248, "cat": "C-5", "title": "Nikitha's Appa/amma's doddamma, chikkamma,atte", "name1": "Nikitha's Appa/amma's doddamma, chikkamma,atte", "name2": "", "others": "", "shirts": "", "ladyStickers": ""}];
+  const STORAGE_KEY = 'suhas_nikitha_wedding_map_v1';
+  const CONFIG_KEY = 'suhas_nikitha_gemini_config_v1';
+  const CATEGORIES = ['ALL', 'C-1', 'C-2', 'C-3', 'C-4', 'C-5', 'C-6'];
+
+  // 100+ Bengaluru Circles, Hotels, Temples, Bakeries, Hospitals & Karnataka Towns
+  const LOCALITY_GAZETTEER = [
+    { keys: ['seetha circle', 'sita circle', 'seeta circle'], lat: 12.938169, lng: 77.549957, label: 'Seetha Circle' },
+    { keys: ['aahar utsav', 'havyaka mess', 'vinayaka hospital', 'oven fresh'], lat: 12.937530, lng: 77.549450, label: 'Seetha Circle (Hotel / Hospital)' },
+    { keys: ['brahmin cafe', 'lj iyengar', 'bunts biriyani', 'prashanth hospital'], lat: 12.938873, lng: 77.551852, label: '80 Feet Rd, Seetha Circle' },
+    { keys: ['vidyapeetha circle', 'vidyapeeta circle', 'vidyapeetha', 'vidyapeeta'], lat: 12.933784, lng: 77.560975, label: 'Vidyapeetha Circle' },
+    { keys: ['srinivasanagar', 'srinivasa nagar', 'bank colony'], lat: 12.937800, lng: 77.552900, label: 'Srinivasanagar / Bank Colony' },
+    { keys: ['ashok nagar', 'ashoknagar', 'netkallappa circle', 'bms college'], lat: 12.939200, lng: 77.573100, label: 'Netkallappa Circle / Ashok Nagar' },
+    { keys: ['vidyarthi bhavan', 'tagore circle', 'gandhi bazaar'], lat: 12.945006, lng: 77.571472, label: 'Gandhi Bazaar / Vidyarthi Bhavan' },
+    { keys: ['ramakrishna ashrama', 'ramakrishna math', 'national college', 'slv corner'], lat: 12.948650, lng: 77.568050, label: 'Ramakrishna Ashrama / SLV Corner' },
+    { keys: ['bugle rock', 'bull temple', 'dodda ganapathi', 'doddaganapathi', 'basavanagudi'], lat: 12.941757, lng: 77.568728, label: 'Basavanagudi / Bull Temple' },
+    { keys: ['south end circle', 'southend circle', 'surana college'], lat: 12.938257, lng: 77.580056, label: 'South End Circle' },
+    { keys: ['madhavan park', 'upahara darshini'], lat: 12.936624, lng: 77.585464, label: 'Madhavan Park, Jayanagar' },
+    { keys: ['cool joint', 'jayanagar 4th block', 'jayanagar 4th', 'jayanagar shopping complex', 'maiyas'], lat: 12.928773, lng: 77.585920, label: 'Jayanagar 4th Block / Cool Joint' },
+    { keys: ['ashoka pillar', 'bengaluru cafe', 'jayanagar 1st block', 'jayanagar 2nd block'], lat: 12.939212, lng: 77.583898, label: 'Ashoka Pillar / Jayanagar 2nd Block' },
+    { keys: ['jayanagar 3rd block', 'jayanagar 3rd', 'nmkrv'], lat: 12.934500, lng: 77.583400, label: 'Jayanagar 3rd Block' },
+    { keys: ['jayanagar 5th block', 'jayanagar 5th', 'shalini grounds'], lat: 12.921200, lng: 77.582100, label: 'Jayanagar 5th Block' },
+    { keys: ['yediyur', 'yediyur lake', 'jayanagar 7th block', 'jayanagar 7th', 'jayanagar 6th'], lat: 12.926500, lng: 77.575400, label: 'Yediyur / Jayanagar 7th Block' },
+    { keys: ['jayanagar 8th block', 'jayanagar 8th'], lat: 12.918200, lng: 77.576800, label: 'Jayanagar 8th Block' },
+    { keys: ['ragigudda', 'jayanagar 9th block', 'jayanagar 9th', 'east end'], lat: 12.916799, lng: 77.593385, label: 'Ragigudda / Jayanagar 9th Block' },
+    { keys: ['jayanagar'], lat: 12.928773, lng: 77.585920, label: 'Jayanagar' },
+    { keys: ['nr colony', 'n r colony', 'narasimharaja colony', 'thyagarajanagar', 'tyagarajanagar'], lat: 12.934800, lng: 77.566500, label: 'NR Colony / Thyagarajanagar' },
+    { keys: ['hanumanthanagar', 'hanumantha nagar', 'kumaraswamy temple', 'gavipuram', 'srinagar'], lat: 12.942500, lng: 77.556800, label: 'Hanumanthanagar / Srinagar' },
+    { keys: ['girinagar', 'giri nagar', 'hosakerehalli', 'avalalli', 'pes college', 'pes university'], lat: 12.938800, lng: 77.543200, label: 'Girinagar' },
+    { keys: ['devegowda petrol'], lat: 12.922158, lng: 77.559976, label: 'Devegowda Petrol Bunk' },
+    { keys: ['kamakya', 'kathriguppe', 'katriguppe', 'banashankari 3rd stage', 'bsk 3rd stage', 'ittamadu', 'chennammanakere', 'taaza thindi'], lat: 12.923967, lng: 77.549266, label: 'Kamakya / Katriguppe BSK 3rd Stage' },
+    { keys: ['banashankari bda', 'bsk 2nd stage', 'banashankari 2nd stage', 'bnm college', 'sevakshetra'], lat: 12.925500, lng: 77.564200, label: 'Banashankari 2nd Stage' },
+    { keys: ['banashankari temple', 'banashankari amma', 'banashankari bus stand'], lat: 12.916035, lng: 77.573064, label: 'Banashankari Temple' },
+    { keys: ['banashankari 1st stage', 'bsk 1st stage'], lat: 12.938169, lng: 77.549957, label: 'Banashankari 1st Stage' },
+    { keys: ['banashankari', 'bsk'], lat: 12.925500, lng: 77.558000, label: 'Banashankari' },
+    { keys: ['padmanabhanagar', 'padmanabha nagar', 'dg petrol', 'gowdanapalya', 'chikkalsandra'], lat: 12.915200, lng: 77.556900, label: 'Padmanabhanagar' },
+    { keys: ['uttarahalli', 'subramanyapura', 'vasanthapura', 'isro layout'], lat: 12.901500, lng: 77.551200, label: 'Uttarahalli / ISRO Layout' },
+    { keys: ['kumaraswamy layout', 'ks layout', 'dayananda sagar', 'kadirenahalli'], lat: 12.905500, lng: 77.562800, label: 'Kumaraswamy Layout' },
+    { keys: ['sarakki', 'jp nagar 1st phase', 'jp nagar 2nd phase', 'jp nagar 3rd phase', 'rv dental'], lat: 12.911800, lng: 77.585500, label: 'JP Nagar 1st/2nd Phase' },
+    { keys: ['puttenahalli', 'brigade millennium', 'jp nagar 6th phase', 'jp nagar 7th phase', 'konanakunte', 'kanakapura road', 'yelachenahalli'], lat: 12.893500, lng: 77.581200, label: 'JP Nagar 6th/7th Phase' },
+    { keys: ['jp nagar', 'j p nagar'], lat: 12.906300, lng: 77.585700, label: 'JP Nagar' },
+    { keys: ['bannerghatta', 'arekere', 'hulimavu', 'bilekahalli', 'meenakshi temple'], lat: 12.891200, lng: 77.599800, label: 'Bannerghatta Rd / Arekere' },
+    { keys: ['btm layout', 'btm 2nd stage', 'btm 1st stage', 'madiwala'], lat: 12.916600, lng: 77.610100, label: 'BTM Layout' },
+    { keys: ['hsr layout', 'hsr', 'agara'], lat: 12.912100, lng: 77.644600, label: 'HSR Layout' },
+    { keys: ['koramangala', 'sony world'], lat: 12.935200, lng: 77.624500, label: 'Koramangala' },
+    { keys: ['indiranagar', 'indira nagar', 'hal 2nd stage', 'thippasandra', 'cmh road', 'domlur'], lat: 12.978400, lng: 77.640800, label: 'Indiranagar' },
+    { keys: ['malleshwaram', 'malleswaram', 'margosa road', 'sampige road', 'kadu malleshwara', 'ctr', 'veena stores', 'vyalikaval', 'sadashivanagar'], lat: 13.003100, lng: 77.568100, label: 'Malleshwaram' },
+    { keys: ['navrang', 'rajajinagar', 'rajaji nagar', 'mahalakshmi layout', 'nandini layout', 'basaveshwaranagar', 'basaveshwara nagar'], lat: 12.990100, lng: 77.552500, label: 'Rajajinagar / Basaveshwaranagar' },
+    { keys: ['maruthi mandir', 'vijayanagar', 'vijaya nagar', 'chord road', 'attiguppe', 'chandra layout', 'nagarbhavi', 'nagarabhavi'], lat: 12.971900, lng: 77.532700, label: 'Vijayanagar / Nagarbhavi' },
+    { keys: ['rr nagar', 'rajarajeshwari nagar', 'rajarajeshwarinagar', 'beml layout', 'ideal homes', 'kengeri'], lat: 12.926000, lng: 77.518600, label: 'Rajarajeshwari Nagar' },
+    { keys: ['chamrajpet', 'chamarajpet', 'shankarpuram', 'shankarapuram', 'vv puram', 'vishveshwarapuram', 'sajjan rao', 'food street'], lat: 12.953800, lng: 77.569800, label: 'Shankarpuram / VV Puram' },
+    { keys: ['hebbal', 'sahakaranagar', 'sahakara nagar', 'vidyaranyapura', 'yelahanka', 'rt nagar', 'sanjaynagar', 'mathikere', 'bel road'], lat: 13.058500, lng: 77.571200, label: 'North Bengaluru' },
+    { keys: ['whitefield', 'marathahalli', 'kundalahalli', 'brookefield', 'hoodi', 'kr puram'], lat: 12.969800, lng: 77.749900, label: 'Whitefield / Marathahalli' },
+    { keys: ['bellandur', 'sarjapur', 'haralur'], lat: 12.925900, lng: 77.676200, label: 'Bellandur / Sarjapur Rd' },
+    { keys: ['electronic city'], lat: 12.845200, lng: 77.660200, label: 'Electronic City' },
+    { keys: ['mysuru', 'mysore', 'saraswathipuram', 'kuvempunagar', 'vv mohalla', 'lakshmipuram', 'jayalakshmipuram'], lat: 12.295800, lng: 76.639400, label: 'Mysuru' },
+    { keys: ['sargur', 'hd kote'], lat: 12.002200, lng: 76.398100, label: 'Sargur' },
+    { keys: ['kudupu', 'mangaluru', 'mangalore'], lat: 12.889100, lng: 74.892600, label: 'Kudupu / Mangaluru' },
+    { keys: ['malur', 'kolar'], lat: 13.003700, lng: 77.938300, label: 'Malur' },
+    { keys: ['hospete', 'hospet'], lat: 15.268900, lng: 76.390900, label: 'Hospete' },
+    { keys: ['sringeri'], lat: 13.419800, lng: 75.256000, label: 'Sringeri' }
+  ];
+
+  // Visual Landmark POIs (Hotels, Bakeries, Hospitals, Temples, Circles) rendered directly on the map
+  // so 60-65yo parents can immediately orient themselves by familiar local establishments
+  const LANDMARK_POIS = [
+    // Around Seetha Circle / Banashankari 1st Stage / Girinagar / Srinivasanagar
+    { name: 'Seetha Circle', type: 'circle', lat: 12.938169, lng: 77.549957 },
+    { name: 'Hotel: Aahar Utsav', type: 'hotel', lat: 12.937319, lng: 77.549336 },
+    { name: 'Hotel: Havyaka Mess', type: 'hotel', lat: 12.937704, lng: 77.549242 },
+    { name: 'Vinayaka Hospital', type: 'hospital', lat: 12.937530, lng: 77.549675 },
+    { name: 'Bakery: Oven Fresh', type: 'bakery', lat: 12.937720, lng: 77.549321 },
+    { name: 'Bakery: Just Bake', type: 'bakery', lat: 12.937451, lng: 77.549132 },
+    { name: 'Bakery: Cake Bites', type: 'bakery', lat: 12.938862, lng: 77.548619 },
+    { name: 'Hotel: New Sagar', type: 'hotel', lat: 12.938928, lng: 77.551560 },
+    { name: 'Hotel: Brahmin Cafe', type: 'hotel', lat: 12.938715, lng: 77.552034 },
+    { name: 'Prashanth Hospital', type: 'hospital', lat: 12.939188, lng: 77.551313 },
+    { name: 'Apaara Hospital', type: 'hospital', lat: 12.938453, lng: 77.551329 },
+    { name: 'L.J. Iyengar Bakery', type: 'bakery', lat: 12.938873, lng: 77.552690 },
+    { name: 'Bakery: Cake Palace', type: 'bakery', lat: 12.940225, lng: 77.553552 },
+    // Around Vidyapeetha Circle / NR Colony / Basavanagudi / Hanumanthanagar
+    { name: 'Vidyapeetha Circle', type: 'temple', lat: 12.933784, lng: 77.560975 },
+    { name: 'Hotel: Sankethi', type: 'hotel', lat: 12.931691, lng: 77.555503 },
+    { name: 'Bull Temple', type: 'temple', lat: 12.941757, lng: 77.568728 },
+    { name: 'Hotel: Vidyarthi Bhavan', type: 'hotel', lat: 12.945006, lng: 77.571472 },
+    { name: 'Ramakrishna Ashrama', type: 'temple', lat: 12.948932, lng: 77.567581 },
+    { name: 'Hotel: SLV Corner', type: 'hotel', lat: 12.948365, lng: 77.568536 },
+    { name: 'Hotel: Anand Sagar', type: 'hotel', lat: 12.939168, lng: 77.571561 },
+    { name: 'Netkallappa Circle', type: 'circle', lat: 12.939200, lng: 77.573100 },
+    // Around Jayanagar / South End Circle / Banashankari
+    { name: 'South End Circle', type: 'circle', lat: 12.938257, lng: 77.580056 },
+    { name: 'Ashoka Pillar', type: 'circle', lat: 12.939212, lng: 77.583898 },
+    { name: 'Madhavan Park', type: 'circle', lat: 12.936624, lng: 77.585464 },
+    { name: 'Hotel: Upahara Darshini', type: 'hotel', lat: 12.933058, lng: 77.584422 },
+    { name: 'Hotel: Cool Joint', type: 'hotel', lat: 12.928773, lng: 77.585920 },
+    { name: 'Banashankari Temple', type: 'temple', lat: 12.916035, lng: 77.573064 },
+    { name: 'Devegowda Petrol Bunk', type: 'circle', lat: 12.922158, lng: 77.559976 },
+    { name: 'Kamakya Circle', type: 'circle', lat: 12.923967, lng: 77.549266 },
+    { name: 'Hotel: Taaza Thindi', type: 'hotel', lat: 12.925953, lng: 77.548490 },
+    { name: 'Ragigudda Temple', type: 'temple', lat: 12.916799, lng: 77.593385 }
+  ];
+
+  // Application State
+  let appState = {
+    assignments: {}, // familyId -> { status: 'pinned'|'out_of_town', lat, lng, note, updatedAt }
+    deletedAt: {},   // familyId -> timestamp (prevents cloud sync resurrection after unmap/undo)
+    home: { lat: 12.9345, lng: 77.5790, label: 'Our Home (Start)' },
+    routeCategoryFilter: 'ALL',
+    maxStopsPerTrip: 9
+  };
+
+  let aiConfig = {
+    geminiApiKey: '',
+    proxyEndpoint: '',
+    familyPasscode: '',
+    gistId: '79ce7a835b7716801986e6acc713dc23',
+    gistToken: ''
+  };
+
+  const DEFAULT_GATE_PIN = '2026';
+
+  let undoHistory = [];
+  let statusFilter = 'todo';
+  let categoryFilter = 'ALL';
+
+  // Active Location Sheet State
+  let currentSheetFamilyId = null;
+  let sheetPinCoords = null;
+  let sheetAutoReverseNote = '';
+  let map = null;
+  let googleRoadLayer = null;
+  let googleSatLayer = null;
+  let isSatView = false;
+  let activePinMarker = null;
+  let neighborMarkersLayer = null;
+  let landmarkMarkersLayer = null;
+
+  // Voice Recognition State
+  let isListening = false;
+  let recognition = null;
+  let mediaRecorder = null;
+  let audioChunks = [];
+  let recordedAudioB64 = null;
+  let recordedMime = 'audio/webm';
+  let audioReadyPromise = null;
+  let resolveAudioReady = null;
+
+  // ============================================================================
+  // INITIALIZATION & CLOUD SYNC
+  // ============================================================================
+  function getAuthHeaders(extra) {
+    const h = Object.assign({}, extra || {});
+    if (aiConfig.familyPasscode) {
+      h['X-Family-Passcode'] = aiConfig.familyPasscode;
+    }
+    return h;
+  }
+
+  function initApp() {
+    try {
+      const savedCfg = localStorage.getItem(CONFIG_KEY);
+      if (savedCfg) aiConfig = Object.assign(aiConfig, JSON.parse(savedCfg));
+
+      if (window.location.hash && window.location.hash.length > 1) {
+        const params = new URLSearchParams(window.location.hash.slice(1));
+        if (params.get('key')) aiConfig.geminiApiKey = params.get('key');
+        if (params.get('proxy')) aiConfig.proxyEndpoint = params.get('proxy');
+        if (params.get('pin')) aiConfig.familyPasscode = params.get('pin');
+        if (params.get('gist')) aiConfig.gistId = params.get('gist');
+        if (params.get('gtoken')) aiConfig.gistToken = params.get('gtoken');
+        localStorage.setItem(CONFIG_KEY, JSON.stringify(aiConfig));
+        // Scrub secrets from the browser address bar immediately after saving to localStorage
+        try {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        } catch (e) {}
+      }
+
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.assignments) {
+          appState = Object.assign(appState, parsed);
+        }
+      }
+    } catch (e) {}
+
+    // On public GitHub Pages / bnsuhas.com, require the family passcode (auto-unlocked via #pin=2026 WhatsApp link)
+    const isPublicHost = /bnsuhas\.com|github\.io/i.test(window.location.hostname || '');
+    if (isPublicHost && !aiConfig.familyPasscode) {
+      document.getElementById('passcodeGateOverlay').classList.add('open');
+    }
+
+    renderAll();
+    pullSharedCloudState();
+    // Poll shared cloud state every 10s so Mom's Pixel 8, Dad's Pixel 8 & Suhas's laptop stay live-synced
+    setInterval(pullSharedCloudState, 10000);
+    window.addEventListener('focus', pullSharedCloudState);
+  }
+
+  function unlockWithGatePasscode() {
+    const val = (document.getElementById('gatePasscodeInput').value || '').trim();
+    if (!val) return;
+    aiConfig.familyPasscode = val;
+    localStorage.setItem(CONFIG_KEY, JSON.stringify(aiConfig));
+    document.getElementById('passcodeGateOverlay').classList.remove('open');
+    pullSharedCloudState();
+  }
+
+  function getSyncUrl() {
+    if (aiConfig.proxyEndpoint) {
+      return aiConfig.proxyEndpoint.replace(/\/voice-parse$/, '/state');
+    }
+    return '/api/state';
+  }
+
+  function promptForFamilyPasscodeIfNeeded() {
+    const pin = window.prompt('Enter Family Passcode to sync & use voice landmark search:');
+    if (pin && pin.trim()) {
+      aiConfig.familyPasscode = pin.trim();
+      localStorage.setItem(CONFIG_KEY, JSON.stringify(aiConfig));
+      pullSharedCloudState();
+    }
+  }
+
+  function mergeRemoteStateObject(remote) {
+    if (!remote || !remote.assignments) return;
+    let changed = false;
+    appState.deletedAt = appState.deletedAt || {};
+    if (remote.deletedAt) {
+      Object.keys(remote.deletedAt).forEach(id => {
+        const rDel = remote.deletedAt[id] || 0;
+        if (rDel > (appState.deletedAt[id] || 0)) {
+          appState.deletedAt[id] = rDel;
+        }
+        const lItem = appState.assignments[id];
+        if (lItem && rDel >= (lItem.updatedAt || 0)) {
+          delete appState.assignments[id];
+          changed = true;
+        }
+      });
+    }
+    Object.keys(remote.assignments).forEach(id => {
+      const rItem = remote.assignments[id];
+      const lItem = appState.assignments[id];
+      const delTs = (appState.deletedAt && appState.deletedAt[id]) || 0;
+      if ((rItem.updatedAt || 0) > delTs && (!lItem || (rItem.updatedAt || 0) > (lItem.updatedAt || 0))) {
+        appState.assignments[id] = rItem;
+        changed = true;
+      }
+    });
+    if (changed) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      renderAll();
+    }
+    setSyncBadge('Synced');
+  }
+
+  function pullSharedCloudState() {
+    // 1. Secret GitHub Gist Sync (works 100% serverlessly on bnsuhas.com GitHub Pages!)
+    if (aiConfig.gistId) {
+      const gHeaders = { 'Accept': 'application/vnd.github+json' };
+      if (aiConfig.gistToken) gHeaders['Authorization'] = `Bearer ${aiConfig.gistToken}`;
+      fetch(`https://api.github.com/gists/${encodeURIComponent(aiConfig.gistId)}`, { headers: gHeaders })
+        .then(r => r.ok ? r.json() : null)
+        .then(gist => {
+          const content = gist && gist.files && gist.files['wedding_invite_state.json'] && gist.files['wedding_invite_state.json'].content;
+          if (content) {
+            mergeRemoteStateObject(JSON.parse(content));
+          }
+        })
+        .catch(() => {});
+      return;
+    }
+
+    // 2. Custom Endpoint / Local Server Sync (/api/state)
+    const isStaticGithubPages = /bnsuhas\.com|github\.io/i.test(window.location.hostname || '');
+    if (!aiConfig.proxyEndpoint && (!window.location.protocol.startsWith('http') || isStaticGithubPages)) return;
+    fetch(getSyncUrl(), { headers: getAuthHeaders() })
+      .then(r => {
+        if (r.status === 401) {
+          setSyncBadge('Passcode Required');
+          return null;
+        }
+        return r.ok ? r.json() : null;
+      })
+      .then(remote => mergeRemoteStateObject(remote))
+      .catch(() => {});
+  }
+
+  function saveState(toastMsg) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+    } catch (e) {}
+    renderAll();
+
+    if (toastMsg) {
+      showSnackbar(toastMsg, undoHistory.length > 0);
+    }
+
+    // 1. Secret GitHub Gist Sync (for bnsuhas.com GitHub Pages)
+    if (aiConfig.gistId && aiConfig.gistToken) {
+      setSyncBadge('Syncing...');
+      fetch(`https://api.github.com/gists/${encodeURIComponent(aiConfig.gistId)}`, {
+        method: 'PATCH',
+        headers: {
+          'Accept': 'application/vnd.github+json',
+          'Authorization': `Bearer ${aiConfig.gistToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          files: {
+            'wedding_invite_state.json': {
+              content: JSON.stringify(appState, null, 2)
+            }
+          }
+        })
+      })
+        .then(r => { if (r.ok) setSyncBadge('Synced'); else setSyncBadge('Saved on device'); })
+        .catch(() => setSyncBadge('Saved on device'));
+      return;
+    }
+
+    // 2. Custom Endpoint / Local Server Sync
+    const isStaticGithubPages = /bnsuhas\.com|github\.io/i.test(window.location.hostname || '');
+    if (aiConfig.proxyEndpoint || (window.location.protocol.startsWith('http') && !isStaticGithubPages)) {
+      setSyncBadge('Syncing...');
+      fetch(getSyncUrl(), {
+        method: 'POST',
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(appState)
+      })
+        .then(r => {
+          if (r.status === 401) {
+            setSyncBadge('Passcode Required');
+            promptForFamilyPasscodeIfNeeded();
+          } else if (r.ok) {
+            setSyncBadge('Synced');
+          }
+        })
+        .catch(() => setSyncBadge('Saved on device'));
+    }
+  }
+
+  function setSyncBadge(text) {
+    const el = document.getElementById('syncBadge');
+    if (el) el.textContent = text;
+  }
+
+  function recordUndoSnapshot() {
+    undoHistory.push(JSON.stringify({
+      assignments: appState.assignments,
+      deletedAt: appState.deletedAt || {}
+    }));
+    if (undoHistory.length > 30) undoHistory.shift();
+  }
+
+  function undoLastChange() {
+    if (!undoHistory.length) return;
+    const prev = JSON.parse(undoHistory.pop());
+    const now = Date.now();
+    appState.deletedAt = Object.assign({}, appState.deletedAt || {}, prev.deletedAt || {});
+    Object.keys(appState.assignments).forEach(id => {
+      if (!prev.assignments[id]) {
+        appState.deletedAt[id] = now;
+      }
+    });
+    Object.keys(prev.assignments).forEach(id => {
+      prev.assignments[id].updatedAt = now;
+      delete appState.deletedAt[id];
+    });
+    appState.assignments = prev.assignments;
+    hideSnackbar();
+    saveState('Last action undone');
+  }
+
+  // ============================================================================
+  // VIEW 1: CLEAN CHECKLIST RENDERING
+  // ============================================================================
+  function switchMainView(view) {
+    const isChecklist = view === 'checklist';
+    document.getElementById('tabBtnChecklist').classList.toggle('active', isChecklist);
+    document.getElementById('tabBtnTrips').classList.toggle('active', !isChecklist);
+    document.getElementById('viewChecklist').style.display = isChecklist ? 'block' : 'none';
+    document.getElementById('viewTrips').classList.toggle('active', !isChecklist);
+    if (!isChecklist) {
+      renderTripsView();
+    }
+  }
+
+  function setStatusFilter(status) {
+    statusFilter = status;
+    document.getElementById('statusBtnTodo').classList.toggle('active', status === 'todo');
+    document.getElementById('statusBtnDone').classList.toggle('active', status === 'done');
+    document.getElementById('statusBtnAll').classList.toggle('active', status === 'all');
+    renderChecklist();
+  }
+
+  function setCategoryFilter(cat) {
+    categoryFilter = cat;
+    renderCategoryStrip();
+    renderChecklist();
+  }
+
+  function handleChecklistSearch() {
+    const val = document.getElementById('checklistSearch').value;
+    document.getElementById('btnClearChecklistSearch').style.display = val ? 'flex' : 'none';
+    renderChecklist();
+  }
+
+  function clearChecklistSearch() {
+    document.getElementById('checklistSearch').value = '';
+    handleChecklistSearch();
+  }
+
+  function renderCategoryStrip() {
+    const strip = document.getElementById('categoryStrip');
+    strip.innerHTML = CATEGORIES.map(cat => {
+      const total = FAMILIES.filter(f => cat === 'ALL' || f.cat === cat).length;
+      const rem = FAMILIES.filter(f => (cat === 'ALL' || f.cat === cat) && !appState.assignments[f.id]).length;
+      const active = categoryFilter === cat ? 'active' : '';
+      const label = cat === 'ALL' ? `All Categories (${rem} left)` : `${cat} (${rem} of ${total} left)`;
+      return `<button class="cat-btn ${active}" onclick="setCategoryFilter('${cat}')">${label}</button>`;
+    }).join('');
+  }
+
+  function renderChecklist() {
+    const container = document.getElementById('checklistContainer');
+    const q = (document.getElementById('checklistSearch').value || '').trim().toLowerCase();
+
+    const filtered = FAMILIES.filter(f => {
+      const a = appState.assignments[f.id];
+      const isDone = Boolean(a);
+      if (statusFilter === 'todo' && isDone) return false;
+      if (statusFilter === 'done' && !isDone) return false;
+      if (categoryFilter !== 'ALL' && f.cat !== categoryFilter) return false;
+      if (q) {
+        const hay = `${f.id} ${f.title} ${f.others} ${a ? a.note : ''}`.toLowerCase();
+        return hay.includes(q);
+      }
+      return true;
+    });
+
+    if (!filtered.length) {
+      container.innerHTML = `
+        <div style="text-align:center;padding:48px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);color:var(--text-secondary);">
+          <div style="font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:6px;">
+            ${statusFilter === 'todo' ? 'All families in this section are completed' : 'No matching families found'}
+          </div>
+          <div style="font-size:0.92rem;">
+            ${statusFilter === 'todo' ? 'Switch to another category above or view your Routes & Packing list.' : 'Try clearing the search box or switching filters.'}
+          </div>
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = filtered.map(f => {
+      const a = appState.assignments[f.id];
+      const isPinned = a && a.status === 'pinned';
+      const isOut = a && a.status === 'out_of_town';
+
+      return `
+        <article class="guest-card ${a ? 'completed' : ''}">
+          <div class="guest-main">
+            <div class="guest-info">
+              <div class="guest-meta-line">
+                <span class="serial-pill">#${f.id}</span>
+                <span>Category ${f.cat}</span>
+                ${isPinned ? `<span style="color:var(--primary);font-weight:700;">• Location Saved</span>` : ''}
+                ${isOut ? `<span style="color:var(--text-muted);font-weight:700;">• Out of Town</span>` : ''}
+              </div>
+              <div class="guest-name">${escapeHtml(f.title)}</div>
+              ${f.others ? `<div class="guest-members">With: ${escapeHtml(f.others)}</div>` : ''}
+            </div>
+          </div>
+
+          ${a ? `
+            <div class="saved-location-box">
+              <div>
+                <div style="font-weight:600;color:var(--text);">
+                  ${isPinned ? (escapeHtml(a.note) || 'Pinned on map') : 'Out of town / No local house visit'}
+                </div>
+                ${isPinned ? `<div style="font-size:0.8rem;color:var(--text-muted);margin-top:2px;">Coordinates: ${a.lat.toFixed(4)}, ${a.lng.toFixed(4)}</div>` : ''}
+              </div>
+            </div>
+            <div class="guest-actions">
+              <button class="btn-secondary-quiet" onclick="openLocationSheet(${f.id})">Edit Location</button>
+              ${isPinned ? `<a class="btn-secondary-quiet" href="https://www.google.com/maps/search/?api=1&query=${a.lat},${a.lng}" target="_blank" rel="noopener">View in Google Maps</a>` : ''}
+              <button class="btn-secondary-quiet" style="color:var(--danger);" onclick="clearFamilyLocation(${f.id})">Move to Remaining</button>
+            </div>
+          ` : `
+            <div class="guest-actions">
+              <button class="btn-primary-locate" onclick="openLocationSheet(${f.id})">
+                Locate House
+              </button>
+              <button class="btn-secondary-quiet" onclick="openSameHouseDialog(${f.id})">
+                Same House As...
+              </button>
+              <button class="btn-secondary-quiet" onclick="markFamilyOutOfTown(${f.id})">
+                Out of Town
+              </button>
+            </div>
+          `}
+        </article>
+      `;
+    }).join('');
+  }
+
+  // ============================================================================
+  // FOCUSED LOCATION SHEET (Single-Family Map & Voice Landmark Pinning)
+  // ============================================================================
+  function ensureSheetMapInitialized() {
+    if (map) return;
+    map = L.map('map', {
+      center: [appState.home.lat, appState.home.lng],
+      zoom: 15,
+      zoomControl: false
+    });
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    googleRoadLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&hl=en&gl=IN&x={x}&y={y}&z={z}', {
+      maxZoom: 21,
+      attribution: 'Map data &copy; Google'
+    }).addTo(map);
+
+    googleSatLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&hl=en&gl=IN&x={x}&y={y}&z={z}', {
+      maxZoom: 21,
+      attribution: 'Map data &copy; Google'
+    });
+
+    landmarkMarkersLayer = L.layerGroup().addTo(map);
+    neighborMarkersLayer = L.layerGroup().addTo(map);
+
+    // Tapping anywhere on the map moves this family's draggable pin to that exact street
+    map.on('click', function(e) {
+      placeOrMoveActiveSheetPin(e.latlng.lat, e.latlng.lng, true);
+    });
+
+    map.on('moveend', function() {
+      renderVisibleLandmarks();
+    });
+  }
+
+  function toggleSatelliteLayer() {
+    if (!map) return;
+    isSatView = !isSatView;
+    const btn = document.getElementById('btnLayerToggle');
+    if (isSatView) {
+      map.removeLayer(googleRoadLayer);
+      googleSatLayer.addTo(map);
+      btn.textContent = 'Street View';
+    } else {
+      map.removeLayer(googleSatLayer);
+      googleRoadLayer.addTo(map);
+      btn.textContent = 'Satellite View';
+    }
+  }
+
+  function openLocationSheet(familyId) {
+    const fam = FAMILIES.find(f => f.id === familyId);
+    if (!fam) return;
+    currentSheetFamilyId = familyId;
+
+    document.getElementById('sheetPersonName').textContent = `#${fam.id} ${fam.title}`;
+    document.getElementById('sheetPersonSub').textContent = fam.others
+      ? `Category ${fam.cat} • With ${fam.others}`
+      : `Category ${fam.cat}`;
+
+    const existing = appState.assignments[familyId];
+    sheetAutoReverseNote = existing && existing.note ? existing.note : '';
+    document.getElementById('landmarkSearchInput').value = existing && existing.note ? existing.note : '';
+    document.getElementById('sheetStatusHint').textContent =
+      'Say or type a nearby circle, hospital, or hotel, then drag the red pin to their exact road.';
+
+    document.getElementById('locationSheetBackdrop').classList.add('open');
+    ensureSheetMapInitialized();
+
+    setTimeout(() => {
+      map.invalidateSize();
+      renderNeighborReferencePins(familyId);
+
+      if (existing && existing.status === 'pinned') {
+        map.setView([existing.lat, existing.lng], 18);
+        placeOrMoveActiveSheetPin(existing.lat, existing.lng, false);
+      } else {
+        // Place initial draggable pin at current map center so they can immediately drag or search
+        const c = map.getCenter();
+        placeOrMoveActiveSheetPin(c.lat, c.lng, false);
+      }
+    }, 80);
+  }
+
+  function closeLocationSheet() {
+    stopSpeechRecognition();
+    document.getElementById('locationSheetBackdrop').classList.remove('open');
+    currentSheetFamilyId = null;
+  }
+
+  function renderVisibleLandmarks() {
+    // Rely directly on Google Maps' built-in native landmark labels & icons (e.g. Vinayaka Hospital, restaurants, parks)
+    // so zero extra floating boxes clutter the roads.
+    if (landmarkMarkersLayer) landmarkMarkersLayer.clearLayers();
+  }
+
+  function renderNeighborReferencePins(excludeFamilyId) {
+    if (!neighborMarkersLayer) return;
+    neighborMarkersLayer.clearLayers();
+
+    FAMILIES.forEach(f => {
+      if (f.id === excludeFamilyId) return;
+      const a = appState.assignments[f.id];
+      if (!a || a.status !== 'pinned') return;
+      const icon = L.divIcon({
+        className: '',
+        html: `<div class="neighbor-pin">#${f.id} ${escapeHtml(f.title.split('&')[0].trim().slice(0, 10))}</div>`,
+        iconSize: [0, 0],
+        iconAnchor: [0, 0]
+      });
+      L.marker([a.lat, a.lng], { icon, interactive: false }).addTo(neighborMarkersLayer);
+    });
+  }
+
+  function placeOrMoveActiveSheetPin(lat, lng, reverseGeocodeIfEmpty) {
+    sheetPinCoords = {
+      lat: Number(lat.toFixed(6)),
+      lng: Number(lng.toFixed(6))
+    };
+
+    const fam = FAMILIES.find(f => f.id === currentSheetFamilyId);
+    const shortTitle = fam ? `#${fam.id} ${fam.title.split('&')[0].trim()}` : 'House Pin';
+
+    if (activePinMarker) {
+      map.removeLayer(activePinMarker);
+    }
+
+    const pinIcon = L.divIcon({
+      className: '',
+      html: `
+        <div class="house-pin-wrap">
+          <svg class="house-pin-svg" viewBox="0 0 48 64" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="24" cy="58" rx="9" ry="4" fill="rgba(220, 38, 38, 0.28)" stroke="#dc2626" stroke-width="1.5"/>
+            <path d="M24 4C13.5 4 5 12.5 5 23C5 36.8 24 58 24 58C24 58 43 36.8 43 23C43 12.5 34.5 4 24 4Z" fill="#dc2626" stroke="#ffffff" stroke-width="3" stroke-linejoin="round"/>
+            <circle cx="24" cy="22" r="7.5" fill="#ffffff"/>
+          </svg>
+          <div class="house-pin-label">${escapeHtml(shortTitle)}</div>
+        </div>
+      `,
+      iconSize: [48, 64],
+      iconAnchor: [24, 58]
+    });
+
+    activePinMarker = L.marker([sheetPinCoords.lat, sheetPinCoords.lng], {
+      icon: pinIcon,
+      draggable: true,
+      zIndexOffset: 1000
+    }).addTo(map);
+
+    activePinMarker.on('dragend', function(e) {
+      const pos = e.target.getLatLng();
+      sheetPinCoords = {
+        lat: Number(pos.lat.toFixed(6)),
+        lng: Number(pos.lng.toFixed(6))
+      };
+      document.getElementById('sheetStatusHint').textContent = 'Red pin moved to street — tap Save Location below.';
+    });
+
+    if (reverseGeocodeIfEmpty) {
+      const searchInput = document.getElementById('landmarkSearchInput');
+      if (!searchInput.value.trim()) {
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${sheetPinCoords.lat}&lon=${sheetPinCoords.lng}&zoom=18`)
+          .then(r => r.json())
+          .then(data => {
+            if (data && data.address) {
+              const a = data.address;
+              const parts = [a.road, a.neighbourhood || a.suburb || a.residential].filter(Boolean);
+              if (parts.length) sheetAutoReverseNote = parts.join(', ');
+            }
+          })
+          .catch(() => {});
+      }
+    }
+  }
+
+  // Voice & Landmark Search inside the Focused Sheet
+  async function toggleSpeechRecognition() {
+    if (isListening) {
+      await stopSpeechRecognition();
+      findLandmarkOnMap();
+    } else {
+      startSpeechRecognition();
+    }
+  }
+
+  function startSpeechRecognition() {
+    isListening = true;
+    recordedAudioB64 = null;
+    audioReadyPromise = null;
+    resolveAudioReady = null;
+    const btn = document.getElementById('btnMic');
+    const lbl = document.getElementById('micBtnLabel');
+    btn.classList.add('listening');
+    lbl.textContent = 'Stop & Find';
+    document.getElementById('sheetStatusHint').textContent =
+      'Speak the nearby circle, landmark, or cross-road (e.g. "Near Seetha Circle, 2nd road left")...';
+
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRec) {
+      try {
+        recognition = new SpeechRec();
+        recognition.lang = 'en-IN';
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.onresult = function(ev) {
+          let text = '';
+          for (let i = 0; i < ev.results.length; i++) {
+            text += ev.results[i][0].transcript;
+          }
+          document.getElementById('landmarkSearchInput').value = text.trim();
+        };
+        recognition.onend = async function() {
+          if (isListening) {
+            await stopSpeechRecognition();
+            findLandmarkOnMap();
+          }
+        };
+        recognition.start();
+      } catch (e) {}
+    }
+
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          audioChunks = [];
+          recordedMime = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+          mediaRecorder = new MediaRecorder(stream, { mimeType: recordedMime });
+          audioReadyPromise = new Promise(resolve => { resolveAudioReady = resolve; });
+          mediaRecorder.ondataavailable = e => {
+            if (e.data && e.data.size > 0) audioChunks.push(e.data);
+          };
+          mediaRecorder.onstop = () => {
+            stream.getTracks().forEach(t => t.stop());
+            const blob = new Blob(audioChunks, { type: recordedMime });
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              recordedAudioB64 = reader.result ? reader.result.split(',')[1] : null;
+              if (resolveAudioReady) resolveAudioReady();
+            };
+            reader.readAsDataURL(blob);
+          };
+          mediaRecorder.start();
+        })
+        .catch(() => {});
+    }
+  }
+
+  async function stopSpeechRecognition() {
+    if (!isListening) return;
+    isListening = false;
+    const btn = document.getElementById('btnMic');
+    const lbl = document.getElementById('micBtnLabel');
+    if (btn) btn.classList.remove('listening');
+    if (lbl) lbl.textContent = 'Speak Landmark';
+
+    if (recognition) {
+      try { recognition.stop(); } catch (e) {}
+      recognition = null;
+    }
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      try { mediaRecorder.stop(); } catch (e) {}
+      if (audioReadyPromise) {
+        try { await Promise.race([audioReadyPromise, new Promise(r => setTimeout(r, 800))]); } catch (e) {}
+      }
+    }
+  }
+
+  async function findLandmarkOnMap() {
+    await stopSpeechRecognition();
+    const rawQuery = (document.getElementById('landmarkSearchInput').value || '').trim();
+    if (!rawQuery && !recordedAudioB64) return;
+
+    const findBtn = document.getElementById('btnFindLandmark');
+    findBtn.textContent = 'Locating...';
+    findBtn.disabled = true;
+
+    try {
+      // 1. Check direct coordinates (e.g. pasted from Google Maps)
+      const coordMatch = rawQuery.match(/(-?\d{1,2}\.\d{3,})\s*,\s*(-?\d{1,3}\.\d{3,})/);
+      if (coordMatch) {
+        const lat = parseFloat(coordMatch[1]);
+        const lng = parseFloat(coordMatch[2]);
+        map.setView([lat, lng], 18);
+        placeOrMoveActiveSheetPin(lat, lng, false);
+        document.getElementById('sheetStatusHint').textContent = 'Moved pin to coordinates — drag pin to adjust and tap Save.';
+        return;
+      }
+
+      // 2. Check our 100+ landmark Bengaluru/Karnataka Gazetteer + Nominatim first for instant response
+      let resolved = await resolveLandmarkCoordinates(rawQuery);
+
+      // 3. Also query Gemini endpoint if configured or when audio was recorded
+      if (!resolved && (aiConfig.proxyEndpoint || aiConfig.geminiApiKey || window.location.protocol.startsWith('http'))) {
+        resolved = await queryGeminiForLandmark(rawQuery, recordedAudioB64, recordedMime);
+      }
+
+      if (resolved && resolved.lat && resolved.lng) {
+        map.setView([resolved.lat, resolved.lng], 18);
+        placeOrMoveActiveSheetPin(resolved.lat, resolved.lng, false);
+        if (resolved.instructions && !document.getElementById('landmarkSearchInput').value.trim()) {
+          document.getElementById('landmarkSearchInput').value = resolved.instructions;
+        }
+        document.getElementById('sheetStatusHint').textContent =
+          `Red pin placed near ${resolved.label || 'landmark'}. Drag the red pin to the exact cross-road and tap Save Location.`;
+      } else {
+        document.getElementById('sheetStatusHint').textContent =
+          'Could not find that exact name. Try a nearby circle or main area (e.g. Seetha Circle, Jayanagar, Banashankari).';
+      }
+    } finally {
+      findBtn.textContent = 'Find';
+      findBtn.disabled = false;
+    }
+  }
+
+  async function resolveLandmarkCoordinates(text) {
+    if (!text) return null;
+    const lower = text.toLowerCase();
+
+    let matchedLocality = null;
+    for (const loc of LOCALITY_GAZETTEER) {
+      if (loc.keys.some(k => lower.includes(k))) {
+        matchedLocality = loc;
+        break;
+      }
+    }
+
+    const roadMatch = text.match(/(\d+(?:st|nd|rd|th)?\s*(?:a|b|c)?\s*(?:main|cross)(?:\s*road|\s*rd)?)/gi);
+    const roadQuery = roadMatch ? roadMatch.join(', ') : '';
+
+    if (roadQuery && matchedLocality) {
+      const q = `${roadQuery}, ${matchedLocality.label}, Bengaluru, Karnataka, India`;
+      try {
+        const r = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(q)}&limit=1`);
+        const res = await r.json();
+        if (res && res.length > 0) {
+          const candLat = parseFloat(res[0].lat);
+          const candLng = parseFloat(res[0].lon);
+          // Only use the road result if it is actually within 450m of the matched landmark/circle
+          if (haversineKm(matchedLocality.lat, matchedLocality.lng, candLat, candLng) <= 0.45) {
+            return {
+              lat: candLat,
+              lng: candLng,
+              label: `${roadQuery}, ${matchedLocality.label}`
+            };
+          }
+        }
+      } catch (e) {}
+    }
+
+    if (matchedLocality) {
+      return {
+        lat: matchedLocality.lat,
+        lng: matchedLocality.lng,
+        label: roadQuery ? `${roadQuery} near ${matchedLocality.label}` : matchedLocality.label
+      };
+    }
+
+    const cleaned = text
+      .replace(/\b(near|opposite|behind|beside|next to|house|floor|gate|call|stay|stays|lives|in|at|left|right|after|before|white|green|black|red|corner|bakery)\b/gi, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    try {
+      const q2 = /india|mysuru|mysore|mangaluru|malur|sringeri/i.test(cleaned)
+        ? cleaned
+        : `${cleaned}, Bengaluru, Karnataka, India`;
+      const r2 = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(q2)}&limit=1`);
+      const res2 = await r2.json();
+      if (res2 && res2.length > 0) {
+        return {
+          lat: parseFloat(res2[0].lat),
+          lng: parseFloat(res2[0].lon),
+          label: res2[0].display_name.split(',').slice(0, 2).join(', ')
+        };
+      }
+    } catch (e) {}
+
+    return null;
+  }
+
+  async function queryGeminiForLandmark(transcript, audioBase64, mimeType) {
+    try {
+      const proxyUrl = aiConfig.proxyEndpoint || '/api/voice-parse';
+      if (aiConfig.proxyEndpoint || window.location.protocol.startsWith('http')) {
+        const resp = await fetch(proxyUrl, {
+          method: 'POST',
+          headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({
+            transcript,
+            audioBase64,
+            mimeType,
+            voiceTargetFamilyId: currentSheetFamilyId
+          })
+        });
+        if (resp.status === 401) {
+          promptForFamilyPasscodeIfNeeded();
+          return null;
+        }
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data && data.lat && data.lng) {
+            return {
+              lat: data.lat,
+              lng: data.lng,
+              label: data.areaLabel || data.searchQuery,
+              instructions: data.instructions
+            };
+          }
+        }
+      }
+
+      if (aiConfig.geminiApiKey) {
+        const prompt = `Extract the Bengaluru/Karnataka landmark or street coordinates from this spoken address clue: "${transcript || ''}".
+Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark name", "instructions": "clean directions summary"}`;
+        const parts = [{ text: prompt }];
+        if (audioBase64) {
+          parts.push({ inlineData: { mimeType: mimeType || 'audio/webm', data: audioBase64 } });
+        }
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(aiConfig.geminiApiKey)}`;
+        const resp = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts }],
+            generationConfig: { responseMimeType: 'application/json' }
+          })
+        });
+        if (resp.ok) {
+          const j = await resp.json();
+          const parsed = JSON.parse(j.candidates?.[0]?.content?.parts?.[0]?.text || '{}');
+          if (parsed.lat && parsed.lng) {
+            return {
+              lat: parsed.lat,
+              lng: parsed.lng,
+              label: parsed.areaLabel,
+              instructions: parsed.instructions
+            };
+          }
+        }
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function saveCurrentFamilyPin() {
+    if (!currentSheetFamilyId || !sheetPinCoords) return;
+    const fam = FAMILIES.find(f => f.id === currentSheetFamilyId);
+    const note = (document.getElementById('landmarkSearchInput').value || sheetAutoReverseNote || '').trim();
+
+    recordUndoSnapshot();
+    if (appState.deletedAt) delete appState.deletedAt[currentSheetFamilyId];
+    appState.assignments[currentSheetFamilyId] = {
+      status: 'pinned',
+      lat: sheetPinCoords.lat,
+      lng: sheetPinCoords.lng,
+      note: note,
+      updatedAt: Date.now()
+    };
+
+    closeLocationSheet();
+    saveState(`Saved location for #${fam.id} ${fam.title}`);
+  }
+
+  // ============================================================================
+  // SHORTCUT DISPOSITIONS: SAME HOUSE & OUT OF TOWN
+  // ============================================================================
+  function markFamilyOutOfTown(familyId) {
+    const fam = FAMILIES.find(f => f.id === familyId);
+    if (!fam) return;
+    recordUndoSnapshot();
+    if (appState.deletedAt) delete appState.deletedAt[familyId];
+    appState.assignments[familyId] = {
+      status: 'out_of_town',
+      note: 'Out of town / No local house visit',
+      updatedAt: Date.now()
+    };
+    saveState(`Marked #${fam.id} ${fam.title} as Out of Town`);
+  }
+
+  function clearFamilyLocation(familyId) {
+    const fam = FAMILIES.find(f => f.id === familyId);
+    recordUndoSnapshot();
+    appState.deletedAt = appState.deletedAt || {};
+    appState.deletedAt[familyId] = Date.now();
+    delete appState.assignments[familyId];
+    saveState(`Moved #${fam ? fam.id : familyId} back to Remaining`);
+  }
+
+  function openSameHouseDialog(familyId) {
+    const fam = FAMILIES.find(f => f.id === familyId);
+    const pinnedList = FAMILIES.filter(f => {
+      const a = appState.assignments[f.id];
+      return a && a.status === 'pinned' && f.id !== familyId;
+    });
+
+    document.getElementById('dialogTitle').textContent = `Same House for #${fam.id} ${fam.title}`;
+    const body = document.getElementById('dialogBody');
+
+    if (!pinnedList.length) {
+      body.innerHTML = `
+        <div style="padding:16px 4px;color:var(--text-secondary);">
+          No houses have been pinned yet. Locate the first relative's house on the map, and then you can link any joint-family members to that same house in one tap.
+        </div>`;
+    } else {
+      body.innerHTML = `
+        <div style="font-size:0.92rem;color:var(--text-secondary);">
+          Select an already-located relative below who lives in the exact same house:
+        </div>
+        ${pinnedList.map(pf => {
+          const a = appState.assignments[pf.id];
+          return `
+            <div style="border:1px solid var(--border);border-radius:var(--radius-md);padding:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+              <div>
+                <div style="font-weight:700;color:var(--text);">#${pf.id} ${escapeHtml(pf.title)}</div>
+                ${a.note ? `<div style="font-size:0.85rem;color:var(--text-secondary);">${escapeHtml(a.note)}</div>` : ''}
+              </div>
+              <button class="btn-icon-text" style="background:var(--primary);color:#fff;border-color:var(--primary);" onclick="linkSameHouse(${familyId}, ${pf.id})">
+                Use This House
+              </button>
+            </div>
+          `;
+        }).join('')}
+      `;
+    }
+    document.getElementById('dialogBackdrop').classList.add('open');
+  }
+
+  function linkSameHouse(targetId, sourceId) {
+    const src = appState.assignments[sourceId];
+    if (!src) return;
+    const fam = FAMILIES.find(f => f.id === targetId);
+    recordUndoSnapshot();
+    if (appState.deletedAt) delete appState.deletedAt[targetId];
+    appState.assignments[targetId] = {
+      status: 'pinned',
+      lat: src.lat,
+      lng: src.lng,
+      note: src.note || `Same house as #${sourceId}`,
+      updatedAt: Date.now()
+    };
+    closeDialogModal();
+    saveState(`Linked #${fam.id} ${fam.title} to #${sourceId}'s house`);
+  }
+
+  function closeDialogModal() {
+    document.getElementById('dialogBackdrop').classList.remove('open');
+  }
+
+  // ============================================================================
+  // VIEW 2: ROUTE OPTIMIZATION & DEFERRED PACKING MANIFEST
+  // ============================================================================
+  function haversineKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function computeOptimizedTrips() {
+    const stops = [];
+    FAMILIES.forEach(f => {
+      if (appState.routeCategoryFilter !== 'ALL' && f.cat !== appState.routeCategoryFilter) return;
+      const a = appState.assignments[f.id];
+      if (!a || a.status !== 'pinned') return;
+
+      let existing = stops.find(s => Math.abs(s.lat - a.lat) < 0.00005 && Math.abs(s.lng - a.lng) < 0.00005);
+      if (!existing) {
+        existing = { lat: a.lat, lng: a.lng, note: a.note || '', families: [] };
+        stops.push(existing);
+      }
+      existing.families.push(f);
+    });
+
+    if (!stops.length) return [];
+
+    // Nearest-Neighbor from Home
+    const unvisited = stops.slice();
+    const ordered = [];
+    let cur = { lat: appState.home.lat, lng: appState.home.lng };
+
+    while (unvisited.length > 0) {
+      let bestIdx = 0;
+      let bestDist = Infinity;
+      for (let i = 0; i < unvisited.length; i++) {
+        const d = haversineKm(cur.lat, cur.lng, unvisited[i].lat, unvisited[i].lng);
+        if (d < bestDist) {
+          bestDist = d;
+          bestIdx = i;
+        }
+      }
+      const nextStop = unvisited.splice(bestIdx, 1)[0];
+      ordered.push(nextStop);
+      cur = nextStop;
+    }
+
+    // 2-Opt Local Search Refinement
+    const n = ordered.length;
+    if (n >= 4) {
+      let improved = true;
+      let iter = 0;
+      while (improved && iter < 40) {
+        improved = false;
+        iter++;
+        for (let i = 0; i < n - 2; i++) {
+          for (let k = i + 2; k < n; k++) {
+            const pA = i === 0 ? appState.home : ordered[i - 1];
+            const pB = ordered[i];
+            const pC = ordered[k];
+            const pD = k + 1 < n ? ordered[k + 1] : null;
+
+            const curCost =
+              haversineKm(pA.lat, pA.lng, pB.lat, pB.lng) +
+              (pD ? haversineKm(pC.lat, pC.lng, pD.lat, pD.lng) : 0);
+            const newCost =
+              haversineKm(pA.lat, pA.lng, pC.lat, pC.lng) +
+              (pD ? haversineKm(pB.lat, pB.lng, pD.lat, pD.lng) : 0);
+
+            if (newCost + 0.01 < curCost) {
+              const rev = ordered.slice(i, k + 1).reverse();
+              ordered.splice(i, k - i + 1, ...rev);
+              improved = true;
+            }
+          }
+        }
+      }
+    }
+
+    const chunkSize = appState.maxStopsPerTrip || 9;
+    const trips = [];
+    for (let i = 0; i < ordered.length; i += chunkSize) {
+      trips.push({
+        tripNumber: trips.length + 1,
+        stops: ordered.slice(i, i + chunkSize)
+      });
+    }
+    return trips;
+  }
+
+  function setTripCategoryFilter(cat) {
+    appState.routeCategoryFilter = cat;
+    saveState();
+  }
+
+  function setTripSize(size) {
+    appState.maxStopsPerTrip = parseInt(size, 10) || 9;
+    saveState();
+  }
+
+  function renderTripsView() {
+    const container = document.getElementById('tripsListContainer');
+    const trips = computeOptimizedTrips();
+
+    if (!trips.length) {
+      container.innerHTML = `
+        <div style="text-align:center;padding:48px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);color:var(--text-secondary);">
+          <div style="font-size:1.08rem;font-weight:700;color:var(--text);margin-bottom:6px;">
+            No houses pinned yet
+          </div>
+          <div style="font-size:0.92rem;">
+            Locate houses in the Family Checklist tab first. Once pinned, your optimized Google Maps trips and car gift-packing lists will appear here automatically.
+          </div>
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = trips.map((trip, idx) => {
+      const origin = `${appState.home.lat},${appState.home.lng}`;
+      const lastStop = trip.stops[trip.stops.length - 1];
+      const destination = `${lastStop.lat},${lastStop.lng}`;
+      const waypoints = trip.stops.slice(0, -1).map(s => `${s.lat},${s.lng}`).join('|');
+      const gmapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}${waypoints ? '&waypoints=' + encodeURIComponent(waypoints) : ''}&travelmode=driving`;
+
+      const tripFamilies = trip.stops.flatMap(s => s.families);
+      const shirts = tripFamilies.map(f => f.shirts).filter(Boolean);
+      const ladies = tripFamilies.map(f => f.ladyStickers).filter(Boolean);
+
+      return `
+        <section class="trip-card">
+          <div class="trip-header">
+            <h3 class="trip-title">Trip ${trip.tripNumber} (${trip.stops.length} Stops • ${tripFamilies.length} Families)</h3>
+            <span style="font-size:0.85rem;color:var(--text-secondary);font-weight:600;">Ordered Driving Loop</span>
+          </div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <a class="btn-primary-locate" style="text-decoration:none;" href="${gmapsUrl}" target="_blank" rel="noopener">
+              Open Multi-Stop Route in Google Maps
+            </a>
+            <button class="btn-secondary-quiet" onclick="shareTripWhatsApp(${idx})">
+              Send Trip Sheet to WhatsApp
+            </button>
+          </div>
+
+          <div class="packing-manifest">
+            <div style="font-weight:700;margin-bottom:6px;color:var(--text);">
+              Car Packing Checklist for Trip ${trip.tripNumber}:
+            </div>
+            <div>• <b>Invitation Cards:</b> ${tripFamilies.length}</div>
+            <div>• <b>Men's Shirt Packets:</b> ${shirts.length ? escapeHtml(shirts.join('  |  ')) : 'None'}</div>
+            ${ladies.length ? `<div>• <b>Ladies C-1/C-2 Packets:</b> ${escapeHtml(ladies.join(', '))}</div>` : ''}
+          </div>
+
+          <div>
+            ${trip.stops.map((s, sIdx) => `
+              <div class="stop-item">
+                <div class="stop-index">${sIdx + 1}</div>
+                <div style="flex:1;min-width:0;">
+                  ${s.families.map(f => `
+                    <div style="font-weight:700;font-size:1rem;color:var(--text);">
+                      #${f.id} ${escapeHtml(f.title)} <span style="font-weight:500;font-size:0.84rem;color:var(--text-muted);">(${f.cat})</span>
+                    </div>
+                    ${f.shirts ? `<div style="font-size:0.82rem;color:var(--text-secondary);">Shirt Sticker: ${escapeHtml(f.shirts)}</div>` : ''}
+                    ${f.ladyStickers ? `<div style="font-size:0.82rem;color:var(--text-secondary);">Lady Sticker: ${escapeHtml(f.ladyStickers)}</div>` : ''}
+                  `).join('')}
+                  ${s.note ? `<div style="font-size:0.88rem;color:var(--primary);font-weight:600;margin-top:3px;">Directions: ${escapeHtml(s.note)}</div>` : ''}
+                </div>
+                <a class="btn-icon-text" style="text-decoration:none;flex-shrink:0;" href="https://www.google.com/maps/search/?api=1&query=${s.lat},${s.lng}" target="_blank" rel="noopener">
+                  Map Pin
+                </a>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `;
+    }).join('');
+  }
+
+  function shareTripWhatsApp(tripIdx) {
+    const trips = computeOptimizedTrips();
+    const trip = trips[tripIdx];
+    if (!trip) return;
+
+    const origin = `${appState.home.lat},${appState.home.lng}`;
+    const lastStop = trip.stops[trip.stops.length - 1];
+    const destination = `${lastStop.lat},${lastStop.lng}`;
+    const waypoints = trip.stops.slice(0, -1).map(s => `${s.lat},${s.lng}`).join('|');
+    const gmapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}${waypoints ? '&waypoints=' + encodeURIComponent(waypoints) : ''}&travelmode=driving`;
+
+    const lines = [
+      `*Invitation Trip ${trip.tripNumber} (${trip.stops.length} Stops)*`,
+      `Google Maps Route: ${gmapsUrl}`,
+      ``
+    ];
+
+    trip.stops.forEach((s, i) => {
+      const names = s.families.map(f => `#${f.id} ${f.title} (${f.cat})`).join(' + ');
+      const shirts = s.families.map(f => f.shirts).filter(Boolean).join(' | ');
+      const ladies = s.families.map(f => f.ladyStickers).filter(Boolean).join(' | ');
+      lines.push(`${i + 1}. *${names}*`);
+      if (s.note) lines.push(`   Directions: ${s.note}`);
+      if (shirts) lines.push(`   Shirt Stickers: ${shirts}`);
+      if (ladies) lines.push(`   Lady Stickers: ${ladies}`);
+      lines.push(`   Pin: https://www.google.com/maps?q=${s.lat},${s.lng}`);
+    });
+
+    window.open(`https://wa.me/?text=${encodeURIComponent(lines.join('\n'))}`, '_blank');
+  }
+
+  // ============================================================================
+  // SETTINGS, CLOUD SYNC & CSV EXPORT
+  // ============================================================================
+  function openSettingsModal() {
+    const doneCount = Object.keys(appState.assignments).length;
+    document.getElementById('dialogTitle').textContent = 'Settings, Sync & Export';
+    document.getElementById('dialogBody').innerHTML = `
+      <div style="background:var(--surface-subtle);padding:12px;border-radius:var(--radius-md);font-size:0.92rem;">
+        <b>Progress:</b> ${doneCount} of ${FAMILIES.length} families completed.
+      </div>
+
+      <button class="btn-primary-locate" onclick="exportCSV()">
+        Download Master CSV (All 248 Rows + Links)
+      </button>
+
+      <div style="border-top:1px solid var(--border);padding-top:12px;display:flex;flex-direction:column;gap:8px;">
+        <div style="font-weight:700;font-size:0.95rem;">Zero-Repo-Risk Setup for bnsuhas.com</div>
+        <div style="font-size:0.84rem;color:var(--text-secondary);">
+          Never put your API key in GitHub. Enter your Gemini Key &amp; Passcode below, then tap <b>Copy Magic WhatsApp Link for Mom &amp; Dad</b>. Everything after <code>#</code> stays on-device and is never sent to GitHub servers.
+        </div>
+        <input
+          type="password"
+          id="cfgPasscodeInput"
+          class="input-clean"
+          placeholder="Family Passcode (e.g. 2026)"
+          value="${escapeHtml(aiConfig.familyPasscode || '2026')}"
+        />
+        <input
+          type="password"
+          id="cfgKeyInput"
+          class="input-clean"
+          placeholder="Gemini API Key (AIza...)"
+          value="${escapeHtml(aiConfig.geminiApiKey || '')}"
+        />
+        <input
+          type="text"
+          id="cfgGistIdInput"
+          class="input-clean"
+          placeholder="Optional: Secret Gist ID for Multi-Phone Sync"
+          value="${escapeHtml(aiConfig.gistId || '')}"
+        />
+        <input
+          type="password"
+          id="cfgGistTokenInput"
+          class="input-clean"
+          placeholder="Optional: GitHub Gist Token (ghp_...)"
+          value="${escapeHtml(aiConfig.gistToken || '')}"
+        />
+        <input
+          type="text"
+          id="cfgProxyInput"
+          class="input-clean"
+          placeholder="Optional: Custom Proxy Endpoint URL"
+          value="${escapeHtml(aiConfig.proxyEndpoint || '')}"
+        />
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-primary-locate" onclick="saveSettingsConfig(true)">
+            Copy Magic WhatsApp Link for Mom &amp; Dad
+          </button>
+          <button class="btn-secondary-quiet" onclick="saveSettingsConfig(false)">
+            Save on This Device
+          </button>
+        </div>
+      </div>
+    `;
+    document.getElementById('dialogBackdrop').classList.add('open');
+  }
+
+  function saveSettingsConfig(copyLink) {
+    aiConfig.familyPasscode = (document.getElementById('cfgPasscodeInput').value || '2026').trim();
+    aiConfig.geminiApiKey = (document.getElementById('cfgKeyInput').value || '').trim();
+    aiConfig.gistId = (document.getElementById('cfgGistIdInput').value || '').trim();
+    aiConfig.gistToken = (document.getElementById('cfgGistTokenInput').value || '').trim();
+    aiConfig.proxyEndpoint = (document.getElementById('cfgProxyInput').value || '').trim();
+    localStorage.setItem(CONFIG_KEY, JSON.stringify(aiConfig));
+    pullSharedCloudState();
+
+    if (copyLink) {
+      const p = new URLSearchParams();
+      if (aiConfig.familyPasscode) p.set('pin', aiConfig.familyPasscode);
+      if (aiConfig.geminiApiKey) p.set('key', aiConfig.geminiApiKey);
+      if (aiConfig.gistId) p.set('gist', aiConfig.gistId);
+      if (aiConfig.gistToken) p.set('gtoken', aiConfig.gistToken);
+      if (aiConfig.proxyEndpoint) p.set('proxy', aiConfig.proxyEndpoint);
+      const baseUrl = window.location.hostname.includes('bnsuhas.com')
+        ? `${window.location.origin}${window.location.pathname}`
+        : 'https://bnsuhas.com/invite/';
+      const fullLink = `${baseUrl}#${p.toString()}`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(fullLink);
+      }
+      closeDialogModal();
+      showSnackbar('Copied private WhatsApp setup link for Mom & Dad!', false);
+    } else {
+      closeDialogModal();
+      showSnackbar('Settings saved on this device', false);
+    }
+  }
+
+  function exportCSV() {
+    const headers = [
+      'Sl. No.', 'Category', 'Family Name', 'Name 1', 'Name 2', 'Other Members',
+      'Shirt Stickers', 'Lady Stickers', 'Status', 'Directions / Landmark Note',
+      'Latitude', 'Longitude', 'Google Maps Link'
+    ];
+    const rows = [headers];
+    FAMILIES.forEach(f => {
+      const a = appState.assignments[f.id];
+      const status = a ? a.status : 'unmapped';
+      const lat = a && a.lat ? a.lat : '';
+      const lng = a && a.lng ? a.lng : '';
+      const link = lat && lng ? `https://www.google.com/maps?q=${lat},${lng}` : '';
+      rows.push([
+        f.id, f.cat, f.title, f.name1, f.name2, f.others,
+        f.shirts, f.ladyStickers, status, a && a.note ? a.note : '',
+        lat, lng, link
+      ]);
+    });
+
+    const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'Wedding_Invites_Master_Locations.csv';
+    a.click();
+  }
+
+  function downloadJSONBackup() {
+    const blob = new Blob([JSON.stringify(appState, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'wedding_locations_backup.json';
+    a.click();
+  }
+
+  function importJSONBackup(ev) {
+    const file = ev.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (data && data.assignments) {
+          recordUndoSnapshot();
+          appState.assignments = Object.assign({}, appState.assignments, data.assignments);
+          closeDialogModal();
+          saveState('Backup merged');
+        }
+      } catch (err) {}
+    };
+    reader.readAsText(file);
+  }
+
+  // ============================================================================
+  // MASTER RENDER & SNACKBAR
+  // ============================================================================
+  function renderAll() {
+    const total = FAMILIES.length;
+    const done = FAMILIES.filter(f => Boolean(appState.assignments[f.id])).length;
+    const pinned = FAMILIES.filter(f => appState.assignments[f.id] && appState.assignments[f.id].status === 'pinned').length;
+    const rem = total - done;
+    const pct = Math.round((done / total) * 100);
+
+    document.getElementById('progressFill').style.width = `${pct}%`;
+    document.getElementById('progressStatText').textContent = `${done} of ${total} completed (${pct}%)`;
+    document.getElementById('badgeRemainingCount').textContent = rem;
+    document.getElementById('badgePinnedCount').textContent = pinned;
+    document.getElementById('countTodo').textContent = rem;
+    document.getElementById('countDone').textContent = done;
+
+    renderCategoryStrip();
+    renderChecklist();
+    if (document.getElementById('viewTrips').classList.contains('active')) {
+      renderTripsView();
+    }
+  }
+
+  let snackTimer = null;
+  function showSnackbar(text, showUndo) {
+    const bar = document.getElementById('snackbar');
+    document.getElementById('snackbarText').textContent = text;
+    document.getElementById('snackbarUndoBtn').style.display = showUndo ? 'inline-block' : 'none';
+    bar.classList.add('show');
+    clearTimeout(snackTimer);
+    snackTimer = setTimeout(hideSnackbar, 5000);
+  }
+
+  function hideSnackbar() {
+    document.getElementById('snackbar').classList.remove('show');
+  }
+
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  window.addEventListener('DOMContentLoaded', initApp);
+</script>
+</body>
+</html>
