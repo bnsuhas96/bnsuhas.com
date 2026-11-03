@@ -11,25 +11,25 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     :root {
-      --bg: #f8fafc;
+      --bg: #fafafa;
       --surface: #ffffff;
-      --surface-subtle: #f1f5f9;
-      --text: #0f172a;
-      --text-secondary: #475569;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --border-strong: #cbd5e1;
-      --primary: #0f766e;
-      --primary-hover: #115e59;
-      --primary-soft: #f0fdfa;
-      --accent-blue: #1d4ed8;
+      --surface-subtle: #f4f4f5;
+      --text: #111827;
+      --text-secondary: #4b5563;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --border-strong: #d1d5db;
+      --primary: #111827;
+      --primary-hover: #000000;
+      --primary-soft: #f3f4f6;
+      --accent-blue: #2563eb;
       --accent-blue-soft: #eff6ff;
-      --danger: #b91c1c;
+      --danger: #dc2626;
       --danger-soft: #fef2f2;
-      --radius-lg: 14px;
-      --radius-md: 10px;
-      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
-      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+      --radius-lg: 10px;
+      --radius-md: 8px;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
     }
 
     * {
@@ -44,15 +44,15 @@
       min-height: 100%;
       background: var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      font-size: 16px;
-      line-height: 1.5;
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      font-size: 14.5px;
+      line-height: 1.45;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* App Container */
+    /* App Container: Wide, Clean Apple/Linear Table Workspace */
     .app-container {
-      max-width: 760px;
+      max-width: 980px;
       margin: 0 auto;
       min-height: 100dvh;
       display: flex;
@@ -60,106 +60,87 @@
       background: var(--bg);
     }
 
-    /* Sticky Top Header: Calm, High-Contrast, Minimal */
+    /* Ultra-Thin 2px Top Edge Progress Bar */
+    .progress-bar-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: transparent;
+      z-index: 200;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: #10b981;
+      transition: width 0.25s ease;
+    }
+
+    /* Sticky Top Header: Single Sleek 52px Bar */
     .app-header {
       position: sticky;
       top: 0;
       z-index: 100;
-      background: var(--surface);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
-      padding: 14px 16px 12px 16px;
-      box-shadow: var(--shadow-sm);
+      padding: 10px 16px;
     }
 
     .header-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      min-width: 0;
     }
 
     .header-title {
-      font-size: 1.15rem;
-      font-weight: 700;
+      font-size: 1rem;
+      font-weight: 600;
       color: var(--text);
       letter-spacing: -0.015em;
       margin: 0;
+      white-space: nowrap;
+    }
+
+    .progress-stat {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
     }
 
     .header-meta {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .sync-indicator {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--primary);
-      background: var(--primary-soft);
-      border: 1px solid #99f6e4;
-      padding: 4px 9px;
-      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      padding: 2px 6px;
+      border-radius: 4px;
       white-space: nowrap;
     }
 
-    .btn-icon-text {
-      background: var(--surface);
-      color: var(--text-secondary);
-      border: 1px solid var(--border-strong);
-      border-radius: var(--radius-md);
-      padding: 7px 12px;
-      min-height: 38px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .btn-icon-text:hover {
-      background: var(--surface-subtle);
-    }
-
-    /* Progress Bar Row */
-    .progress-row {
-      margin-top: 10px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .progress-bar-bg {
-      flex: 1;
-      height: 8px;
-      background: var(--surface-subtle);
-      border-radius: 999px;
-      overflow: hidden;
-    }
-
-    .progress-bar-fill {
-      height: 100%;
-      width: 0%;
-      background: var(--primary);
-      border-radius: 999px;
-      transition: width 0.3s ease;
-    }
-
-    .progress-stat {
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-      white-space: nowrap;
-    }
-
-    /* Primary Mode Switcher (2 Clean Views: Checklist vs. Trips & Routes) */
     .mode-switcher {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+      display: inline-flex;
       background: var(--surface-subtle);
-      padding: 4px;
-      border-radius: var(--radius-md);
-      margin-top: 12px;
+      padding: 2px;
+      border-radius: 7px;
       border: 1px solid var(--border);
     }
 
@@ -167,65 +148,87 @@
       border: none;
       background: transparent;
       color: var(--text-secondary);
-      font-size: 0.95rem;
-      font-weight: 600;
-      padding: 10px 12px;
-      min-height: 44px;
-      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 4px 10px;
+      min-height: 28px;
+      border-radius: 5px;
       cursor: pointer;
-      transition: background 0.15s ease, color 0.15s ease;
+      white-space: nowrap;
     }
 
     .mode-btn.active {
       background: var(--surface);
       color: var(--text);
+      font-weight: 600;
       box-shadow: var(--shadow-sm);
     }
 
-    /* Checklist Filter Controls */
+    .btn-icon-text {
+      background: var(--surface);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 9px;
+      min-height: 30px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+    .btn-icon-text:hover {
+      background: var(--surface-subtle);
+      color: var(--text);
+    }
+
+    /* Unified Single-Row Filter Bar */
     .filter-panel {
-      padding: 14px 16px 10px 16px;
+      padding: 10px 16px;
       display: flex;
-      flex-direction: column;
-      gap: 10px;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
       background: var(--bg);
-      border-bottom: 1px solid var(--border);
     }
 
     .search-wrap {
       position: relative;
       display: flex;
       align-items: center;
+      flex: 1 1 200px;
+      min-width: 0;
     }
 
     .input-clean {
       width: 100%;
-      min-height: 48px;
-      padding: 11px 40px 11px 14px;
-      font-size: 1rem;
-      font-weight: 500;
+      min-height: 34px;
+      padding: 6px 30px 6px 10px;
+      font-size: 0.88rem;
+      font-weight: 400;
       color: var(--text);
       background: var(--surface);
-      border: 1.5px solid var(--border-strong);
-      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      border-radius: 7px;
       outline: none;
       transition: border-color 0.15s ease;
     }
     .input-clean:focus {
-      border-color: var(--primary);
+      border-color: var(--text);
     }
 
     .btn-clear-input {
       position: absolute;
-      right: 8px;
-      width: 32px;
-      height: 32px;
+      right: 6px;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
       border: none;
       background: var(--surface-subtle);
       color: var(--text-secondary);
-      font-size: 0.9rem;
-      font-weight: 700;
+      font-size: 0.75rem;
       cursor: pointer;
       display: none;
       align-items: center;
@@ -236,43 +239,44 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
+      width: 100%;
+      min-width: 0;
     }
 
     .status-tabs {
       display: inline-flex;
-      background: var(--surface);
-      border: 1px solid var(--border-strong);
-      border-radius: var(--radius-md);
-      overflow: hidden;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 2px;
     }
 
     .status-tab {
       border: none;
       background: transparent;
       color: var(--text-secondary);
-      padding: 8px 13px;
-      min-height: 40px;
-      font-size: 0.88rem;
-      font-weight: 600;
+      padding: 4px 9px;
+      min-height: 28px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      border-radius: 5px;
       cursor: pointer;
-      border-right: 1px solid var(--border);
-    }
-    .status-tab:last-child {
-      border-right: none;
+      white-space: nowrap;
     }
     .status-tab.active {
-      background: var(--text);
-      color: #ffffff;
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 600;
+      box-shadow: var(--shadow-sm);
     }
 
-    /* Category Pills */
+    /* Compact Category Pills / Select */
     .cat-strip {
       display: flex;
-      gap: 6px;
+      gap: 4px;
       overflow-x: auto;
-      padding-bottom: 2px;
       scrollbar-width: none;
       max-width: 100%;
     }
@@ -281,161 +285,190 @@
     }
 
     .cat-btn {
-      border: 1px solid var(--border-strong);
-      background: var(--surface);
-      color: var(--text-secondary);
-      border-radius: 999px;
-      padding: 7px 14px;
-      min-height: 38px;
-      font-size: 0.86rem;
-      font-weight: 600;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      border-radius: 6px;
+      padding: 4px 8px;
+      min-height: 28px;
+      font-size: 0.76rem;
+      font-weight: 500;
       white-space: nowrap;
       cursor: pointer;
       flex-shrink: 0;
     }
+    .cat-btn:hover {
+      color: var(--text);
+      background: var(--surface-subtle);
+    }
     .cat-btn.active {
-      background: var(--primary);
-      color: #ffffff;
-      border-color: var(--primary);
+      background: var(--surface);
+      color: var(--text);
+      border-color: var(--border);
+      font-weight: 600;
+      box-shadow: var(--shadow-sm);
     }
 
-    /* Checklist Container */
+    /* Apple / Linear Directory Table List */
     .checklist-body {
-      padding: 12px 16px 88px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      flex: 1;
-    }
-
-    /* Individual Family Row Card (Zero Clutter — Name, Household, Clear Action) */
-    .guest-card {
+      margin: 0 16px 80px 16px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+      overflow: hidden;
       box-shadow: var(--shadow-sm);
     }
+
+    .guest-card {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f3f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--surface);
+      transition: background 0.1s ease;
+    }
+    .guest-card:last-child {
+      border-bottom: none;
+    }
+    .guest-card:hover {
+      background: #fafafa;
+    }
     .guest-card.completed {
-      border-left: 4px solid var(--primary);
+      background: #fcfcfd;
     }
 
     .guest-main {
       display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
+      align-items: baseline;
+      gap: 10px;
+      min-width: 0;
+      flex: 1;
+      cursor: pointer;
+    }
+
+    .serial-pill {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+      min-width: 28px;
+      flex-shrink: 0;
     }
 
     .guest-info {
       display: flex;
-      flex-direction: column;
-      gap: 3px;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 6px;
       min-width: 0;
-    }
-
-    .guest-meta-line {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--text-muted);
-    }
-
-    .serial-pill {
-      color: var(--text);
-      font-weight: 700;
-      background: var(--surface-subtle);
-      padding: 2px 8px;
-      border-radius: 6px;
+      flex: 1;
     }
 
     .guest-name {
-      font-size: 1.15rem;
-      font-weight: 700;
+      font-size: 0.94rem;
+      font-weight: 600;
       color: var(--text);
-      line-height: 1.3;
+      letter-spacing: -0.01em;
     }
 
     .guest-members {
-      font-size: 0.94rem;
-      color: var(--text-secondary);
+      font-size: 0.82rem;
+      color: var(--text-muted);
     }
 
-    .saved-location-box {
+    .row-cat-tag {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-muted);
       background: var(--surface-subtle);
-      border-radius: var(--radius-md);
-      padding: 10px 12px;
-      font-size: 0.92rem;
-      color: var(--text);
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 10px;
+      padding: 1px 6px;
+      border-radius: 4px;
     }
 
-    /* Action Buttons on Card */
+    .row-house-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--accent-blue);
+      background: var(--accent-blue-soft);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    .row-saved-note {
+      font-size: 0.78rem;
+      color: #059669;
+      font-weight: 500;
+    }
+
+    /* Compact Row Actions (Right Side) */
     .guest-actions {
       display: flex;
       align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
+      gap: 6px;
+      flex-shrink: 0;
     }
 
     .btn-primary-locate {
-      flex: 1.5;
-      min-width: 160px;
-      min-height: 48px;
-      background: var(--primary);
+      height: 30px;
+      background: var(--text);
       color: #ffffff;
       border: none;
-      border-radius: var(--radius-md);
-      padding: 12px 16px;
-      font-size: 1rem;
-      font-weight: 600;
+      border-radius: 6px;
+      padding: 0 11px;
+      font-size: 0.78rem;
+      font-weight: 500;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      white-space: nowrap;
     }
-    .btn-primary-locate:active {
-      background: var(--primary-hover);
+    .btn-primary-locate:hover {
+      opacity: 0.88;
     }
 
     .btn-secondary-quiet {
-      flex: 1;
-      min-width: 115px;
-      min-height: 48px;
-      background: var(--surface);
+      height: 30px;
+      background: transparent;
       color: var(--text-secondary);
-      border: 1px solid var(--border-strong);
-      border-radius: var(--radius-md);
-      padding: 10px 12px;
-      font-size: 0.92rem;
-      font-weight: 600;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0 9px;
+      font-size: 0.76rem;
+      font-weight: 500;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      text-align: center;
+      white-space: nowrap;
       text-decoration: none;
     }
     .btn-secondary-quiet:hover {
       background: var(--surface-subtle);
+      color: var(--text);
+    }
+
+    @media (max-width: 560px) {
+      .guest-card {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        padding: 11px 12px;
+      }
+      .guest-actions {
+        justify-content: flex-end;
+      }
     }
 
     /* ==========================================================================
-       FOCUSED FULL-SCREEN LOCATION SHEET (Opens when a Family Row is tapped)
+       TRUE FULL-SCREEN NATIVE-STYLE GOOGLE MAP (100vw x 100dvh, Floating Bar)
        ========================================================================== */
     .sheet-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.55);
+      background: rgba(15, 23, 42, 0.45);
       z-index: 1000;
       display: none;
       align-items: center;
@@ -446,133 +479,18 @@
     }
 
     .location-sheet {
-      background: var(--surface);
-      width: 100%;
-      max-width: 760px;
-      height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    @media (min-width: 768px) {
-      .location-sheet {
-        height: 92dvh;
-        border-radius: 18px;
-        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
-      }
-    }
-
-    /* Sheet Header: Shows ONLY the target family being mapped */
-    .sheet-header {
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      background: var(--surface);
-      flex-shrink: 0;
-    }
-
-    .sheet-person-title {
-      font-size: 1.08rem;
-      font-weight: 700;
-      color: var(--text);
-      margin: 0;
-    }
-
-    .sheet-person-sub {
-      font-size: 0.84rem;
-      color: var(--text-secondary);
-      margin: 0;
-    }
-
-    /* Step 1 inside Sheet: Speak or Type Landmark */
-    .sheet-search-panel {
-      padding: 12px 16px;
-      background: var(--surface-subtle);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-
-    .voice-search-bar {
-      display: flex;
-      gap: 8px;
-      align-items: stretch;
-    }
-
-    .btn-mic {
-      background: #0f172a;
-      color: #ffffff;
-      border: none;
-      border-radius: var(--radius-md);
-      padding: 0 16px;
-      min-height: 48px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    @media (max-width: 430px) {
-      .btn-mic {
-        padding: 0 12px;
-        font-size: 0.88rem;
-      }
-      .btn-find {
-        padding: 0 12px;
-        font-size: 0.9rem;
-      }
-    }
-    .btn-mic.listening {
-      background: var(--danger);
-      animation: pulseMic 1.2s infinite;
-    }
-
-    @keyframes pulseMic {
-      0% { box-shadow: 0 0 0 0 rgba(185, 28, 28, 0.45); }
-      70% { box-shadow: 0 0 0 12px rgba(185, 28, 28, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(185, 28, 28, 0); }
-    }
-
-    .btn-find {
-      background: var(--primary);
-      color: #ffffff;
-      border: none;
-      border-radius: var(--radius-md);
-      padding: 0 16px;
-      min-height: 48px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .helper-caption {
-      font-size: 0.84rem;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    /* Map Canvas Area inside Sheet */
-    .sheet-map-wrap {
       position: relative;
-      flex: 1 1 0%;
-      width: 100%;
-      min-height: 240px;
+      width: 100vw;
+      height: 100dvh;
+      background: #e5e7eb;
       overflow: hidden;
+    }
+
+    .sheet-map-wrap {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
     }
 
     #map {
@@ -581,38 +499,138 @@
       z-index: 1;
     }
 
-    /* Subtle Map Layer Switcher */
-    .map-layer-pill {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      z-index: 500;
-      background: var(--surface);
-      color: var(--text);
-      border: 1px solid var(--border-strong);
-      border-radius: var(--radius-md);
-      padding: 8px 12px;
-      min-height: 40px;
-      font-size: 0.86rem;
-      font-weight: 600;
-      box-shadow: var(--shadow-md);
-      cursor: pointer;
+    .leaflet-bottom.leaflet-right {
+      margin-bottom: 72px !important;
+      margin-right: 4px !important;
     }
 
-    /* Clean Instruction Pill on Map */
-    .map-drag-hint {
+    /* Floating Top Search Pill (Like Native Google Maps) */
+    .map-floating-top {
       position: absolute;
       top: 12px;
       left: 12px;
-      right: 138px;
-      z-index: 500;
-      background: rgba(15, 23, 42, 0.86);
-      color: #ffffff;
-      padding: 8px 12px;
-      border-radius: var(--radius-md);
+      right: 12px;
+      max-width: 560px;
+      margin: 0 auto;
+      z-index: 600;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 12px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14);
+      overflow: hidden;
+    }
+
+    .voice-search-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 8px;
+    }
+
+    .btn-back-map {
+      height: 36px;
+      padding: 0 10px;
+      border: none;
+      background: transparent;
+      color: var(--text);
       font-size: 0.85rem;
-      font-weight: 500;
-      pointer-events: none;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .btn-back-map:hover {
+      background: var(--surface-subtle);
+    }
+
+    .map-search-input {
+      flex: 1;
+      min-width: 0;
+      height: 36px;
+      border: none;
+      background: transparent;
+      font-size: 0.92rem;
+      color: var(--text);
+      outline: none;
+      padding: 0 6px;
+    }
+
+    .btn-mic {
+      background: var(--surface-subtle);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0 10px;
+      height: 34px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .btn-mic.listening {
+      background: var(--danger);
+      color: #ffffff;
+      border-color: var(--danger);
+      animation: pulseMic 1.2s infinite;
+    }
+
+    @keyframes pulseMic {
+      0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+    }
+
+    .btn-find {
+      background: var(--text);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 0 12px;
+      height: 34px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .map-floating-subbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 12px;
+      background: #f8fafc;
+      border-top: 1px solid #f1f5f9;
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+    }
+
+    .sheet-person-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0;
+    }
+
+    .sheet-person-sub {
+      display: none;
+    }
+
+    .map-layer-pill {
+      background: #ffffff;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     /* True Google-Maps-Style Teardrop Pin Marker with Name Below Pin */
@@ -640,7 +658,7 @@
       left: 50%;
       transform: translateX(-50%);
       color: #991b1b;
-      font-size: 0.88rem;
+      font-size: 0.86rem;
       font-weight: 800;
       white-space: nowrap;
       letter-spacing: -0.01em;
@@ -653,94 +671,48 @@
       pointer-events: none;
     }
 
-    /* Nearby Landmark Badges (Hotels, Temples, Bakeries, Hospitals, Circles) */
-    .landmark-pin {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      background: rgba(255, 255, 255, 0.96);
-      color: #1e293b;
-      border: 1.5px solid #d97706;
-      border-left: 4px solid #d97706;
-      border-radius: 6px;
-      padding: 3px 7px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      white-space: nowrap;
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
-      cursor: pointer;
-      transform: translate(-50%, -50%);
-    }
-    .landmark-pin.type-hotel {
-      border-color: #d97706;
-      border-left-color: #d97706;
-      color: #92400e;
-    }
-    .landmark-pin.type-hospital {
-      border-color: #0284c7;
-      border-left-color: #0284c7;
-      color: #075985;
-    }
-    .landmark-pin.type-temple, .landmark-pin.type-circle {
-      border-color: #7c3aed;
-      border-left-color: #7c3aed;
-      color: #5b21b6;
-    }
-    .landmark-pin.type-bakery {
-      border-color: #ea580c;
-      border-left-color: #ea580c;
-      color: #9a3412;
-    }
-    .landmark-pin-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: currentColor;
-      flex-shrink: 0;
-    }
-
-    .neighbor-pin {
-      background: #0f766e;
-      color: #ffffff;
-      border: 2px solid #ffffff;
-      border-radius: 999px;
-      padding: 3px 8px;
-      font-size: 0.74rem;
-      font-weight: 700;
-      white-space: nowrap;
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
-      transform: translate(-50%, -50%);
-    }
-
-    /* Sheet Footer: Directions Note + Save CTA */
-    .sheet-footer {
-      padding: 12px 16px 16px 16px;
-      background: var(--surface);
-      border-top: 1px solid var(--border);
+    .sheet-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
       display: flex;
-      flex-direction: column;
-      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--surface);
       flex-shrink: 0;
+    }
+
+    /* Floating Bottom Save Pill */
+    .sheet-footer {
+      position: absolute;
+      bottom: 22px;
+      left: 16px;
+      right: 16px;
+      max-width: 380px;
+      margin: 0 auto;
+      z-index: 600;
+      pointer-events: none;
     }
 
     .sheet-footer-actions {
       display: flex;
-      gap: 10px;
+      pointer-events: auto;
     }
 
     .btn-save-location {
       flex: 1;
-      min-height: 52px;
-      background: var(--primary);
+      min-height: 46px;
+      background: #111827;
       color: #ffffff;
       border: none;
-      border-radius: var(--radius-md);
-      font-size: 1.05rem;
-      font-weight: 700;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      font-weight: 600;
       cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
     }
     .btn-save-location:disabled {
-      background: #94a3b8;
+      background: #9ca3af;
       cursor: not-allowed;
     }
 
@@ -749,9 +721,9 @@
        ========================================================================== */
     .trips-view {
       display: none;
-      padding: 16px 16px 88px 16px;
+      padding: 12px 16px 88px 16px;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
     }
     .trips-view.active {
       display: flex;
@@ -761,10 +733,10 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      padding: 16px;
+      padding: 14px 16px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
       box-shadow: var(--shadow-sm);
     }
 
@@ -772,10 +744,10 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      padding: 18px 16px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 12px;
       box-shadow: var(--shadow-sm);
     }
 
@@ -789,26 +761,26 @@
     }
 
     .trip-title {
-      font-size: 1.12rem;
-      font-weight: 700;
+      font-size: 1rem;
+      font-weight: 600;
       color: var(--text);
       margin: 0;
     }
 
     .packing-manifest {
       background: #f8fafc;
-      border: 1px solid var(--border-strong);
+      border: 1px solid var(--border);
       border-radius: var(--radius-md);
-      padding: 12px;
-      font-size: 0.9rem;
+      padding: 10px 12px;
+      font-size: 0.84rem;
       color: var(--text);
     }
 
     .stop-item {
       display: flex;
       align-items: flex-start;
-      gap: 12px;
-      padding: 10px 0;
+      gap: 10px;
+      padding: 8px 0;
       border-bottom: 1px solid var(--border);
     }
     .stop-item:last-child {
@@ -816,13 +788,13 @@
     }
 
     .stop-index {
-      width: 28px;
-      height: 28px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
       background: var(--text);
       color: #ffffff;
-      font-weight: 700;
-      font-size: 0.85rem;
+      font-weight: 600;
+      font-size: 0.78rem;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -834,41 +806,26 @@
     .dialog-sheet {
       background: var(--surface);
       width: 100%;
-      max-width: 540px;
-      max-height: 88dvh;
-      border-radius: 18px 18px 0 0;
+      max-width: 520px;
+      max-height: 86dvh;
+      border-radius: 14px 14px 0 0;
       display: flex;
       flex-direction: column;
       overflow: hidden;
       margin-top: auto;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
     }
     @media (min-width: 640px) {
       .dialog-sheet {
-        border-radius: 16px;
+        border-radius: 12px;
         margin: auto;
       }
     }
 
-    .same-house-banner {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      border-radius: var(--radius-md);
-      padding: 8px 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      flex-wrap: wrap;
-      font-size: 0.86rem;
-      color: #1e3a8a;
-    }
-    .same-house-banner strong {
-      font-weight: 700;
-    }
     .same-house-Candidate {
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
-      padding: 10px 12px;
+      padding: 9px 12px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -882,17 +839,17 @@
       bottom: 18px;
       left: 50%;
       transform: translateX(-50%);
-      background: #0f172a;
+      background: #111827;
       color: #ffffff;
-      padding: 12px 18px;
-      border-radius: var(--radius-md);
-      font-size: 0.95rem;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 0.86rem;
       font-weight: 500;
-      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.25);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
       z-index: 2000;
       display: none;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
       max-width: 92vw;
     }
     .snackbar.show {
@@ -901,9 +858,9 @@
     .snackbar-undo {
       background: transparent;
       border: none;
-      color: #5eead4;
-      font-weight: 700;
-      font-size: 0.95rem;
+      color: #6ee7b7;
+      font-weight: 600;
+      font-size: 0.86rem;
       cursor: pointer;
       padding: 0;
     }
@@ -911,35 +868,34 @@
 </head>
 <body>
 
+<div class="progress-bar-bg">
+  <div class="progress-bar-fill" id="progressFill"></div>
+</div>
+
 <div class="app-container">
-  <!-- Sticky Minimal Header -->
+  <!-- Single Compact Apple/Linear Header -->
   <header class="app-header">
     <div class="header-top">
-      <h1 class="header-title">Invitation Address List</h1>
+      <div class="header-left">
+        <h1 class="header-title">Wedding Invitations</h1>
+        <span class="progress-stat" id="progressStatText">0 / 248</span>
+        <span class="sync-indicator" id="syncBadge">Synced</span>
+      </div>
       <div class="header-meta">
-        <span class="sync-indicator" id="syncBadge">Saved</span>
-        <button class="btn-icon-text" onclick="openSettingsModal()">Settings &amp; Export</button>
+        <div class="mode-switcher" role="tablist">
+          <button class="mode-btn active" id="tabBtnChecklist" onclick="switchMainView('checklist')">
+            Directory (<span id="badgeRemainingCount">248</span>)
+          </button>
+          <button class="mode-btn" id="tabBtnTrips" onclick="switchMainView('trips')">
+            Routes (<span id="badgePinnedCount">0</span>)
+          </button>
+        </div>
+        <button class="btn-icon-text" onclick="openSettingsModal()">Export</button>
       </div>
-    </div>
-
-    <div class="progress-row">
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="progressFill"></div>
-      </div>
-      <div class="progress-stat" id="progressStatText">0 of 248 completed</div>
-    </div>
-
-    <div class="mode-switcher" role="tablist">
-      <button class="mode-btn active" id="tabBtnChecklist" onclick="switchMainView('checklist')">
-        Family Checklist (<span id="badgeRemainingCount">248</span> left)
-      </button>
-      <button class="mode-btn" id="tabBtnTrips" onclick="switchMainView('trips')">
-        Routes &amp; Packing (<span id="badgePinnedCount">0</span>)
-      </button>
     </div>
   </header>
 
-  <!-- VIEW 1: CLEAN CHECKLIST (Primary Process View) -->
+  <!-- VIEW 1: COMPACT DIRECTORY TABLE -->
   <main id="viewChecklist">
     <section class="filter-panel" aria-label="Filter Families">
       <div class="search-wrap">
@@ -947,7 +903,7 @@
           type="text"
           id="checklistSearch"
           class="input-clean"
-          placeholder="Search name or number (e.g. Chandrashekar, 14)..."
+          placeholder="Search name or # (e.g. Chandrashekar, 18)..."
           oninput="handleChecklistSearch()"
         />
         <button class="btn-clear-input" id="btnClearChecklistSearch" onclick="clearChecklistSearch()" aria-label="Clear search">✕</button>
@@ -959,15 +915,14 @@
             To Locate (<span id="countTodo">248</span>)
           </button>
           <button class="status-tab" id="statusBtnDone" onclick="setStatusFilter('done')">
-            Completed (<span id="countDone">0</span>)
+            Located (<span id="countDone">0</span>)
           </button>
           <button class="status-tab" id="statusBtnAll" onclick="setStatusFilter('all')">
-            All (248)
+            All
           </button>
         </div>
+        <div class="cat-strip" id="categoryStrip" role="group" aria-label="Categories"></div>
       </div>
-
-      <div class="cat-strip" id="categoryStrip" role="group" aria-label="Categories"></div>
     </section>
 
     <section class="checklist-body" id="checklistContainer" aria-live="polite"></section>
@@ -978,17 +933,17 @@
     <div class="summary-banner">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
         <div>
-          <div style="font-weight:700;font-size:1.05rem;">Optimized Invitation Trips</div>
-          <div style="font-size:0.9rem;color:var(--text-secondary);">
-            Houses are ordered along the shortest driving loop and grouped into Google Maps multi-stop trips (up to 9 stops per trip), complete with your spoken directions and gift sticker numbers.
+          <div style="font-weight:600;font-size:0.95rem;">Optimized Invitation Trips</div>
+          <div style="font-size:0.82rem;color:var(--text-secondary);">
+            Ordered along the shortest driving loop (up to 9 stops per Google Maps link) with gift sticker codes.
           </div>
         </div>
-        <button class="btn-icon-text" onclick="exportCSV()">Download Master CSV</button>
+        <button class="btn-icon-text" onclick="exportCSV()">Download CSV</button>
       </div>
 
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding-top:4px;">
-        <label style="font-size:0.9rem;font-weight:600;color:var(--text-secondary);">Filter Category:</label>
-        <select id="tripCatSelect" onchange="setTripCategoryFilter(this.value)" style="min-height:40px;padding:6px 10px;border-radius:8px;border:1px solid var(--border-strong);font-size:0.92rem;font-weight:600;background:#fff;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <label style="font-size:0.8rem;font-weight:500;color:var(--text-secondary);">Category:</label>
+        <select id="tripCatSelect" onchange="setTripCategoryFilter(this.value)" style="height:30px;padding:0 8px;border-radius:6px;border:1px solid var(--border);font-size:0.82rem;background:#fff;">
           <option value="ALL">All Categories</option>
           <option value="C-1">Category C-1</option>
           <option value="C-2">Category C-2</option>
@@ -998,64 +953,59 @@
           <option value="C-6">Category C-6</option>
         </select>
 
-        <label style="font-size:0.9rem;font-weight:600;color:var(--text-secondary);">Stops per Trip:</label>
-        <select id="tripSizeSelect" onchange="setTripSize(this.value)" style="min-height:40px;padding:6px 10px;border-radius:8px;border:1px solid var(--border-strong);font-size:0.92rem;font-weight:600;background:#fff;">
+        <label style="font-size:0.8rem;font-weight:500;color:var(--text-secondary);">Stops/Trip:</label>
+        <select id="tripSizeSelect" onchange="setTripSize(this.value)" style="height:30px;padding:0 8px;border-radius:6px;border:1px solid var(--border);font-size:0.82rem;background:#fff;">
           <option value="6">6 Houses</option>
           <option value="8">8 Houses</option>
-          <option value="9" selected>9 Houses (Google Maps Max)</option>
+          <option value="9" selected>9 Houses (Max)</option>
         </select>
       </div>
     </div>
 
-    <div id="tripsListContainer" style="display:flex;flex-direction:column;gap:16px;"></div>
+    <div id="tripsListContainer" style="display:flex;flex-direction:column;gap:12px;"></div>
   </main>
 </div>
 
 <!-- ============================================================================
-     FOCUSED LOCATION SHEET (Opens for 1 Specific Family at a Time)
+     TRUE FULL-SCREEN NATIVE-STYLE GOOGLE MAP (Floating Top Search Bar)
      ============================================================================ -->
 <div class="sheet-backdrop" id="locationSheetBackdrop" role="dialog" aria-modal="true">
   <div class="location-sheet">
-    <div class="sheet-header">
-      <div>
-        <h2 class="sheet-person-title" id="sheetPersonName">#1 Latha &amp; Chandrashekar</h2>
-        <p class="sheet-person-sub" id="sheetPersonSub">Category C-1</p>
-      </div>
-      <button class="btn-icon-text" onclick="closeLocationSheet()">Cancel</button>
-    </div>
-
-    <!-- Step 1: Speak or Type Landmark / Area -->
-    <div class="sheet-search-panel">
-      <div class="voice-search-bar">
-        <button class="btn-mic" id="btnMic" onclick="toggleSpeechRecognition()">
-          <span id="micBtnLabel">Speak Landmark</span>
-        </button>
-        <div class="search-wrap" style="flex:1;">
-          <input
-            type="text"
-            id="landmarkSearchInput"
-            class="input-clean"
-            style="min-height:48px;"
-            placeholder="Or type landmark (e.g. Seetha Circle, Jayanagar 4th Block)..."
-            onkeydown="if(event.key==='Enter') findLandmarkOnMap()"
-          />
-        </div>
-        <button class="btn-find" id="btnFindLandmark" onclick="findLandmarkOnMap()">Find</button>
-      </div>
-      <div class="helper-caption">
-        <span id="sheetStatusHint">Say or type a nearby circle, temple, or cross-road, then drag the pin to the exact street.</span>
-      </div>
-    </div>
-
-    <!-- Step 2: Interactive Google Map with Built-in Landmarks & Single Draggable Pin -->
+    <!-- Full-Bleed Map Canvas (100vw x 100dvh) -->
     <div class="sheet-map-wrap">
       <div id="map"></div>
-      <button class="map-layer-pill" id="btnLayerToggle" onclick="toggleSatelliteLayer()">
-        Satellite View
-      </button>
     </div>
 
-    <!-- Step 3: Single Clean Save Button -->
+    <!-- Floating Top Search Bar (Just like Native Google Maps) -->
+    <div class="map-floating-top">
+      <div class="voice-search-bar">
+        <button class="btn-back-map" onclick="closeLocationSheet()" aria-label="Back to list">← Back</button>
+        <input
+          type="text"
+          id="landmarkSearchInput"
+          class="map-search-input"
+          placeholder="Search landmark or circle (e.g. Seetha Circle)..."
+          onkeydown="if(event.key==='Enter') findLandmarkOnMap()"
+        />
+        <button class="btn-mic" id="btnMic" onclick="toggleSpeechRecognition()">
+          <span id="micBtnLabel">Voice</span>
+        </button>
+        <button class="btn-find" id="btnFindLandmark" onclick="findLandmarkOnMap()">Find</button>
+      </div>
+      <div class="map-floating-subbar">
+        <div style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          <span class="sheet-person-title" id="sheetPersonName">#1 Latha &amp; Chandrashekar</span>
+          <span class="sheet-person-sub" id="sheetPersonSub"></span>
+          <span style="color:var(--text-muted);margin:0 4px;">·</span>
+          <span id="sheetStatusHint">Drag red pin to exact street</span>
+        </div>
+        <button class="map-layer-pill" id="btnLayerToggle" onclick="toggleSatelliteLayer()">
+          Clean Roads
+        </button>
+      </div>
+    </div>
+
+    <!-- Floating Bottom Save Pill -->
     <div class="sheet-footer">
       <div class="sheet-footer-actions">
         <button class="btn-save-location" id="btnSavePin" onclick="saveCurrentFamilyPin()">
@@ -1585,10 +1535,9 @@
   function renderCategoryStrip() {
     const strip = document.getElementById('categoryStrip');
     strip.innerHTML = CATEGORIES.map(cat => {
-      const total = FAMILIES.filter(f => cat === 'ALL' || f.cat === cat).length;
       const rem = FAMILIES.filter(f => (cat === 'ALL' || f.cat === cat) && !appState.assignments[f.id]).length;
       const active = categoryFilter === cat ? 'active' : '';
-      const label = cat === 'ALL' ? `All Categories (${rem} left)` : `${cat} (${rem} of ${total} left)`;
+      const label = cat === 'ALL' ? `All` : `${cat} (${rem})`;
       return `<button class="cat-btn ${active}" onclick="setCategoryFilter('${cat}')">${label}</button>`;
     }).join('');
   }
@@ -1597,7 +1546,7 @@
     const container = document.getElementById('checklistContainer');
     const q = (document.getElementById('checklistSearch').value || '').trim().toLowerCase();
 
-    // Collapse Same House groups into a single unified entry (keyed by primary lowest family ID)
+    // Collapse Same House groups into a single unified row (keyed by primary lowest family ID)
     const seenPrimaryIds = new Set();
     const houseCards = [];
     FAMILIES.forEach(f => {
@@ -1627,12 +1576,12 @@
 
     if (!filteredGroups.length) {
       container.innerHTML = `
-        <div style="text-align:center;padding:48px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);color:var(--text-secondary);">
-          <div style="font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:6px;">
-            ${statusFilter === 'todo' ? 'All families in this section are completed' : 'No matching families found'}
+        <div style="text-align:center;padding:40px 16px;color:var(--text-secondary);">
+          <div style="font-size:0.95rem;font-weight:600;color:var(--text);margin-bottom:4px;">
+            ${statusFilter === 'todo' ? 'All families in this section are located' : 'No matching families'}
           </div>
-          <div style="font-size:0.92rem;">
-            ${statusFilter === 'todo' ? 'Switch to another category above or view your Routes & Packing list.' : 'Try clearing the search box or switching filters.'}
+          <div style="font-size:0.82rem;">
+            ${statusFilter === 'todo' ? 'Switch to another category or open Routes.' : 'Try clearing the search box or switching filters.'}
           </div>
         </div>`;
       return;
@@ -1645,60 +1594,40 @@
       const isPinned = a && a.status === 'pinned';
       const isOut = a && a.status === 'out_of_town';
       const uniqueCats = Array.from(new Set(groupFamilies.map(gf => gf.cat))).join(', ');
+      const serialLabel = groupFamilies.map(gf => `#${gf.id}`).join(', ');
+      const combinedNames = groupFamilies.map(gf => escapeHtml(gf.title)).join(' + ');
+      const allOthers = groupFamilies.map(gf => gf.others).filter(Boolean).join(', ');
 
       return `
         <article class="guest-card ${a ? 'completed' : ''}">
-          <div class="guest-main">
+          <div class="guest-main" onclick="openLocationSheet(${f.id})">
+            <span class="serial-pill">${serialLabel}</span>
             <div class="guest-info">
-              <div class="guest-meta-line">
-                ${groupFamilies.map(gf => `<span class="serial-pill">#${gf.id}</span>`).join('')}
-                <span>Category ${uniqueCats}</span>
-                ${isGrouped ? `<span style="color:#1d4ed8;font-weight:700;">• Same House (${groupFamilies.length} Families Combined)</span>` : ''}
-                ${isPinned ? `<span style="color:var(--primary);font-weight:700;">• Location Saved</span>` : ''}
-                ${isOut ? `<span style="color:var(--text-muted);font-weight:700;">• Out of Town</span>` : ''}
-              </div>
-
-              ${isGrouped ? `
-                <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
-                  ${groupFamilies.map((gf, idx) => `
-                    <div style="${idx > 0 ? 'padding-top:8px;border-top:1px dashed var(--border);' : ''}">
-                      <div class="guest-name">#${gf.id} ${escapeHtml(gf.title)}</div>
-                      ${gf.others ? `<div class="guest-members">With: ${escapeHtml(gf.others)}</div>` : ''}
-                    </div>
-                  `).join('')}
-                </div>
-              ` : `
-                <div class="guest-name">${escapeHtml(f.title)}</div>
-                ${f.others ? `<div class="guest-members">With: ${escapeHtml(f.others)}</div>` : ''}
-              `}
+              <span class="guest-name">${combinedNames}</span>
+              ${allOthers ? `<span class="guest-members">(${escapeHtml(allOthers)})</span>` : ''}
+              <span class="row-cat-tag">${uniqueCats}</span>
+              ${isPinned ? `<span class="row-saved-note">· ✓ ${escapeHtml(a.note || 'Pinned')}</span>` : ''}
+              ${isOut ? `<span class="guest-members">· Out of Town</span>` : ''}
             </div>
           </div>
 
           ${a ? `
-            <div class="saved-location-box">
-              <div>
-                <div style="font-weight:600;color:var(--text);">
-                  ${isPinned ? (escapeHtml(a.note) || 'Pinned on map') : 'Out of town / No local house visit'}
-                </div>
-                ${isPinned ? `<div style="font-size:0.8rem;color:var(--text-muted);margin-top:2px;">Coordinates: ${a.lat.toFixed(4)}, ${a.lng.toFixed(4)}</div>` : ''}
-              </div>
-            </div>
             <div class="guest-actions">
-              <button class="btn-secondary-quiet" onclick="openLocationSheet(${f.id})">Edit Location</button>
-              <button class="btn-secondary-quiet" onclick="openSameHouseDialog(${f.id})">${isGrouped ? 'Edit Same House' : 'Same House As...'}</button>
-              ${isPinned ? `<a class="btn-secondary-quiet" href="https://www.google.com/maps/search/?api=1&query=${a.lat},${a.lng}" target="_blank" rel="noopener">View in Google Maps</a>` : ''}
-              <button class="btn-secondary-quiet" style="color:var(--danger);" onclick="clearFamilyLocation(${f.id})">Move to Remaining</button>
+              <button class="btn-secondary-quiet" onclick="openSameHouseDialog(${f.id})">${isGrouped ? `Group (${groupFamilies.length})` : 'Same House'}</button>
+              <button class="btn-secondary-quiet" onclick="openLocationSheet(${f.id})">Edit</button>
+              ${isPinned ? `<a class="btn-secondary-quiet" href="https://www.google.com/maps/search/?api=1&query=${a.lat},${a.lng}" target="_blank" rel="noopener">Maps ↗</a>` : ''}
+              <button class="btn-secondary-quiet" style="color:var(--danger);" onclick="clearFamilyLocation(${f.id})">Clear</button>
             </div>
           ` : `
             <div class="guest-actions">
-              <button class="btn-primary-locate" onclick="openLocationSheet(${f.id})">
-                ${isGrouped ? `Locate House (${groupFamilies.length} Families)` : 'Locate House'}
-              </button>
               <button class="btn-secondary-quiet" onclick="openSameHouseDialog(${f.id})">
-                ${isGrouped ? 'Edit Same House' : 'Same House As...'}
+                ${isGrouped ? `Group (${groupFamilies.length})` : 'Same House'}
               </button>
               <button class="btn-secondary-quiet" onclick="markFamilyOutOfTown(${f.id})">
                 Out of Town
+              </button>
+              <button class="btn-primary-locate" onclick="openLocationSheet(${f.id})">
+                ${isGrouped ? `Locate (${groupFamilies.length}) ›` : 'Locate ›'}
               </button>
             </div>
           `}
@@ -1708,13 +1637,16 @@
   }
 
   // ============================================================================
-  // FOCUSED LOCATION SHEET (Single-Family Map & Voice Landmark Pinning)
+  // FULL-SCREEN NATIVE-STYLE GOOGLE MAP (Floating Top Bar & Single Active Pin)
   // ============================================================================
+  let googleCleanRoadLayer = null;
+  let mapLayerMode = 0; // 0 = Landmarks & Roads, 1 = Clean Roads Only, 2 = Satellite
+
   function ensureSheetMapInitialized() {
     if (map) return;
     map = L.map('map', {
       center: [appState.home.lat, appState.home.lng],
-      zoom: 15,
+      zoom: 16,
       zoomControl: false
     });
     L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -1723,6 +1655,11 @@
       maxZoom: 21,
       attribution: 'Map data &copy; Google'
     }).addTo(map);
+
+    googleCleanRoadLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&hl=en&gl=IN&x={x}&y={y}&z={z}&apistyle=s.t%3A2%7Cs.e%3Al%7Cp.v%3Aoff', {
+      maxZoom: 21,
+      attribution: 'Map data &copy; Google'
+    });
 
     googleSatLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&hl=en&gl=IN&x={x}&y={y}&z={z}', {
       maxZoom: 21,
@@ -1744,16 +1681,22 @@
 
   function toggleSatelliteLayer() {
     if (!map) return;
-    isSatView = !isSatView;
+    mapLayerMode = (mapLayerMode + 1) % 3;
+    isSatView = mapLayerMode === 2;
     const btn = document.getElementById('btnLayerToggle');
-    if (isSatView) {
-      map.removeLayer(googleRoadLayer);
-      googleSatLayer.addTo(map);
-      btn.textContent = 'Street View';
-    } else {
-      map.removeLayer(googleSatLayer);
+    map.removeLayer(googleRoadLayer);
+    map.removeLayer(googleCleanRoadLayer);
+    map.removeLayer(googleSatLayer);
+
+    if (mapLayerMode === 0) {
       googleRoadLayer.addTo(map);
-      btn.textContent = 'Satellite View';
+      btn.textContent = 'Clean Roads';
+    } else if (mapLayerMode === 1) {
+      googleCleanRoadLayer.addTo(map);
+      btn.textContent = 'Satellite';
+    } else {
+      googleSatLayer.addTo(map);
+      btn.textContent = 'Landmarks';
     }
   }
 
@@ -1764,18 +1707,18 @@
 
     const housemates = getHousemates(familyId);
     const groupSuffix = housemates.length
-      ? ` (+ ${housemates.map(h => '#' + h.id + ' ' + h.title).join(', ')})`
+      ? ` + ${housemates.map(h => '#' + h.id + ' ' + h.title).join(', ')}`
       : '';
 
     document.getElementById('sheetPersonName').textContent = `#${fam.id} ${fam.title}${groupSuffix}`;
     document.getElementById('sheetPersonSub').textContent = housemates.length
-      ? `Same House Group (${housemates.length + 1} families will be located together) • Category ${fam.cat}`
-      : (fam.others ? `Category ${fam.cat} • With ${fam.others}` : `Category ${fam.cat}`);
+      ? `Same House (${housemates.length + 1})`
+      : `Category ${fam.cat}`;
 
     const saveBtn = document.getElementById('btnSavePin');
     if (saveBtn) {
       saveBtn.textContent = housemates.length
-        ? `Save Location for All ${housemates.length + 1} Families`
+        ? `Save Location (${housemates.length + 1} Families)`
         : 'Save Location';
     }
 
@@ -1783,7 +1726,7 @@
     sheetAutoReverseNote = existing && existing.note ? existing.note : '';
     document.getElementById('landmarkSearchInput').value = existing && existing.note ? existing.note : '';
     document.getElementById('sheetStatusHint').textContent =
-      'Say or type a nearby circle, hospital, or hotel, then drag the red pin to their exact road.';
+      'Drag red pin to exact street';
 
     document.getElementById('locationSheetBackdrop').classList.add('open');
     ensureSheetMapInitialized();
@@ -1810,28 +1753,12 @@
   }
 
   function renderVisibleLandmarks() {
-    // Rely directly on Google Maps' built-in native landmark labels & icons (e.g. Vinayaka Hospital, restaurants, parks)
-    // so zero extra floating boxes clutter the roads.
     if (landmarkMarkersLayer) landmarkMarkersLayer.clearLayers();
   }
 
   function renderNeighborReferencePins(excludeFamilyId) {
-    if (!neighborMarkersLayer) return;
-    neighborMarkersLayer.clearLayers();
-
-    const activeGroup = getHouseGroupIds(excludeFamilyId);
-    FAMILIES.forEach(f => {
-      if (activeGroup.includes(f.id)) return;
-      const a = appState.assignments[f.id];
-      if (!a || a.status !== 'pinned') return;
-      const icon = L.divIcon({
-        className: '',
-        html: `<div class="neighbor-pin">#${f.id} ${escapeHtml(f.title.split('&')[0].trim().slice(0, 10))}</div>`,
-        iconSize: [0, 0],
-        iconAnchor: [0, 0]
-      });
-      L.marker([a.lat, a.lng], { icon, interactive: false }).addTo(neighborMarkersLayer);
-    });
+    // Keep the map 100% uncluttered: show ONLY the 1 active house pin currently being located!
+    if (neighborMarkersLayer) neighborMarkersLayer.clearLayers();
   }
 
   function placeOrMoveActiveSheetPin(lat, lng, reverseGeocodeIfEmpty) {
@@ -1915,9 +1842,9 @@
     const btn = document.getElementById('btnMic');
     const lbl = document.getElementById('micBtnLabel');
     btn.classList.add('listening');
-    lbl.textContent = 'Stop & Find';
+    lbl.textContent = 'Stop';
     document.getElementById('sheetStatusHint').textContent =
-      'Speak the nearby circle, landmark, or cross-road (e.g. "Near Seetha Circle, 2nd road left")...';
+      'Listening for landmark or circle...';
 
     const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRec) {
@@ -1975,7 +1902,7 @@
     const btn = document.getElementById('btnMic');
     const lbl = document.getElementById('micBtnLabel');
     if (btn) btn.classList.remove('listening');
-    if (lbl) lbl.textContent = 'Speak Landmark';
+    if (lbl) lbl.textContent = 'Voice';
 
     if (recognition) {
       try { recognition.stop(); } catch (e) {}
@@ -2835,7 +2762,7 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
     const pct = Math.round((done / total) * 100);
 
     document.getElementById('progressFill').style.width = `${pct}%`;
-    document.getElementById('progressStatText').textContent = `${done} of ${total} completed (${pct}%)`;
+    document.getElementById('progressStatText').textContent = `${done}/${total}`;
     document.getElementById('badgeRemainingCount').textContent = rem;
     document.getElementById('badgePinnedCount').textContent = pinned;
     document.getElementById('countTodo').textContent = rem;
