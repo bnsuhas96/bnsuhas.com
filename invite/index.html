@@ -1387,6 +1387,10 @@
   };
 
   const DEFAULT_GATE_PIN = '2026';
+  // Primary: Maarga Google Cloud (medha-clinical) Vertex AI Express API Key (AQ...)
+  const DEFAULT_ENC_VERTEX_KEY = 'c2Ecdz1LJyZXP2gsDRMuORAVBVN/e1x6VUd5CwkjGlAqOCcePyg+MDc3fGRWBwBIQEw4RRI=';
+  // Fallback: Gemini AI Studio API Key (AIza...)
+  const DEFAULT_ENC_GEMINI_KEY = 'c3lIVwwKNxAnFjUNIAALLRgUJx93WV10ZFBHaCQADwAZPUM7IxhE';
 
   let undoHistory = [];
   let statusFilter = 'todo';
@@ -1438,6 +1442,11 @@
     try {
       const savedCfg = localStorage.getItem(CONFIG_KEY);
       if (savedCfg) aiConfig = Object.assign(aiConfig, JSON.parse(savedCfg));
+      // Always ensure Maarga Google Cloud Vertex AI key is pre-configured out of the box
+      if (!aiConfig.geminiApiKey || !aiConfig.geminiApiKey.startsWith('AQ.')) {
+        const autoVertexKey = deobfuscateGeminiKeyFromSync(DEFAULT_ENC_VERTEX_KEY);
+        if (autoVertexKey) aiConfig.geminiApiKey = autoVertexKey;
+      }
 
       if (window.location.hash && window.location.hash.length > 1) {
         const params = new URLSearchParams(window.location.hash.slice(1));
@@ -1495,7 +1504,7 @@
   function obfuscateGeminiKeyForSync(rawKey) {
     if (!rawKey) return '';
     try {
-      const salt = `${aiConfig.familyPasscode || DEFAULT_GATE_PIN}_suhas_nikitha_2026`;
+      const salt = `${DEFAULT_GATE_PIN}_suhas_nikitha_2026`;
       const bytes = [];
       for (let i = 0; i < rawKey.length; i++) {
         bytes.push(rawKey.charCodeAt(i) ^ salt.charCodeAt(i % salt.length));
@@ -1509,13 +1518,19 @@
   function deobfuscateGeminiKeyFromSync(encStr) {
     if (!encStr) return '';
     try {
-      const salt = `${aiConfig.familyPasscode || DEFAULT_GATE_PIN}_suhas_nikitha_2026`;
       const bin = atob(encStr);
-      let out = '';
-      for (let i = 0; i < bin.length; i++) {
-        out += String.fromCharCode(bin.charCodeAt(i) ^ salt.charCodeAt(i % salt.length));
+      const salts = [
+        `${DEFAULT_GATE_PIN}_suhas_nikitha_2026`,
+        `${aiConfig.familyPasscode || DEFAULT_GATE_PIN}_suhas_nikitha_2026`
+      ];
+      for (const salt of salts) {
+        let out = '';
+        for (let i = 0; i < bin.length; i++) {
+          out += String.fromCharCode(bin.charCodeAt(i) ^ salt.charCodeAt(i % salt.length));
+        }
+        if (out.startsWith('AQ.') || out.startsWith('AIza')) return out;
       }
-      return out.startsWith('AIza') ? out : '';
+      return '';
     } catch (e) {
       return '';
     }
@@ -2637,70 +2652,14 @@
   }
 
   // ============================================================================
-  // GEMINI MULTIMODAL AUDIO ASR ENGINE (Map Landmark, Route Planner & Checklist)
+  // GEMINI MULTIMODAL AUDIO ASR ENGINE (Maarga Google Cloud Vertex AI + Fallback)
   // ============================================================================
   let activeVoiceMode = null; // 'landmark' | 'route' | 'checklist'
   let vadAudioCtx = null;
   let vadInterval = null;
-  let forceBrowserVoiceFallback = false;
 
   function hasGeminiVoiceConfigured() {
-    const isStaticHost = /bnsuhas\.com|github\.io/i.test(window.location.hostname || '');
-    return Boolean(
-      aiConfig.geminiApiKey ||
-      aiConfig.proxyEndpoint ||
-      (window.location.protocol.startsWith('http') && !isStaticHost)
-    );
-  }
-
-  function openGeminiKeyQuickSetupDialog(targetMode) {
-    document.getElementById('dialogTitle').textContent = 'Enable Gemini AI Voice ASR';
-    document.getElementById('dialogBody').innerHTML = `
-      <div style="background:#ecfdf5;border:1px solid #a7f3d0;padding:12px;border-radius:var(--radius-md);font-size:0.88rem;color:#065f46;line-height:1.45;">
-        <b>Why Gemini AI Voice?</b> Built-in browser speech recognition struggles with Kannada &amp; South Bangalore names (<i>Seetha Circle, Katriguppe, Vinayaka Hospital, Sujatha</i>).<br><br>
-        Paste your Gemini API Key (<code>AIza...</code>) once below. It will <b>automatically sync encrypted</b> to Mom's &amp; Dad's phones (and is never stored in GitHub).
-      </div>
-      <input
-        type="password"
-        id="quickGeminiKeyInput"
-        class="input-clean"
-        placeholder="Paste Gemini API Key (AIza...)"
-        value="${escapeHtml(aiConfig.geminiApiKey || '')}"
-      />
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn-primary-locate" onclick="saveQuickGeminiKeyAndStart('${targetMode}')">
-          Save &amp; Start Gemini Voice
-        </button>
-        <button class="btn-secondary-quiet" onclick="useBrowserVoiceFallbackOnce('${targetMode}')">
-          Use Basic Browser Voice
-        </button>
-      </div>
-    `;
-    document.getElementById('dialogBackdrop').classList.add('open');
-  }
-
-  function saveQuickGeminiKeyAndStart(targetMode) {
-    const val = (document.getElementById('quickGeminiKeyInput').value || '').trim();
-    if (!val) {
-      showSnackbar('Please paste a valid Gemini API key (starts with AIza)', false);
-      return;
-    }
-    aiConfig.geminiApiKey = val;
-    localStorage.setItem(CONFIG_KEY, JSON.stringify(aiConfig));
-    pushSharedCloudState();
-    closeDialogModal();
-    showSnackbar('Gemini AI Voice enabled & synced for all family phones!', false);
-    if (targetMode === 'landmark') startSpeechRecognition('landmark');
-    else if (targetMode === 'route') startSpeechRecognition('route');
-    else if (targetMode === 'checklist') startSpeechRecognition('checklist');
-  }
-
-  function useBrowserVoiceFallbackOnce(targetMode) {
-    forceBrowserVoiceFallback = true;
-    closeDialogModal();
-    if (targetMode === 'landmark') startSpeechRecognition('landmark');
-    else if (targetMode === 'route') startSpeechRecognition('route');
-    else if (targetMode === 'checklist') startSpeechRecognition('checklist');
+    return true;
   }
 
   function updateVoiceButtonsUI(listeningMode) {
@@ -2722,9 +2681,8 @@
     if (isListening) {
       await stopAndProcessVoiceCapture();
     } else {
-      if (!hasGeminiVoiceConfigured() && !forceBrowserVoiceFallback) {
-        openGeminiKeyQuickSetupDialog('landmark');
-        return;
+      if (!aiConfig.geminiApiKey) {
+        aiConfig.geminiApiKey = deobfuscateGeminiKeyFromSync(DEFAULT_ENC_VERTEX_KEY) || '';
       }
       startSpeechRecognition('landmark');
     }
@@ -2734,9 +2692,8 @@
     if (isListening) {
       await stopAndProcessVoiceCapture();
     } else {
-      if (!hasGeminiVoiceConfigured() && !forceBrowserVoiceFallback) {
-        openGeminiKeyQuickSetupDialog('checklist');
-        return;
+      if (!aiConfig.geminiApiKey) {
+        aiConfig.geminiApiKey = deobfuscateGeminiKeyFromSync(DEFAULT_ENC_VERTEX_KEY) || '';
       }
       startSpeechRecognition('checklist');
     }
@@ -2901,24 +2858,34 @@
   }
 
   async function callGeminiMultimodalJson(promptText, audioBase64, mimeType) {
-    if (!aiConfig.geminiApiKey) return null;
+    const vertexKey = (aiConfig.geminiApiKey && aiConfig.geminiApiKey.startsWith('AQ.'))
+      ? aiConfig.geminiApiKey
+      : deobfuscateGeminiKeyFromSync(DEFAULT_ENC_VERTEX_KEY);
+    const studioKey = (aiConfig.geminiApiKey && aiConfig.geminiApiKey.startsWith('AIza'))
+      ? aiConfig.geminiApiKey
+      : deobfuscateGeminiKeyFromSync(DEFAULT_ENC_GEMINI_KEY);
+    if (!aiConfig.geminiApiKey && vertexKey) {
+      aiConfig.geminiApiKey = vertexKey;
+    }
+
     const cleanMime = (mimeType || 'audio/webm').split(';')[0];
     const parts = [{ text: promptText }];
     if (audioBase64) {
       parts.push({ inlineData: { mimeType: cleanMime, data: audioBase64 } });
     }
-    // Try current high-speed Gemini Flash models in order
-    const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-3.8-flash'];
-    for (const modelName of models) {
+    const payload = JSON.stringify({
+      contents: [{ role: 'user', parts }],
+      generationConfig: { responseMimeType: 'application/json', temperature: 0.1 }
+    });
+
+    // 1. Primary: Maarga Google Cloud Vertex AI (medha-clinical -> gemini-3-flash-preview)
+    if (vertexKey) {
       try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(aiConfig.geminiApiKey)}`;
-        const resp = await fetch(url, {
+        const vertexUrl = `https://aiplatform.googleapis.com/v1/publishers/google/models/gemini-3-flash-preview:generateContent?key=${encodeURIComponent(vertexKey)}`;
+        const resp = await fetch(vertexUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts }],
-            generationConfig: { responseMimeType: 'application/json', temperature: 0.1 }
-          })
+          body: payload
         });
         if (resp.ok) {
           const j = await resp.json();
@@ -2926,6 +2893,26 @@
           return JSON.parse(rawText);
         }
       } catch (e) {}
+    }
+
+    // 2. Automatic Fallback: Gemini AI Studio (gemini-3.1-flash-lite / gemini-3-flash-preview)
+    if (studioKey) {
+      const models = ['gemini-3.1-flash-lite', 'gemini-3-flash-preview'];
+      for (const modelName of models) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(studioKey)}`;
+          const resp = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: payload
+          });
+          if (resp.ok) {
+            const j = await resp.json();
+            const rawText = j.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+            return JSON.parse(rawText);
+          }
+        } catch (e) {}
+      }
     }
     return null;
   }
@@ -3864,9 +3851,8 @@ Return ONLY valid JSON:
       await stopAndProcessVoiceCapture();
       return;
     }
-    if (!hasGeminiVoiceConfigured() && !forceBrowserVoiceFallback) {
-      openGeminiKeyQuickSetupDialog('route');
-      return;
+    if (!aiConfig.geminiApiKey) {
+      aiConfig.geminiApiKey = deobfuscateGeminiKeyFromSync(DEFAULT_ENC_VERTEX_KEY) || '';
     }
     startSpeechRecognition('route');
   }
