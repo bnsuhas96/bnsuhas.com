@@ -327,14 +327,22 @@
     }
 
     .guest-card {
-      padding: 10px 14px;
-      border-bottom: 1px solid #f3f4f6;
+      padding: 14px 16px;
+      border-bottom: 1px solid #e5e7eb;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
       background: var(--surface);
       transition: background 0.1s ease;
+    }
+    @media (min-width: 720px) {
+      .guest-card {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
     }
     .guest-card:last-child {
       border-bottom: none;
@@ -343,7 +351,7 @@
       background: #fafafa;
     }
     .guest-card.completed {
-      background: #fcfcfd;
+      background: #f8fafc;
     }
 
     .guest-main {
@@ -356,11 +364,11 @@
     }
 
     .serial-pill {
-      font-size: 0.78rem;
-      font-weight: 500;
-      color: var(--text-muted);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-secondary);
       font-variant-numeric: tabular-nums;
-      min-width: 28px;
+      min-width: 32px;
       flex-shrink: 0;
     }
 
@@ -374,77 +382,84 @@
     }
 
     .guest-name {
-      font-size: 0.94rem;
-      font-weight: 600;
+      font-size: 1.02rem;
+      font-weight: 700;
       color: var(--text);
       letter-spacing: -0.01em;
     }
 
     .guest-members {
-      font-size: 0.82rem;
-      color: var(--text-muted);
+      font-size: 0.86rem;
+      color: var(--text-secondary);
     }
 
     .row-cat-tag {
-      font-size: 0.72rem;
-      font-weight: 500;
-      color: var(--text-muted);
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--text-secondary);
       background: var(--surface-subtle);
-      padding: 1px 6px;
-      border-radius: 4px;
+      padding: 2px 8px;
+      border-radius: 5px;
     }
 
     .row-house-tag {
-      font-size: 0.72rem;
+      font-size: 0.76rem;
       font-weight: 600;
       color: var(--accent-blue);
       background: var(--accent-blue-soft);
-      padding: 1px 6px;
-      border-radius: 4px;
+      padding: 2px 8px;
+      border-radius: 5px;
     }
 
     .row-saved-note {
-      font-size: 0.78rem;
+      font-size: 0.84rem;
       color: #059669;
-      font-weight: 500;
+      font-weight: 600;
     }
 
-    /* Compact Row Actions (Right Side) */
+    /* Large, Easy-to-Tap Row Action Buttons */
     .guest-actions {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      flex-wrap: wrap;
       flex-shrink: 0;
     }
 
     .btn-primary-locate {
-      height: 30px;
+      min-height: 40px;
       background: var(--text);
       color: #ffffff;
       border: none;
-      border-radius: 6px;
-      padding: 0 11px;
-      font-size: 0.78rem;
-      font-weight: 500;
+      border-radius: 8px;
+      padding: 0 16px;
+      font-size: 0.88rem;
+      font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       white-space: nowrap;
+      flex: 1 1 auto;
+    }
+    @media (min-width: 720px) {
+      .btn-primary-locate {
+        flex: 0 0 auto;
+      }
     }
     .btn-primary-locate:hover {
-      opacity: 0.88;
+      opacity: 0.9;
     }
 
     .btn-secondary-quiet {
-      height: 30px;
-      background: transparent;
-      color: var(--text-secondary);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 0 9px;
-      font-size: 0.76rem;
-      font-weight: 500;
+      min-height: 40px;
+      background: #ffffff;
+      color: var(--text);
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 0 12px;
+      font-size: 0.84rem;
+      font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
@@ -458,13 +473,13 @@
     }
 
     .btn-invited-toggle {
-      height: 30px;
+      min-height: 40px;
       background: #ffffff;
-      color: var(--text-secondary);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 0 8px;
-      font-size: 0.75rem;
+      color: var(--text);
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 0 12px;
+      font-size: 0.84rem;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
@@ -475,27 +490,28 @@
     .btn-invited-toggle.is-invited {
       background: #ecfdf5;
       color: #047857;
-      border-color: #6ee7b7;
+      border-color: #34d399;
+      font-weight: 700;
     }
 
     .map-search-suggestions {
       display: none;
-      max-height: 220px;
+      max-height: 260px;
       overflow-y: auto;
-      border-top: 1px solid #f1f5f9;
+      border-top: 1px solid #e2e8f0;
       background: #ffffff;
     }
     .map-search-suggestions.open {
       display: block;
     }
     .map-suggestion-item {
-      padding: 8px 12px;
-      border-bottom: 1px solid #f8fafc;
+      padding: 12px 14px;
+      border-bottom: 1px solid #f1f5f9;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
-      font-size: 0.84rem;
+      gap: 10px;
+      font-size: 0.92rem;
       color: var(--text);
       cursor: pointer;
     }
@@ -508,8 +524,8 @@
       background: rgba(255, 255, 255, 0.94);
       border: 1px solid #cbd5e1;
       border-radius: 6px;
-      padding: 1px 6px;
-      font-size: 0.68rem;
+      padding: 2px 8px;
+      font-size: 0.72rem;
       font-weight: 600;
       color: #334155;
       white-space: nowrap;
@@ -520,32 +536,23 @@
 
     @media (max-width: 560px) {
       .guest-card {
-        padding: 9px 10px;
-        gap: 6px;
-      }
-      .serial-pill {
-        min-width: 24px;
-        font-size: 0.74rem;
-      }
-      .guest-name {
-        font-size: 0.86rem;
-      }
-      .guest-members {
-        font-size: 0.75rem;
+        padding: 12px 12px;
+        gap: 9px;
       }
       .guest-actions {
-        gap: 3px;
+        gap: 6px;
+        width: 100%;
       }
       .btn-secondary-quiet,
       .btn-invited-toggle {
-        height: 26px;
-        padding: 0 5px;
-        font-size: 0.71rem;
+        min-height: 38px;
+        padding: 0 10px;
+        font-size: 0.8rem;
       }
       .btn-primary-locate {
-        height: 26px;
-        padding: 0 7px;
-        font-size: 0.72rem;
+        min-height: 38px;
+        padding: 0 14px;
+        font-size: 0.84rem;
       }
     }
 
@@ -612,18 +619,18 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      padding: 6px 8px;
+      padding: 8px 10px;
     }
 
     .btn-back-map {
-      height: 36px;
-      padding: 0 10px;
-      border: none;
-      background: transparent;
+      height: 42px;
+      padding: 0 12px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
       color: var(--text);
-      font-size: 0.85rem;
-      font-weight: 600;
-      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-radius: 10px;
       cursor: pointer;
       white-space: nowrap;
       flex-shrink: 0;
@@ -635,24 +642,24 @@
     .map-search-input {
       flex: 1;
       min-width: 0;
-      height: 36px;
+      height: 42px;
       border: none;
       background: transparent;
-      font-size: 0.92rem;
+      font-size: 0.96rem;
       color: var(--text);
       outline: none;
       padding: 0 6px;
     }
 
     .btn-mic {
-      background: var(--surface-subtle);
+      background: #f1f5f9;
       color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0 10px;
-      height: 34px;
-      font-size: 0.78rem;
-      font-weight: 600;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 0 13px;
+      height: 42px;
+      font-size: 0.86rem;
+      font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
       flex-shrink: 0;
@@ -674,11 +681,11 @@
       background: var(--text);
       color: #ffffff;
       border: none;
-      border-radius: 8px;
-      padding: 0 12px;
-      height: 34px;
-      font-size: 0.8rem;
-      font-weight: 600;
+      border-radius: 10px;
+      padding: 0 15px;
+      height: 42px;
+      font-size: 0.88rem;
+      font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
       flex-shrink: 0;
@@ -689,18 +696,24 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      padding: 6px 12px;
+      padding: 8px 12px;
       background: #f8fafc;
-      border-top: 1px solid #f1f5f9;
-      font-size: 0.76rem;
+      border-top: 1px solid #e2e8f0;
+      font-size: 0.82rem;
       color: var(--text-secondary);
+      flex-wrap: wrap;
     }
 
     .sheet-person-title {
-      font-size: 0.8rem;
-      font-weight: 600;
+      font-size: 0.88rem;
+      font-weight: 700;
       color: var(--text);
       margin: 0;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 7px;
+      padding: 4px 10px;
+      display: inline-block;
     }
 
     .sheet-person-sub {
@@ -710,32 +723,36 @@
     .map-layer-pill {
       background: #ffffff;
       color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 2px 7px;
-      font-size: 0.72rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      min-height: 34px;
+      padding: 0 10px;
+      font-size: 0.78rem;
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
       flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
     .map-layer-pill.active-pill {
       background: #ecfdf5;
       color: #065f46;
-      border-color: #a7f3d0;
+      border-color: #6ee7b7;
     }
 
     /* Clean Circular Numbered Pins for All Saved Locations (Zero Road Clutter) */
     .saved-house-dot {
-      min-width: 26px;
-      height: 26px;
-      padding: 0 5px;
+      min-width: 30px;
+      height: 30px;
+      padding: 0 6px;
       border-radius: 999px;
       background: #059669;
       color: #ffffff;
       border: 2px solid #ffffff;
       box-shadow: 0 2px 6px rgba(15, 23, 42, 0.35);
-      font-size: 0.72rem;
+      font-size: 0.76rem;
       font-weight: 700;
       font-variant-numeric: tabular-nums;
       display: inline-flex;
@@ -802,10 +819,10 @@
     /* Floating Bottom Save Pill */
     .sheet-footer {
       position: absolute;
-      bottom: 22px;
+      bottom: 20px;
       left: 12px;
       right: 12px;
-      max-width: 460px;
+      max-width: 520px;
       margin: 0 auto;
       z-index: 600;
       pointer-events: none;
@@ -813,19 +830,19 @@
 
     .sheet-footer-actions {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       pointer-events: auto;
     }
 
     .btn-pick-family-map {
-      min-height: 44px;
-      padding: 0 14px;
+      min-height: 50px;
+      padding: 0 16px;
       background: rgba(255, 255, 255, 0.98);
       color: var(--text);
-      border: 1px solid rgba(0, 0, 0, 0.12);
-      border-radius: 999px;
-      font-size: 0.84rem;
-      font-weight: 600;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 14px;
+      font-size: 0.92rem;
+      font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
@@ -833,15 +850,15 @@
 
     .btn-save-location {
       flex: 1;
-      min-height: 44px;
-      background: #111827;
+      min-height: 50px;
+      background: #059669;
       color: #ffffff;
       border: none;
-      border-radius: 999px;
-      font-size: 0.9rem;
-      font-weight: 600;
+      border-radius: 14px;
+      font-size: 0.96rem;
+      font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 8px 24px rgba(5, 150, 105, 0.35);
     }
     .btn-save-location:disabled {
       background: #9ca3af;
@@ -1170,7 +1187,7 @@
             oninput="handleMapSearchInput(this.value)"
           />
           <button type="button" class="btn-mic" id="btnMic" onclick="toggleSpeechRecognition()">
-            <span id="micBtnLabel">Voice</span>
+            <span id="micBtnLabel">🎤 Voice</span>
           </button>
           <button type="submit" class="btn-find" id="btnFindLandmark">Find</button>
         </form>
@@ -1178,10 +1195,10 @@
       <div class="map-search-suggestions" id="mapSearchSuggestions"></div>
       <div class="map-floating-subbar">
         <div style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-          <span class="sheet-person-title" id="sheetPersonName" style="cursor:pointer;" onclick="openAssignFamilyToPinDialog()">#1 Latha &amp; Chandrashekar</span>
+          <span class="sheet-person-title" id="sheetPersonName" style="cursor:pointer;" onclick="openAssignFamilyToPinDialog(false)">Choose Family ▾</span>
           <span class="sheet-person-sub" id="sheetPersonSub"></span>
           <span style="color:var(--text-muted);margin:0 4px;">·</span>
-          <span id="sheetStatusHint">Tap street or drag red pin</span>
+          <span id="sheetStatusHint">Search or speak any place</span>
         </div>
         <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
           <button class="map-layer-pill active-pill" id="btnToggleAllPins" onclick="toggleShowAllSavedPins()">
@@ -1200,11 +1217,11 @@
     <!-- Floating Bottom Save & Direct Family Picker Pill -->
     <div class="sheet-footer">
       <div class="sheet-footer-actions">
-        <button class="btn-pick-family-map" id="btnPickFamilyMap" onclick="openAssignFamilyToPinDialog()">
-          Pick Family ▾
+        <button class="btn-pick-family-map" id="btnPickFamilyMap" onclick="openAssignFamilyToPinDialog(false)">
+          Choose Family ▾
         </button>
         <button class="btn-save-location" id="btnSavePin" onclick="saveCurrentFamilyPin()">
-          Save Location
+          Choose Family &amp; Save Pin
         </button>
       </div>
     </div>
@@ -1389,6 +1406,8 @@
   const DEFAULT_GATE_PIN = '2026';
   // Primary: Maarga Google Cloud (medha-clinical) Vertex AI Express API Key (AQ...)
   const DEFAULT_ENC_VERTEX_KEY = 'c2Ecdz1LJyZXP2gsDRMuORAVBVN/e1x6VUd5CwkjGlAqOCcePyg+MDc3fGRWBwBIQEw4RRI=';
+  // Google Maps Places & Geocoding API Key on medha-clinical (AIza...)
+  const DEFAULT_ENC_MAPS_KEY = 'c3lIVwwKMQoTAGc7Ah8YJFAREkBGWA5YUXgOHBU4HxI3Jgs5XgI9';
   // Fallback: Gemini AI Studio API Key (AIza...)
   const DEFAULT_ENC_GEMINI_KEY = 'c3lIVwwKNxAnFjUNIAALLRgUJx93WV10ZFBHaCQADwAZPUM7IxhE';
 
@@ -2018,26 +2037,26 @@
           ${a ? `
             <div class="guest-actions">
               <button class="btn-invited-toggle ${isInv ? 'is-invited' : ''}" onclick="toggleFamilyInvited(${f.id}, event)" title="Mark as Invited">
-                ${isInv ? '✓ Invited' : 'Invite'}
+                ${isInv ? '✓ Invited' : 'Mark Invited'}
               </button>
-              <button class="btn-secondary-quiet" onclick="openSameHouseDialog(${f.id})">${isGrouped ? `Group (${groupFamilies.length})` : 'Group'}</button>
-              <button class="btn-secondary-quiet" onclick="openLocationSheet(${f.id})">Edit</button>
+              <button class="btn-secondary-quiet" onclick="openSameHouseDialog(${f.id})">${isGrouped ? `Same House (${groupFamilies.length})` : 'Same House'}</button>
+              <button class="btn-secondary-quiet" onclick="openLocationSheet(${f.id})">📍 Edit Pin</button>
               ${isPinned ? `<a class="btn-secondary-quiet" href="https://www.google.com/maps/search/?api=1&query=${a.lat},${a.lng}" target="_blank" rel="noopener">Maps ↗</a>` : ''}
               <button class="btn-secondary-quiet" style="color:var(--danger);" onclick="clearFamilyLocation(${f.id})">✕</button>
             </div>
           ` : `
             <div class="guest-actions">
               <button class="btn-invited-toggle ${isInv ? 'is-invited' : ''}" onclick="toggleFamilyInvited(${f.id}, event)" title="Mark as Invited">
-                ${isInv ? '✓ Invited' : 'Invite'}
+                ${isInv ? '✓ Invited' : 'Mark Invited'}
               </button>
               <button class="btn-secondary-quiet" onclick="openSameHouseDialog(${f.id})" title="Tag Same House">
-                ${isGrouped ? `Group (${groupFamilies.length})` : 'Group'}
+                ${isGrouped ? `Same House (${groupFamilies.length})` : 'Same House'}
               </button>
               <button class="btn-secondary-quiet" onclick="markFamilyOutOfTown(${f.id})" title="Mark Out of Town">
-                Out
+                Out of Town
               </button>
               <button class="btn-primary-locate" onclick="openLocationSheet(${f.id})">
-                ${isGrouped ? `Pin (${groupFamilies.length}) ›` : 'Pin ›'}
+                ${isGrouped ? `📍 Locate (${groupFamilies.length}) ›` : '📍 Locate ›'}
               </button>
             </div>
           `}
@@ -2054,6 +2073,7 @@
   let showAllSavedPins = true;
   let mapOpenedFromOverview = false;
   let mapFamilyPickerQuery = '';
+  let mapPickerSaveImmediately = false;
 
   function ensureSheetMapInitialized() {
     if (map) return;
@@ -2085,6 +2105,9 @@
     // Tapping anywhere on the map moves this family's draggable pin to that exact street
     map.on('click', function(e) {
       placeOrMoveActiveSheetPin(e.latlng.lat, e.latlng.lng, true);
+      document.getElementById('sheetStatusHint').textContent = currentSheetFamilyId
+        ? 'Pin moved to street — tap Save Location below.'
+        : 'Pin placed — tap "Choose Family & Save Pin" below to pick whose house this is.';
     });
 
     map.on('moveend', function() {
@@ -2114,6 +2137,17 @@
   }
 
   function updateSheetFamilyUI(familyId) {
+    const saveBtn = document.getElementById('btnSavePin');
+    const pickBtn = document.getElementById('btnPickFamilyMap');
+    if (!familyId) {
+      currentSheetFamilyId = null;
+      document.getElementById('sheetPersonName').textContent = 'Choose Family ▾';
+      document.getElementById('sheetPersonSub').textContent = '';
+      if (pickBtn) pickBtn.textContent = 'Choose Family ▾';
+      if (saveBtn) saveBtn.textContent = 'Choose Family & Save Pin';
+      return;
+    }
+
     const fam = FAMILIES.find(f => f.id === familyId);
     if (!fam) return;
     currentSheetFamilyId = familyId;
@@ -2128,10 +2162,10 @@
       ? `Same House (${housemates.length + 1})`
       : `Category ${fam.cat}`;
 
-    const saveBtn = document.getElementById('btnSavePin');
+    if (pickBtn) pickBtn.textContent = 'Switch Family ▾';
     if (saveBtn) {
       saveBtn.textContent = housemates.length
-        ? `Save #${fam.id} (+${housemates.length})`
+        ? `Save #${fam.id} (+${housemates.length}) Location`
         : `Save #${fam.id} Location`;
     }
   }
@@ -2140,22 +2174,22 @@
     mapOpenedFromOverview = true;
     showAllSavedPins = true;
 
-    const nextUnmapped = FAMILIES.find(f => !appState.assignments[f.id]) || FAMILIES[0];
-    updateSheetFamilyUI(nextUnmapped.id);
+    // Do NOT force #1 Latha & Chandrashekar when opening Map overview!
+    // Let the user freely search/voice-search any place first, then choose whose house it is.
+    updateSheetFamilyUI(null);
 
-    const existing = appState.assignments[nextUnmapped.id];
-    sheetAutoReverseNote = existing && existing.note ? existing.note : '';
+    sheetAutoReverseNote = '';
     document.getElementById('landmarkSearchInput').value = '';
     hideMapSearchSuggestions();
     document.getElementById('sheetStatusHint').textContent =
-      'All marked houses shown in green · Search or tap any street';
+      'Search or speak any place, then tap "Choose Family & Save Pin"';
 
     document.getElementById('locationSheetBackdrop').classList.add('open');
     ensureSheetMapInitialized();
 
     setTimeout(() => {
       map.invalidateSize();
-      renderNeighborReferencePins(currentSheetFamilyId);
+      renderNeighborReferencePins(null);
       renderVisibleLandmarks();
       const pinnedCount = getUniqueSavedHouseGroups().length;
       if (pinnedCount > 0) {
@@ -2325,17 +2359,17 @@
       }).addTo(neighborMarkersLayer);
 
       const popupHtml = `
-        <div style="font-family:var(--font-sans);min-width:210px;padding:2px;">
-          <div style="font-weight:700;font-size:0.86rem;color:#111827;margin-bottom:2px;">${names}</div>
-          ${g.note ? `<div style="font-size:0.76rem;color:#059669;margin-bottom:6px;">${escapeHtml(g.note)}</div>` : ''}
-          <div style="display:flex;gap:5px;flex-wrap:wrap;">
-            <button onclick="toggleFamilyInvited(${g.primaryId}, event)" style="height:26px;padding:0 8px;border:1px solid ${g.invited ? '#6ee7b7' : '#d1d5db'};border-radius:5px;background:${g.invited ? '#ecfdf5' : '#fff'};color:${g.invited ? '#047857' : '#111827'};font-size:0.74rem;font-weight:600;cursor:pointer;">
+        <div style="font-family:var(--font-sans);min-width:230px;padding:4px;">
+          <div style="font-weight:700;font-size:0.94rem;color:#111827;margin-bottom:4px;">${names}</div>
+          ${g.note ? `<div style="font-size:0.82rem;color:#059669;margin-bottom:8px;">${escapeHtml(g.note)}</div>` : ''}
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button onclick="toggleFamilyInvited(${g.primaryId}, event)" style="min-height:36px;padding:0 12px;border:1px solid ${g.invited ? '#34d399' : '#cbd5e1'};border-radius:8px;background:${g.invited ? '#ecfdf5' : '#fff'};color:${g.invited ? '#047857' : '#111827'};font-size:0.82rem;font-weight:700;cursor:pointer;">
               ${g.invited ? '✓ Invited' : 'Mark Invited'}
             </button>
-            <button onclick="openLocationSheet(${g.primaryId}, true)" style="height:26px;padding:0 8px;border:1px solid #d1d5db;border-radius:5px;background:#fff;font-size:0.74rem;font-weight:600;cursor:pointer;">
+            <button onclick="openLocationSheet(${g.primaryId}, true)" style="min-height:36px;padding:0 12px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;font-size:0.82rem;font-weight:600;cursor:pointer;">
               Edit Pin
             </button>
-            <button onclick="openSameHouseDialog(${g.primaryId})" style="height:26px;padding:0 8px;border:1px solid #d1d5db;border-radius:5px;background:#fff;font-size:0.74rem;font-weight:600;cursor:pointer;">
+            <button onclick="openSameHouseDialog(${g.primaryId})" style="min-height:36px;padding:0 12px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;font-size:0.82rem;font-weight:600;cursor:pointer;">
               Same House
             </button>
           </div>
@@ -2345,9 +2379,12 @@
     });
   }
 
-  function openAssignFamilyToPinDialog() {
+  function openAssignFamilyToPinDialog(saveImmediately = false) {
     mapFamilyPickerQuery = '';
-    document.getElementById('dialogTitle').textContent = 'Choose Family to Mark on Map';
+    mapPickerSaveImmediately = Boolean(saveImmediately);
+    document.getElementById('dialogTitle').textContent = mapPickerSaveImmediately
+      ? 'Whose House Is This Pin?'
+      : 'Choose Family to Mark on Map';
     const body = document.getElementById('dialogBody');
     body.innerHTML = `
       <div class="search-wrap">
@@ -2355,11 +2392,12 @@
           type="search"
           id="mapFamilySearchInput"
           class="input-clean"
-          placeholder="Search family name or # (e.g. Shubha, 18)..."
+          style="min-height:42px;font-size:0.95rem;"
+          placeholder="Search family name or # (e.g. Sujatha, 18)..."
           oninput="handleMapFamilySearch(this.value)"
         />
       </div>
-      <div id="mapFamilyCandidateList" style="display:flex;flex-direction:column;gap:6px;max-height:54dvh;overflow-y:auto;"></div>
+      <div id="mapFamilyCandidateList" style="display:flex;flex-direction:column;gap:8px;max-height:56dvh;overflow-y:auto;"></div>
     `;
     renderMapFamilyCandidateList();
     document.getElementById('dialogBackdrop').classList.add('open');
@@ -2402,23 +2440,31 @@
       const a = appState.assignments[f.id];
       const names = gf.map(x => `#${x.id} ${escapeHtml(x.title)}`).join(' + ');
       return `
-        <div class="same-house-Candidate" style="cursor:pointer;" onclick="selectFamilyForMapPin(${f.id})">
+        <div class="same-house-Candidate" style="cursor:pointer;padding:12px 14px;" onclick="selectFamilyForMapPin(${f.id})">
           <div style="min-width:0;flex:1;">
-            <div style="font-weight:600;font-size:0.88rem;color:var(--text);">
+            <div style="font-weight:700;font-size:0.95rem;color:var(--text);">
               ${names} <span class="row-cat-tag">${f.cat}</span>
             </div>
-            ${a ? `<div style="font-size:0.76rem;color:#059669;">✓ Located (${escapeHtml(a.note || 'Pinned')})</div>` : `<div style="font-size:0.76rem;color:var(--text-muted);">To Locate</div>`}
+            ${a ? `<div style="font-size:0.82rem;color:#059669;font-weight:600;">✓ Located (${escapeHtml(a.note || 'Pinned')})</div>` : `<div style="font-size:0.82rem;color:var(--text-muted);">To Locate</div>`}
           </div>
-          <button class="btn-primary-locate" style="height:28px;padding:0 10px;">Select</button>
+          <button class="btn-primary-locate" style="min-height:38px;padding:0 14px;flex:0 0 auto;">
+            ${mapPickerSaveImmediately ? 'Save Pin Here' : 'Select'}
+          </button>
         </div>
       `;
     }).join('');
   }
 
   function selectFamilyForMapPin(familyId) {
+    const shouldSaveImmediately = mapPickerSaveImmediately;
+    mapPickerSaveImmediately = false;
     closeDialogModal();
     updateSheetFamilyUI(familyId);
     renderNeighborReferencePins(familyId);
+    if (shouldSaveImmediately && sheetPinCoords) {
+      saveCurrentFamilyPin();
+      return;
+    }
     const existing = appState.assignments[familyId];
     if (existing && existing.status === 'pinned') {
       map.setView([existing.lat, existing.lng], 18);
@@ -2436,7 +2482,7 @@
 
     const fam = FAMILIES.find(f => f.id === currentSheetFamilyId);
     const housemates = currentSheetFamilyId ? getHousemates(currentSheetFamilyId) : [];
-    const baseTitle = fam ? `#${fam.id} ${fam.title.split('&')[0].trim()}` : 'House Pin';
+    const baseTitle = fam ? `#${fam.id} ${fam.title.split('&')[0].trim()}` : 'New House Pin';
     const shortTitle = housemates.length ? `${baseTitle} (+${housemates.length})` : baseTitle;
 
     if (activePinMarker) {
@@ -2471,7 +2517,9 @@
         lat: Number(pos.lat.toFixed(6)),
         lng: Number(pos.lng.toFixed(6))
       };
-      document.getElementById('sheetStatusHint').textContent = 'Red pin moved to street — tap Save Location below.';
+      document.getElementById('sheetStatusHint').textContent = currentSheetFamilyId
+        ? 'Pin moved to street — tap Save Location below.'
+        : 'Pin moved — tap "Choose Family & Save Pin" below.';
     });
 
     if (reverseGeocodeIfEmpty) {
@@ -2492,8 +2540,71 @@
   }
 
   // ============================================================================
-  // FOOLPROOF MOBILE LANDMARK SEARCH + LIVE AUTOCOMPLETE + VOICE
+  // REAL GOOGLE MAPS PLACES API + GOOGLE VOICE SEARCH ENGINE
   // ============================================================================
+  function getGoogleMapsPlacesKey() {
+    return deobfuscateGeminiKeyFromSync(DEFAULT_ENC_MAPS_KEY);
+  }
+
+  function cleanConversationalPlaceQuery(raw) {
+    return String(raw || '')
+      .replace(/^(?:it\s+is\s+|house\s+is\s+|located\s+|staying\s+)?(?: right\s+|just\s+)?(?:near|opposite|opp|behind|beside|next\s+to|in\s+front\s+of|close\s+to|around|by|at)\s+/i, '')
+      .replace(/\b(?:near|opposite|behind|beside|next\s+to|in\s+front\s+of)\b/gi, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  async function queryGoogleMapsPlaces(rawQuery, maxResults = 5) {
+    const mapsKey = getGoogleMapsPlacesKey();
+    if (!mapsKey || !rawQuery) return [];
+    const cleanedQ = cleanConversationalPlaceQuery(rawQuery);
+    if (!cleanedQ) return [];
+
+    const hasCity = /bengaluru|bangalore|mysuru|mysore|mangaluru|mangalore|hassan|tumkur|tumakuru|shimoga|shivamogga|sringeri|hospet|malur|hubli|dharwad|belgaum|udupi|india/i.test(cleanedQ);
+    const textQuery = hasCity ? cleanedQ : `${cleanedQ}, Bengaluru`;
+
+    try {
+      const resp = await fetch('https://places.googleapis.com/v1/places:searchText', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': mapsKey,
+          'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.location'
+        },
+        body: JSON.stringify({
+          textQuery,
+          maxResultCount: maxResults,
+          locationBias: {
+            circle: {
+              center: { latitude: 12.9345, longitude: 77.5600 },
+              radius: 30000.0
+            }
+          }
+        })
+      });
+      if (!resp.ok) return [];
+      const data = await resp.json();
+      const places = data.places || [];
+      return places
+        .filter(p => p.location && typeof p.location.latitude === 'number' && typeof p.location.longitude === 'number')
+        .map(p => {
+          const name = (p.displayName && p.displayName.text) || cleanedQ;
+          const addr = p.formattedAddress || '';
+          const shortSub = addr.split(',').slice(0, 3).join(',').trim();
+          return {
+            kind: 'place',
+            label: name,
+            sub: shortSub || 'Google Maps',
+            lat: Number(p.location.latitude),
+            lng: Number(p.location.longitude),
+            instructions: rawQuery.trim()
+          };
+        });
+    } catch (e) {
+      return [];
+    }
+  }
+
   function normalizeSouthIndianPhonetic(str) {
     return String(str || '')
       .toLowerCase()
@@ -2575,34 +2686,19 @@
 
     renderMapSuggestionDropdown(localMatches.slice(0, 6));
 
-    // 4. Also fetch live fuzzy places from Photon OSM Geocoder (debounced 220ms)
+    // 4. Fetch live Google Maps Places API suggestions (debounced 180ms)
     clearTimeout(mapSuggestTimer);
     mapSuggestTimer = setTimeout(async () => {
       try {
-        const r = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q + ' Bengaluru')}&lat=12.9345&lon=77.5600&limit=5`);
-        if (!r.ok) return;
-        const data = await r.json();
-        const remoteMatches = [];
-        (data.features || []).forEach(feat => {
-          const coords = feat.geometry && feat.geometry.coordinates;
-          const props = feat.properties || {};
-          if (!coords || coords.length < 2) return;
-          const lng = Number(coords[0]);
-          const lat = Number(coords[1]);
-          const name = props.name || props.street || props.locality;
-          if (!name) return;
-          const sub = [props.street, props.locality || props.district || props.city].filter(Boolean).join(', ');
-          const key = `${name}_${lat.toFixed(3)}`;
-          if (!seenLabels.has(key) && !seenLabels.has(name)) {
-            seenLabels.add(key);
-            remoteMatches.push({ kind: 'place', label: name, sub: sub || 'Bengaluru', lat, lng });
-          }
-        });
-        if (remoteMatches.length) {
-          renderMapSuggestionDropdown([...localMatches, ...remoteMatches].slice(0, 7));
+        const gMatches = await queryGoogleMapsPlaces(q, 5);
+        if (gMatches.length) {
+          // Put exact Google Maps Places first, followed by any family matches
+          const famMatches = localMatches.filter(m => m.kind === 'family');
+          renderMapSuggestionDropdown([...gMatches, ...famMatches].slice(0, 7));
+          return;
         }
       } catch (e) {}
-    }, 220);
+    }, 180);
   }
 
   function renderMapSuggestionDropdown(items) {
@@ -2617,10 +2713,10 @@
     box.innerHTML = currentMapSuggestions.map((it, idx) => `
       <div class="map-suggestion-item" onclick="selectMapSearchSuggestion(${idx})">
         <div style="min-width:0;flex:1;">
-          <div style="font-weight:600;color:var(--text);">${escapeHtml(it.label)}</div>
-          <div style="font-size:0.74rem;color:var(--text-muted);">${escapeHtml(it.sub || '')}</div>
+          <div style="font-weight:700;color:var(--text);">${escapeHtml(it.label)}</div>
+          <div style="font-size:0.78rem;color:var(--text-muted);">${escapeHtml(it.sub || '')}</div>
         </div>
-        <span style="font-size:0.75rem;font-weight:600;color:var(--accent-blue);">${it.kind === 'family' ? 'Family ›' : 'Go ›'}</span>
+        <span style="font-size:0.8rem;font-weight:700;color:var(--accent-blue);">${it.kind === 'family' ? 'Family ›' : 'Go ›'}</span>
       </div>
     `).join('');
     box.classList.add('open');
@@ -2642,21 +2738,26 @@
       return;
     }
 
-    if (inp) inp.value = item.label;
-    sheetAutoReverseNote = item.label;
+    const fullNote = item.sub && item.sub !== 'Google Maps' && item.sub !== 'Landmark' && item.sub !== 'Area / Circle'
+      ? `${item.label}, ${item.sub.split(',')[0]}`
+      : item.label;
+    if (inp) inp.value = fullNote;
+    sheetAutoReverseNote = fullNote;
     map.setView([item.lat, item.lng], 18);
     placeOrMoveActiveSheetPin(item.lat, item.lng, false);
     renderVisibleLandmarks();
-    document.getElementById('sheetStatusHint').textContent =
-      `Pin placed at ${item.label} — drag to exact street & tap Save.`;
+    document.getElementById('sheetStatusHint').textContent = currentSheetFamilyId
+      ? `Pin placed at ${item.label} — drag to street & tap Save.`
+      : `Pin placed at ${item.label} — tap "Choose Family & Save Pin" below.`;
   }
 
   // ============================================================================
-  // GEMINI MULTIMODAL AUDIO ASR ENGINE (Maarga Google Cloud Vertex AI + Fallback)
+  // GOOGLE MAPS VOICE SEARCH + VERTEX AI MULTIMODAL AUDIO ENGINE
   // ============================================================================
   let activeVoiceMode = null; // 'landmark' | 'route' | 'checklist'
   let vadAudioCtx = null;
   let vadInterval = null;
+  let speechSilenceTimer = null;
 
   function hasGeminiVoiceConfigured() {
     return true;
@@ -2706,25 +2807,20 @@
     audioReadyPromise = null;
     resolveAudioReady = null;
     window._lastBrowserTranscript = '';
+    clearTimeout(speechSilenceTimer);
     updateVoiceButtonsUI(mode);
 
-    const useGeminiAudio = hasGeminiVoiceConfigured();
     if (mode === 'landmark') {
-      document.getElementById('sheetStatusHint').textContent = useGeminiAudio
-        ? 'Gemini AI listening... Speak landmark, road, or relative name (auto-stops on pause)'
-        : 'Listening for landmark or circle...';
+      document.getElementById('landmarkSearchInput').value = '';
+      document.getElementById('sheetStatusHint').textContent =
+        '🎤 Listening (Google Maps Voice)... Speak place name e.g. "Prarthana School, Padmanabhanagar"';
     } else if (mode === 'route') {
-      showSnackbar(useGeminiAudio
-        ? 'Gemini AI listening: e.g. "I want to do 5 houses today"'
-        : 'Speak now: e.g. "I want to do 5 houses today"', false);
+      showSnackbar('🎤 Speak now: e.g. "I want to do 5 houses today"', false);
     } else if (mode === 'checklist') {
-      showSnackbar(useGeminiAudio
-        ? 'Gemini AI listening: Speak relative name or #serial'
-        : 'Speak relative name or #serial', false);
+      showSnackbar('🎤 Speak relative name or #serial', false);
     }
 
-    // Only write live browser SpeechRecognition text into the input box if Gemini is NOT configured.
-    // When Gemini IS configured, we keep browser transcript only as a hidden backup so it never overwrites the input with mangled ASR!
+    // 1. Primary: Native Google SpeechRecognition (streams live words into the input box immediately, just like Google Maps!)
     const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRec) {
       try {
@@ -2738,21 +2834,33 @@
             text += ev.results[i][0].transcript;
           }
           window._lastBrowserTranscript = text.trim();
-          if (!useGeminiAudio) {
-            if (mode === 'landmark') document.getElementById('landmarkSearchInput').value = window._lastBrowserTranscript;
-            else if (mode === 'route') document.getElementById('routeVoiceInput').value = window._lastBrowserTranscript;
-            else if (mode === 'checklist') document.getElementById('checklistSearch').value = window._lastBrowserTranscript;
+          if (mode === 'landmark') document.getElementById('landmarkSearchInput').value = window._lastBrowserTranscript;
+          else if (mode === 'route') document.getElementById('routeVoiceInput').value = window._lastBrowserTranscript;
+          else if (mode === 'checklist') {
+            document.getElementById('checklistSearch').value = window._lastBrowserTranscript;
+            handleChecklistSearch();
+          }
+
+          // Auto-submit 1.4s after user finishes speaking a phrase (just like Google Maps voice search!)
+          clearTimeout(speechSilenceTimer);
+          if (window._lastBrowserTranscript.length >= 2) {
+            speechSilenceTimer = setTimeout(() => {
+              if (isListening) stopAndProcessVoiceCapture();
+            }, 1400);
           }
         };
         recognition.onend = async function() {
-          if (isListening && !useGeminiAudio) {
+          if (isListening && window._lastBrowserTranscript) {
+            clearTimeout(speechSilenceTimer);
             await stopAndProcessVoiceCapture();
           }
         };
         recognition.start();
+        return; // Do NOT open duplicate getUserMedia stream when native SpeechRecognition is active (prevents mic hardware contention/clipping!)
       } catch (e) {}
     }
 
+    // 2. Fallback for browsers without SpeechRecognition (e.g. iOS WebViews): Record audio & transcribe via Vertex AI Gemini
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.getUserMedia({
         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
@@ -2783,7 +2891,6 @@
           };
           mediaRecorder.start(200);
 
-          // Web Audio Voice Activity Detection (VAD): auto-stop 1.5s after the user finishes speaking
           try {
             const AudioCtx = window.AudioContext || window.webkitAudioContext;
             if (AudioCtx) {
@@ -2802,12 +2909,12 @@
                 let sum = 0;
                 for (let i = 0; i < dataArr.length; i++) sum += dataArr[i];
                 const avg = sum / dataArr.length;
-                if (avg > 16) {
+                if (avg > 20) {
                   hasSpoken = true;
                   silenceStart = 0;
                 } else if (hasSpoken) {
                   if (!silenceStart) silenceStart = Date.now();
-                  else if (Date.now() - silenceStart > 1500) {
+                  else if (Date.now() - silenceStart > 1600) {
                     stopAndProcessVoiceCapture();
                   }
                 } else if (Date.now() - startedAt > 9000) {
@@ -2827,6 +2934,7 @@
   async function stopSpeechRecognition() {
     if (!isListening) return;
     isListening = false;
+    clearTimeout(speechSilenceTimer);
     updateVoiceButtonsUI(null);
     if (vadInterval) { clearInterval(vadInterval); vadInterval = null; }
     if (vadAudioCtx) { try { vadAudioCtx.close(); } catch (e) {} vadAudioCtx = null; }
@@ -2922,44 +3030,28 @@
     const lbl = document.getElementById('routeMicBtnLabel');
     if (lbl) lbl.textContent = '✨ Thinking...';
     try {
-      if (recordedAudioB64 && aiConfig.geminiApiKey) {
-        const poiList = LANDMARK_POIS.map(p => p.name).concat(LOCALITY_GAZETTEER.map(l => l.label)).join(', ');
-        const prompt = `You are a Kannada & South-Indian English speech-to-text & route-planning assistant for 60-65yo parents in Bengaluru.
-Listen to the audio (which may be in English, Kannada, or mixed, e.g. "I want to do 5 houses today", "5 houses near Seetha Circle", "Ivattu aidhu mane Jayanagar hatra").
-Known Bengaluru landmarks/areas: ${poiList}.
-Backup browser transcript (may have ASR errors): "${window._lastBrowserTranscript || ''}".
+      const browserText = (window._lastBrowserTranscript || (inp && inp.value) || '').trim();
+      if (browserText) {
+        if (inp) inp.value = browserText;
+        await parseAndApplyVoiceRouteCommand(browserText);
+        return;
+      }
+      if (recordedAudioB64) {
+        const prompt = `Transcribe the spoken route plan request in English/Kannada (e.g. "I want to do 5 houses today near Seetha Circle").
 Return ONLY valid JSON:
 {
   "cleanTranscript": "clean English summary of what was said, e.g. I want to do 5 houses today near Seetha Circle",
   "houseCount": number_or_null,
-  "category": "ALL" | "C-1" | "C-2" | "C-3" | "C-4" | "C-5" | "C-6" | null,
-  "nearLocation": "canonical landmark or locality name if mentioned, else empty string",
-  "uninvitedOnly": true
+  "category": "ALL" | "C-1" | "C-2" | "C-3" | "C-4" | "C-5" | "C-6" | null
 }`;
         const parsed = await callGeminiMultimodalJson(prompt, recordedAudioB64, recordedMime);
         if (parsed && parsed.cleanTranscript) {
           if (inp) inp.value = parsed.cleanTranscript;
-          if (parsed.houseCount && parsed.houseCount >= 1 && parsed.houseCount <= 25) {
-            appState.maxStopsPerTrip = Number(parsed.houseCount);
-            ensureTripSizeOptionExists(appState.maxStopsPerTrip);
-          }
-          if (parsed.category) {
-            appState.routeCategoryFilter = parsed.category;
-            const catSel = document.getElementById('tripCatSelect');
-            if (catSel) catSel.value = parsed.category;
-          }
           await parseAndApplyVoiceRouteCommand(parsed.cleanTranscript);
           return;
         }
       }
-      // Fallback to browser transcript if no Gemini response
-      const fallback = (window._lastBrowserTranscript || (inp && inp.value) || '').trim();
-      if (fallback) {
-        if (inp) inp.value = fallback;
-        await parseAndApplyVoiceRouteCommand(fallback);
-      } else {
-        showSnackbar('Could not hear clearly — tap Speak Plan and say e.g. "I want to do 5 houses today"', false);
-      }
+      showSnackbar('Could not hear clearly — tap Speak Plan and say e.g. "I want to do 5 houses today"', false);
     } finally {
       if (lbl) lbl.textContent = '🎤 Speak Plan';
       recordedAudioB64 = null;
@@ -2971,7 +3063,12 @@ Return ONLY valid JSON:
     const lbl = document.getElementById('checklistMicLabel');
     if (lbl) lbl.textContent = '✨...';
     try {
-      if (recordedAudioB64 && aiConfig.geminiApiKey) {
+      if (window._lastBrowserTranscript && inp) {
+        inp.value = window._lastBrowserTranscript;
+        handleChecklistSearch();
+        return;
+      }
+      if (recordedAudioB64) {
         const famCatalog = FAMILIES.map(f => `#${f.id}: ${f.title} (${f.others || ''})`).join('\n');
         const prompt = `Listen to the spoken relative name, serial number, or area in Kannada/Indian English and match it against this wedding guest list:
 ${famCatalog}
@@ -2983,13 +3080,8 @@ Return ONLY valid JSON:
         if (parsed && parsed.searchText) {
           if (inp) inp.value = parsed.searchText;
           handleChecklistSearch();
-          showSnackbar(`Gemini Voice Filter: "${parsed.searchText}"`, false);
           return;
         }
-      }
-      if (window._lastBrowserTranscript && inp) {
-        inp.value = window._lastBrowserTranscript;
-        handleChecklistSearch();
       }
     } finally {
       if (lbl) lbl.textContent = '🎤 Voice';
@@ -3003,51 +3095,30 @@ Return ONLY valid JSON:
     const inp = document.getElementById('landmarkSearchInput');
     if (inp) inp.blur(); // Dismiss mobile keyboard immediately so the map & pin are visible!
     let rawQuery = (inp ? inp.value : '').trim();
+    if (!rawQuery && window._lastBrowserTranscript) {
+      rawQuery = window._lastBrowserTranscript.trim();
+      if (inp) inp.value = rawQuery;
+    }
     const hasAudio = Boolean(recordedAudioB64);
-    if (!rawQuery && !hasAudio && !window._lastBrowserTranscript) return;
+    if (!rawQuery && !hasAudio) return;
 
     const findBtn = document.getElementById('btnFindLandmark');
     findBtn.textContent = '...';
     findBtn.disabled = true;
 
     try {
-      // 1. PRIORITY #1 WHEN VOICE WAS USED: Run Gemini Multimodal Audio FIRST so Kannada/Indian place names are transcribed accurately!
-      const isStaticHost = /bnsuhas\.com|github\.io/i.test(window.location.hostname || '');
-      if (hasAudio && (aiConfig.geminiApiKey || aiConfig.proxyEndpoint || (window.location.protocol.startsWith('http') && !isStaticHost))) {
-        document.getElementById('sheetStatusHint').textContent = '✨ Gemini AI analyzing spoken landmark...';
-        const geminiRes = await queryGeminiForLandmark(window._lastBrowserTranscript || rawQuery, recordedAudioB64, recordedMime);
+      // 1. If browser SpeechRecognition wasn't available and we only have raw audio, transcribe verbatim via Gemini FIRST
+      if (!rawQuery && hasAudio) {
+        document.getElementById('sheetStatusHint').textContent = '🎤 Transcribing spoken place name...';
+        const geminiRes = await queryGeminiForLandmark('', recordedAudioB64, recordedMime);
         recordedAudioB64 = null;
-        if (geminiRes) {
-          if (geminiRes.cleanTranscript && inp) {
-            inp.value = geminiRes.cleanTranscript;
-            rawQuery = geminiRes.cleanTranscript;
-          }
-          if (geminiRes.matchedFamilyId && !geminiRes.label) {
-            selectFamilyForMapPin(Number(geminiRes.matchedFamilyId));
-            return;
-          }
-          // Prefer our high-precision local gazetteer/POI coords if Gemini identified a known landmark name, else use Gemini's lat/lng
-          const localRefined = geminiRes.label ? await resolveLandmarkCoordinates(geminiRes.label) : null;
-          const finalLat = (localRefined && localRefined.lat) || geminiRes.lat;
-          const finalLng = (localRefined && localRefined.lng) || geminiRes.lng;
-          const finalLabel = (localRefined && localRefined.label) || geminiRes.label || rawQuery;
-          if (finalLat && finalLng) {
-            sheetAutoReverseNote = geminiRes.instructions || finalLabel;
-            if (inp) inp.value = sheetAutoReverseNote;
-            map.setView([finalLat, finalLng], 18);
-            placeOrMoveActiveSheetPin(finalLat, finalLng, false);
-            renderVisibleLandmarks();
-            document.getElementById('sheetStatusHint').textContent =
-              `✨ Gemini Voice: Pin placed near ${finalLabel} — drag to street & tap Save.`;
-            return;
-          }
+        if (geminiRes && geminiRes.cleanTranscript) {
+          rawQuery = geminiRes.cleanTranscript.trim();
+          if (inp) inp.value = rawQuery;
         }
       }
 
-      if (!rawQuery && window._lastBrowserTranscript) {
-        rawQuery = window._lastBrowserTranscript;
-        if (inp) inp.value = rawQuery;
-      }
+      if (!rawQuery) return;
 
       // 2. Check direct coordinates (e.g. pasted from Google Maps)
       const coordMatch = rawQuery.match(/(-?\d{1,2}\.\d{3,})\s*,\s*(-?\d{1,3}\.\d{3,})/);
@@ -3061,15 +3132,10 @@ Return ONLY valid JSON:
         return;
       }
 
-      // 3. Multi-tier fuzzy Bengaluru Gazetteer + LANDMARK_POIS + Photon OSM + Nominatim
+      // 3. PRIORITY #1: Real Google Maps Places API + Multi-tier Geocoder (Prarthana School, Durga Parameshwari Temple, etc.)
       let resolved = await resolveLandmarkCoordinates(rawQuery);
 
-      // 4. Also query Gemini text fallback if typed query wasn't in local gazetteer/OSM
-      if (!resolved && (aiConfig.proxyEndpoint || aiConfig.geminiApiKey || (window.location.protocol.startsWith('http') && !isStaticHost))) {
-        resolved = await queryGeminiForLandmark(rawQuery, null, recordedMime);
-      }
-
-      // 5. What if Mom typed a relative's name or #serial in the Map search box?
+      // 4. What if user typed a relative's name or #serial in the Map search box?
       if (!resolved && rawQuery) {
         const normQ = normalizeSouthIndianPhonetic(rawQuery);
         const famHit = FAMILIES.find(f =>
@@ -3087,15 +3153,18 @@ Return ONLY valid JSON:
       }
 
       if (resolved && resolved.lat && resolved.lng) {
-        sheetAutoReverseNote = resolved.instructions || resolved.label || rawQuery;
+        const displayNote = resolved.label || rawQuery;
+        sheetAutoReverseNote = rawQuery.length > displayNote.length ? rawQuery : displayNote;
+        if (inp) inp.value = sheetAutoReverseNote;
         map.setView([resolved.lat, resolved.lng], 18);
         placeOrMoveActiveSheetPin(resolved.lat, resolved.lng, false);
         renderVisibleLandmarks();
-        document.getElementById('sheetStatusHint').textContent =
-          `Pin placed near ${resolved.label || 'landmark'} — drag to exact street & tap Save.`;
+        document.getElementById('sheetStatusHint').textContent = currentSheetFamilyId
+          ? `📍 Pin placed at ${displayNote} — drag to exact house & tap Save.`
+          : `📍 Pin placed at ${displayNote} — tap "Choose Family & Save Pin" below.`;
       } else {
         document.getElementById('sheetStatusHint').textContent =
-          'Could not find that exact name. Try a nearby circle or area (e.g. Seetha Circle, Jayanagar).';
+          'Could not find that exact name. Try adding the area name (e.g. Prarthana School Padmanabhanagar).';
       }
     } finally {
       findBtn.textContent = 'Find';
@@ -3109,7 +3178,20 @@ Return ONLY valid JSON:
     const lower = text.toLowerCase().trim();
     const normText = normalizeSouthIndianPhonetic(text);
 
-    // 1. Check specific LANDMARK_POIS first (Hospitals, Hotels, Bakeries, Temples, Circles)
+    // 1. PRIORITY #1: Real Google Maps Places API (places.googleapis.com/v1/places:searchText)
+    // Finds exact schools, temples, hospitals, apartments, shops, and streets in Bengaluru just like Google Maps!
+    const gPlaces = await queryGoogleMapsPlaces(text, 1);
+    if (gPlaces && gPlaces.length > 0) {
+      const top = gPlaces[0];
+      return {
+        lat: top.lat,
+        lng: top.lng,
+        label: top.label,
+        instructions: text.trim()
+      };
+    }
+
+    // 2. Check specific LANDMARK_POIS (if offline or Google Places unavailable)
     for (const poi of LANDMARK_POIS) {
       const cleanPoi = poi.name.replace(/^(hotel|bakery):\s*/i, '').toLowerCase();
       const normPoi = normalizeSouthIndianPhonetic(cleanPoi);
@@ -3118,57 +3200,23 @@ Return ONLY valid JSON:
       }
     }
 
-    // 2. Check LOCALITY_GAZETTEER with phonetic & token tolerance
+    // 3. Check LOCALITY_GAZETTEER only to determine if there is a locality anchor
     let matchedLocality = null;
     for (const loc of LOCALITY_GAZETTEER) {
       const exactHit = loc.keys.some(k => lower.includes(k) || normalizeSouthIndianPhonetic(k) === normText);
-      const tokenHit = loc.keys.some(k => {
-        const baseK = k.replace(/\b(circle|temple|college|park|petrol|layout|stage|block|phase)\b/g, '').trim();
-        const normBase = normalizeSouthIndianPhonetic(baseK);
-        return normBase.length >= 5 && normText.includes(normBase);
-      });
-      if (exactHit || tokenHit) {
+      if (exactHit) {
         matchedLocality = loc;
         break;
       }
     }
 
-    const roadMatch = text.match(/(\d+(?:st|nd|rd|th)?\s*(?:a|b|c)?\s*(?:main|cross)(?:\s*road|\s*rd)?)/gi);
-    const roadQuery = roadMatch ? roadMatch.join(', ') : '';
+    const cleaned = cleanConversationalPlaceQuery(text);
 
-    const cleaned = text
-      .replace(/\b(near|opposite|behind|beside|next to|house|floor|gate|call|stay|stays|lives|in|at|left|right|after|before|white|green|black|red)\b/gi, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-
-    // Check if the user typed additional specific words beyond the locality name (e.g. "Sagar Hospital Jayanagar" or "18th Main Jayanagar")
-    let hasSpecificSubQuery = Boolean(roadQuery);
-    if (matchedLocality && !hasSpecificSubQuery) {
-      let remainder = lower;
-      matchedLocality.keys.forEach(k => { remainder = remainder.replace(k, ' '); });
-      remainder = remainder.replace(/\b(circle|near|in|at|main|road|cross|bengaluru|bangalore|stage|block|phase)\b/gi, ' ').trim();
-      if (remainder.length >= 4) hasSpecificSubQuery = true;
-    }
-
-    // If the user just searched the locality/circle itself (e.g. "Seetha Circle", "Seeta", "Jayanagar 4th Block"), return immediately!
-    if (matchedLocality && !hasSpecificSubQuery) {
-      return {
-        lat: matchedLocality.lat,
-        lng: matchedLocality.lng,
-        label: matchedLocality.label
-      };
-    }
-
-    // 3. Query Photon (Komoot) Fuzzy OSM Geocoder + Nominatim in parallel for specific places/streets
+    // 4. Query Photon (Komoot) OSM Geocoder for specific places before ever falling back to a generic locality center
     const anchorLat = matchedLocality ? matchedLocality.lat : 12.9345;
     const anchorLng = matchedLocality ? matchedLocality.lng : 77.5600;
-    const maxRadiusKm = matchedLocality ? 4.5 : 45.0;
-    const searchStr = roadQuery && matchedLocality
-      ? `${roadQuery} ${matchedLocality.label} Bengaluru`
-      : `${cleaned} Bengaluru`;
-
     try {
-      const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(searchStr)}&lat=${anchorLat}&lon=${anchorLng}&limit=5`;
+      const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(cleaned + ' Bengaluru')}&lat=${anchorLat}&lon=${anchorLng}&limit=5`;
       const rPhoton = await fetch(photonUrl);
       if (rPhoton.ok) {
         const pData = await rPhoton.json();
@@ -3177,32 +3225,10 @@ Return ONLY valid JSON:
           if (!coords || coords.length < 2) continue;
           const candLng = Number(coords[0]);
           const candLat = Number(coords[1]);
-          if (haversineKm(anchorLat, anchorLng, candLat, candLng) <= maxRadiusKm) {
+          if (haversineKm(12.9345, 77.5600, candLat, candLng) <= 45.0) {
             const p = feat.properties || {};
-            const lbl = [p.name || p.street, p.locality || p.district || (matchedLocality && matchedLocality.label)].filter(Boolean).join(', ');
+            const lbl = [p.name || p.street, p.locality || p.district].filter(Boolean).join(', ');
             return { lat: candLat, lng: candLng, label: lbl || cleaned };
-          }
-        }
-      }
-    } catch (e) {}
-
-    try {
-      const qNom = /india|mysuru|mysore|mangaluru|malur|sringeri|hospet/i.test(cleaned)
-        ? cleaned
-        : `${cleaned}, Bengaluru, Karnataka, India`;
-      const nomUrl = `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(qNom)}&viewbox=77.40,13.18,77.80,12.78&limit=3`;
-      const r2 = await fetch(nomUrl);
-      if (r2.ok) {
-        const res2 = await r2.json();
-        for (const hit of (res2 || [])) {
-          const candLat = parseFloat(hit.lat);
-          const candLng = parseFloat(hit.lon);
-          if (!matchedLocality || haversineKm(anchorLat, anchorLng, candLat, candLng) <= maxRadiusKm) {
-            return {
-              lat: candLat,
-              lng: candLng,
-              label: hit.display_name.split(',').slice(0, 2).join(', ')
-            };
           }
         }
       }
@@ -3212,7 +3238,7 @@ Return ONLY valid JSON:
       return {
         lat: matchedLocality.lat,
         lng: matchedLocality.lng,
-        label: roadQuery ? `${roadQuery} near ${matchedLocality.label}` : matchedLocality.label
+        label: matchedLocality.label
       };
     }
 
@@ -3221,72 +3247,33 @@ Return ONLY valid JSON:
 
   async function queryGeminiForLandmark(transcript, audioBase64, mimeType) {
     try {
-      const proxyUrl = aiConfig.proxyEndpoint || '/api/voice-parse';
-      const isStaticHost = /bnsuhas\.com|github\.io/i.test(window.location.hostname || '');
-      if (aiConfig.proxyEndpoint || (window.location.protocol.startsWith('http') && !isStaticHost)) {
-        const resp = await fetch(proxyUrl, {
-          method: 'POST',
-          headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
-          body: JSON.stringify({
-            transcript,
-            audioBase64,
-            mimeType,
-            voiceTargetFamilyId: currentSheetFamilyId
-          })
-        });
-        if (resp.status === 401) {
-          promptForFamilyPasscodeIfNeeded();
-          return null;
-        }
-        if (resp.ok) {
-          const data = await resp.json();
-          if (data && (data.lat || data.areaLabel || data.searchQuery)) {
-            return {
-              cleanTranscript: data.instructions || data.areaLabel || data.searchQuery || transcript,
-              lat: data.lat,
-              lng: data.lng,
-              label: data.areaLabel || data.searchQuery,
-              instructions: data.instructions
-            };
-          }
-        }
-      }
-
-      if (aiConfig.geminiApiKey) {
-        const knownLandmarks = LANDMARK_POIS.map(p => `${p.name} (${p.lat},${p.lng})`).join('; ');
-        const knownAreas = LOCALITY_GAZETTEER.map(l => `${l.label} (${l.lat},${l.lng})`).join('; ');
-        const prompt = `You are a South-Bangalore / Karnataka speech-to-text & geocoding assistant for 60-65yo Indian parents marking wedding invitation houses.
-Listen carefully to the audio (or read the text clue: "${transcript || ''}").
-Known South Bengaluru Landmarks: ${knownLandmarks}
-Known Bengaluru Localities: ${knownAreas}
+      const prompt = `Transcribe the spoken Bengaluru/Karnataka place name, school, temple, hospital, road, and locality verbatim.
+Do NOT drop the specific building, temple, or school name! For example, if the speaker says "near Prarthana School, Padmanabhanagar", return "Near Prarthana School, Padmanabhanagar" (never shorten it to just "Padmanabhanagar").
+Backup text clue: "${transcript || ''}".
 Return ONLY valid JSON:
 {
-  "cleanTranscript": "accurate transcription of what the speaker said with correct Kannada/Bengaluru spelling",
-  "areaLabel": "canonical landmark, hospital, hotel, circle, road, or locality name in Bengaluru/Karnataka",
-  "instructions": "clean house direction note (e.g. Near Seetha Circle, 2nd cross left)",
-  "lat": number,
-  "lng": number,
-  "matchedFamilyId": number_or_null
+  "cleanTranscript": "full verbatim place name and area spoken by the user"
 }`;
-        const parsed = await callGeminiMultimodalJson(prompt, audioBase64, mimeType);
-        if (parsed && (parsed.lat || parsed.areaLabel)) {
-          return {
-            cleanTranscript: parsed.cleanTranscript || parsed.instructions || parsed.areaLabel,
-            lat: parsed.lat,
-            lng: parsed.lng,
-            label: parsed.areaLabel,
-            instructions: parsed.instructions || parsed.cleanTranscript,
-            matchedFamilyId: parsed.matchedFamilyId
-          };
-        }
+      const parsed = await callGeminiMultimodalJson(prompt, audioBase64, mimeType);
+      if (parsed && parsed.cleanTranscript) {
+        return {
+          cleanTranscript: parsed.cleanTranscript
+        };
       }
     } catch (e) {}
     return null;
   }
 
   function saveCurrentFamilyPin() {
-    if (!currentSheetFamilyId || !sheetPinCoords) return;
+    if (!sheetPinCoords) return;
+    // If no family is selected yet (e.g. user opened Map Overview first, searched a place, and tapped Save),
+    // open the searchable Family Picker and immediately save once they tap a family!
+    if (!currentSheetFamilyId) {
+      openAssignFamilyToPinDialog(true);
+      return;
+    }
     const fam = FAMILIES.find(f => f.id === currentSheetFamilyId);
+    if (!fam) return;
     const note = (document.getElementById('landmarkSearchInput').value || sheetAutoReverseNote || '').trim();
     const groupIds = getHouseGroupIds(currentSheetFamilyId);
     const now = Date.now();
@@ -3311,18 +3298,14 @@ Return ONLY valid JSON:
 
     if (mapOpenedFromOverview) {
       saveState(toast);
-      const nextUnmapped = FAMILIES.find(f => !appState.assignments[f.id]);
-      if (nextUnmapped) {
-        updateSheetFamilyUI(nextUnmapped.id);
-        sheetAutoReverseNote = '';
-        document.getElementById('landmarkSearchInput').value = '';
-        document.getElementById('sheetStatusHint').textContent =
-          `Saved #${fam.id} · Now marking #${nextUnmapped.id} (or tap Pick Family)`;
-        renderNeighborReferencePins(nextUnmapped.id);
-        placeOrMoveActiveSheetPin(sheetPinCoords.lat, sheetPinCoords.lng, false);
-      } else {
-        renderNeighborReferencePins(null);
-      }
+      // Reset to no forced family after saving in Map Overview mode so user is never forced to mark #1 Latha!
+      updateSheetFamilyUI(null);
+      sheetAutoReverseNote = '';
+      document.getElementById('landmarkSearchInput').value = '';
+      document.getElementById('sheetStatusHint').textContent =
+        `✓ Saved #${fam.id} ${fam.title}! Search next place or tap "Choose Family ▾"`;
+      renderNeighborReferencePins(null);
+      placeOrMoveActiveSheetPin(sheetPinCoords.lat, sheetPinCoords.lng, false);
     } else {
       closeLocationSheet();
       saveState(toast);
