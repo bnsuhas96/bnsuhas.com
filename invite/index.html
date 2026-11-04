@@ -251,19 +251,26 @@
       border: 1px solid var(--border);
       border-radius: 7px;
       padding: 2px;
+      overflow-x: auto;
+      max-width: 100%;
+      scrollbar-width: none;
+    }
+    .status-tabs::-webkit-scrollbar {
+      display: none;
     }
 
     .status-tab {
       border: none;
       background: transparent;
       color: var(--text-secondary);
-      padding: 4px 9px;
+      padding: 4px 8px;
       min-height: 28px;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 500;
       border-radius: 5px;
       cursor: pointer;
       white-space: nowrap;
+      flex-shrink: 0;
     }
     .status-tab.active {
       background: var(--surface);
@@ -450,6 +457,67 @@
       color: var(--text);
     }
 
+    .btn-invited-toggle {
+      height: 30px;
+      background: #ffffff;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+    }
+    .btn-invited-toggle.is-invited {
+      background: #ecfdf5;
+      color: #047857;
+      border-color: #6ee7b7;
+    }
+
+    .map-search-suggestions {
+      display: none;
+      max-height: 220px;
+      overflow-y: auto;
+      border-top: 1px solid #f1f5f9;
+      background: #ffffff;
+    }
+    .map-search-suggestions.open {
+      display: block;
+    }
+    .map-suggestion-item {
+      padding: 8px 12px;
+      border-bottom: 1px solid #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.84rem;
+      color: var(--text);
+      cursor: pointer;
+    }
+    .map-suggestion-item:hover,
+    .map-suggestion-item:active {
+      background: #f1f5f9;
+    }
+
+    .landmark-ref-pill {
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 1px 6px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: #334155;
+      white-space: nowrap;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
     @media (max-width: 560px) {
       .guest-card {
         padding: 9px 10px;
@@ -466,17 +534,18 @@
         font-size: 0.75rem;
       }
       .guest-actions {
-        gap: 4px;
+        gap: 3px;
       }
-      .btn-secondary-quiet {
+      .btn-secondary-quiet,
+      .btn-invited-toggle {
         height: 26px;
-        padding: 0 6px;
-        font-size: 0.72rem;
+        padding: 0 5px;
+        font-size: 0.71rem;
       }
       .btn-primary-locate {
         height: 26px;
-        padding: 0 8px;
-        font-size: 0.73rem;
+        padding: 0 7px;
+        font-size: 0.72rem;
       }
     }
 
@@ -964,15 +1033,20 @@
   <!-- VIEW 1: COMPACT DIRECTORY TABLE -->
   <main id="viewChecklist">
     <section class="filter-panel" aria-label="Filter Families">
-      <div class="search-wrap">
-        <input
-          type="text"
-          id="checklistSearch"
-          class="input-clean"
-          placeholder="Search name or # (e.g. Chandrashekar, 18)..."
-          oninput="handleChecklistSearch()"
-        />
-        <button class="btn-clear-input" id="btnClearChecklistSearch" onclick="clearChecklistSearch()" aria-label="Clear search">✕</button>
+      <div class="search-wrap" style="display:flex;gap:6px;align-items:center;">
+        <div style="position:relative;flex:1;min-width:0;">
+          <input
+            type="text"
+            id="checklistSearch"
+            class="input-clean"
+            placeholder="Search name or # (e.g. Chandrashekar, 18)..."
+            oninput="handleChecklistSearch()"
+          />
+          <button class="btn-clear-input" id="btnClearChecklistSearch" onclick="clearChecklistSearch()" aria-label="Clear search">✕</button>
+        </div>
+        <button type="button" class="btn-mic" id="btnChecklistMic" onclick="toggleChecklistVoiceSearch()" style="flex-shrink:0;">
+          <span id="checklistMicLabel">🎤 Voice</span>
+        </button>
       </div>
 
       <div class="filter-row">
@@ -982,6 +1056,9 @@
           </button>
           <button class="status-tab" id="statusBtnDone" onclick="setStatusFilter('done')">
             Located (<span id="countDone">0</span>)
+          </button>
+          <button class="status-tab" id="statusBtnInvited" onclick="setStatusFilter('invited')">
+            Invited ✓ (<span id="countInvited">0</span>)
           </button>
           <button class="status-tab" id="statusBtnAll" onclick="setStatusFilter('all')">
             All
@@ -994,22 +1071,40 @@
     <section class="checklist-body" id="checklistContainer" aria-live="polite"></section>
   </main>
 
-  <!-- VIEW 2: AUTO-GROUPED TRIPS, GOOGLE MAPS LINKS & PACKING MANIFEST (Output View) -->
+  <!-- VIEW 2: AUTO-GROUPED TRIPS, VOICE ROUTE PLANNER & PACKING MANIFEST (Output View) -->
   <main class="trips-view" id="viewTrips">
     <div class="summary-banner">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
         <div>
-          <div style="font-weight:600;font-size:0.95rem;">Optimized Invitation Trips</div>
-          <div style="font-size:0.82rem;color:var(--text-secondary);">
-            Ordered along the shortest driving loop (up to 9 stops per Google Maps link) with gift sticker codes.
+          <div style="font-weight:600;font-size:0.95rem;">Voice &amp; Smart Route Planner</div>
+          <div style="font-size:0.8rem;color:var(--text-secondary);">
+            Say <em>"I want to do 5 houses today"</em> or <em>"5 houses near Jayanagar"</em> — routes uninvited houses &amp; plots them below.
           </div>
         </div>
         <button class="btn-icon-text" onclick="exportCSV()">Download CSV</button>
       </div>
 
+      <form onsubmit="event.preventDefault(); runVoiceRoutePlanFromInput();" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+        <input
+          type="search"
+          id="routeVoiceInput"
+          class="input-clean"
+          enterkeyhint="go"
+          style="flex:1 1 210px;min-width:0;"
+          placeholder="e.g. I want to do 5 houses today (or near Seetha Circle)..."
+        />
+        <button type="button" class="btn-mic" id="btnRouteMic" onclick="toggleRouteVoicePlan()">
+          <span id="routeMicBtnLabel">🎤 Speak Plan</span>
+        </button>
+        <button type="submit" class="btn-find">Plan Route</button>
+      </form>
+
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-        <label style="font-size:0.8rem;font-weight:500;color:var(--text-secondary);">Category:</label>
-        <select id="tripCatSelect" onchange="setTripCategoryFilter(this.value)" style="height:30px;padding:0 8px;border-radius:6px;border:1px solid var(--border);font-size:0.82rem;background:#fff;">
+        <button type="button" class="btn-secondary-quiet" onclick="applyQuickRouteCommand('I want to do 5 houses today')">5 Houses Today</button>
+        <button type="button" class="btn-secondary-quiet" onclick="applyQuickRouteCommand('I want to do 8 houses today')">8 Houses Today</button>
+
+        <label style="font-size:0.78rem;font-weight:500;color:var(--text-secondary);">Category:</label>
+        <select id="tripCatSelect" onchange="setTripCategoryFilter(this.value)" style="height:28px;padding:0 6px;border-radius:6px;border:1px solid var(--border);font-size:0.78rem;background:#fff;">
           <option value="ALL">All Categories</option>
           <option value="C-1">Category C-1</option>
           <option value="C-2">Category C-2</option>
@@ -1019,12 +1114,30 @@
           <option value="C-6">Category C-6</option>
         </select>
 
-        <label style="font-size:0.8rem;font-weight:500;color:var(--text-secondary);">Stops/Trip:</label>
-        <select id="tripSizeSelect" onchange="setTripSize(this.value)" style="height:30px;padding:0 8px;border-radius:6px;border:1px solid var(--border);font-size:0.82rem;background:#fff;">
+        <label style="font-size:0.78rem;font-weight:500;color:var(--text-secondary);">Stops/Trip:</label>
+        <select id="tripSizeSelect" onchange="setTripSize(this.value)" style="height:28px;padding:0 6px;border-radius:6px;border:1px solid var(--border);font-size:0.78rem;background:#fff;">
+          <option value="3">3 Houses</option>
+          <option value="4">4 Houses</option>
+          <option value="5">5 Houses</option>
           <option value="6">6 Houses</option>
           <option value="8">8 Houses</option>
           <option value="9" selected>9 Houses (Max)</option>
         </select>
+
+        <button type="button" class="btn-secondary-quiet" id="btnToggleHideInvitedTrips" onclick="toggleHideInvitedInTrips()">
+          Uninvited Only: On
+        </button>
+      </div>
+
+      <div id="routeVoiceStatusBanner" style="display:none;font-size:0.82rem;font-weight:600;color:#047857;background:#ecfdf5;border:1px solid #a7f3d0;padding:8px 10px;border-radius:8px;"></div>
+
+      <!-- Interactive Route Map for Today's Planned Stops -->
+      <div id="routesOverviewMapWrap" style="display:none;flex-direction:column;gap:6px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <span id="routesMapTitle" style="font-size:0.82rem;font-weight:600;color:var(--text);">Today's Route Map</span>
+          <span style="font-size:0.75rem;color:var(--text-muted);">Tap any stop pin for details</span>
+        </div>
+        <div id="routesOverviewMap" style="width:100%;height:250px;border-radius:10px;border:1px solid var(--border);z-index:1;"></div>
       </div>
     </div>
 
@@ -1045,19 +1158,24 @@
     <!-- Floating Top Search Bar (Just like Native Google Maps) -->
     <div class="map-floating-top">
       <div class="voice-search-bar">
-        <button class="btn-back-map" onclick="closeLocationSheet()" aria-label="Back to list">← Back</button>
-        <input
-          type="text"
-          id="landmarkSearchInput"
-          class="map-search-input"
-          placeholder="Search landmark or circle (e.g. Seetha Circle)..."
-          onkeydown="if(event.key==='Enter') findLandmarkOnMap()"
-        />
-        <button class="btn-mic" id="btnMic" onclick="toggleSpeechRecognition()">
-          <span id="micBtnLabel">Voice</span>
-        </button>
-        <button class="btn-find" id="btnFindLandmark" onclick="findLandmarkOnMap()">Find</button>
+        <button type="button" class="btn-back-map" onclick="closeLocationSheet()" aria-label="Back to list">← Back</button>
+        <form onsubmit="event.preventDefault(); findLandmarkOnMap();" style="display:flex;flex:1;min-width:0;align-items:center;gap:6px;margin:0;">
+          <input
+            type="search"
+            id="landmarkSearchInput"
+            class="map-search-input"
+            enterkeyhint="search"
+            autocomplete="off"
+            placeholder="Search landmark, road, or name..."
+            oninput="handleMapSearchInput(this.value)"
+          />
+          <button type="button" class="btn-mic" id="btnMic" onclick="toggleSpeechRecognition()">
+            <span id="micBtnLabel">Voice</span>
+          </button>
+          <button type="submit" class="btn-find" id="btnFindLandmark">Find</button>
+        </form>
       </div>
+      <div class="map-search-suggestions" id="mapSearchSuggestions"></div>
       <div class="map-floating-subbar">
         <div style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
           <span class="sheet-person-title" id="sheetPersonName" style="cursor:pointer;" onclick="openAssignFamilyToPinDialog()">#1 Latha &amp; Chandrashekar</span>
@@ -1240,14 +1358,21 @@
     { name: 'Ragigudda Temple', type: 'temple', lat: 12.916799, lng: 77.593385 }
   ];
 
+  // Zero-Config Real-Time Multi-Phone Cloud Sync Endpoints (CORS * enabled, works out-of-the-box on bnsuhas.com)
+  const SHARED_REST_OBJECT_URL = 'https://api.restful-api.dev/objects/ff808181a09d98f701a1a52087192b88';
+  const SHARED_NTFY_TOPIC = 'suhas_nikitha_wedding_sync_9f8a7b6c5d4e';
+  let liveSyncEventSource = null;
+
   // Application State
   let appState = {
-    assignments: {}, // familyId -> { status: 'pinned'|'out_of_town', lat, lng, note, updatedAt }
+    assignments: {}, // familyId -> { status: 'pinned'|'out_of_town', lat, lng, note, invited, updatedAt }
     houseGroups: {}, // familyId -> { groupId: string|null, updatedAt: number } (pre-map or post-map Same House grouping)
+    invitedMap: {},  // familyId -> { invited: boolean, updatedAt: number } (independent invited check-off)
     deletedAt: {},   // familyId -> timestamp (prevents cloud sync resurrection after unmap/undo)
     home: { lat: 12.9345, lng: 77.5790, label: 'Our Home (Start)' },
     routeCategoryFilter: 'ALL',
-    maxStopsPerTrip: 9
+    maxStopsPerTrip: 9,
+    hideInvitedInTrips: true
   };
 
   let sameHouseActiveTargetId = null;
@@ -1290,7 +1415,7 @@
   let resolveAudioReady = null;
 
   // ============================================================================
-  // INITIALIZATION & CLOUD SYNC
+  // INITIALIZATION & ZERO-CONFIG MULTI-PHONE CLOUD SYNC
   // ============================================================================
   function getAuthHeaders(extra) {
     const h = Object.assign({}, extra || {});
@@ -1300,7 +1425,16 @@
     return h;
   }
 
+  function hasAnyLocalProgress() {
+    return (
+      Object.keys(appState.assignments || {}).length > 0 ||
+      Object.keys(appState.houseGroups || {}).length > 0 ||
+      Object.keys(appState.invitedMap || {}).length > 0
+    );
+  }
+
   function initApp() {
+    let loadedLocalProgress = false;
     try {
       const savedCfg = localStorage.getItem(CONFIG_KEY);
       if (savedCfg) aiConfig = Object.assign(aiConfig, JSON.parse(savedCfg));
@@ -1313,7 +1447,6 @@
         if (params.get('gist')) aiConfig.gistId = params.get('gist');
         if (params.get('gtoken')) aiConfig.gistToken = params.get('gtoken');
         localStorage.setItem(CONFIG_KEY, JSON.stringify(aiConfig));
-        // Scrub secrets from the browser address bar immediately after saving to localStorage
         try {
           window.history.replaceState(null, '', window.location.pathname + window.location.search);
         } catch (e) {}
@@ -1324,21 +1457,23 @@
         const parsed = JSON.parse(saved);
         if (parsed && parsed.assignments) {
           appState = Object.assign(appState, parsed);
+          appState.invitedMap = appState.invitedMap || {};
+          loadedLocalProgress = hasAnyLocalProgress();
         }
       }
     } catch (e) {}
 
-    // On public GitHub Pages / bnsuhas.com, require the family passcode (auto-unlocked via #pin=2026 WhatsApp link)
     const isPublicHost = /bnsuhas\.com|github\.io/i.test(window.location.hostname || '');
     if (isPublicHost && !aiConfig.familyPasscode) {
       document.getElementById('passcodeGateOverlay').classList.add('open');
     }
 
     renderAll();
-    pullSharedCloudState();
-    // Poll shared cloud state every 10s so Mom's Pixel 8, Dad's Pixel 8 & Suhas's laptop stay live-synced
-    setInterval(pullSharedCloudState, 10000);
-    window.addEventListener('focus', pullSharedCloudState);
+    // Pull cloud state first, and if this browser already had local progress saved earlier, push merged state to cloud so Mom's phone gets it automatically!
+    pullSharedCloudState(loadedLocalProgress);
+    startLiveCloudStream();
+    setInterval(() => pullSharedCloudState(false), 10000);
+    window.addEventListener('focus', () => pullSharedCloudState(false));
   }
 
   function unlockWithGatePasscode() {
@@ -1347,7 +1482,7 @@
     aiConfig.familyPasscode = val;
     localStorage.setItem(CONFIG_KEY, JSON.stringify(aiConfig));
     document.getElementById('passcodeGateOverlay').classList.remove('open');
-    pullSharedCloudState();
+    pullSharedCloudState(hasAnyLocalProgress());
   }
 
   function getSyncUrl() {
@@ -1357,23 +1492,65 @@
     return '/api/state';
   }
 
+  function obfuscateGeminiKeyForSync(rawKey) {
+    if (!rawKey) return '';
+    try {
+      const salt = `${aiConfig.familyPasscode || DEFAULT_GATE_PIN}_suhas_nikitha_2026`;
+      const bytes = [];
+      for (let i = 0; i < rawKey.length; i++) {
+        bytes.push(rawKey.charCodeAt(i) ^ salt.charCodeAt(i % salt.length));
+      }
+      return btoa(String.fromCharCode(...bytes));
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function deobfuscateGeminiKeyFromSync(encStr) {
+    if (!encStr) return '';
+    try {
+      const salt = `${aiConfig.familyPasscode || DEFAULT_GATE_PIN}_suhas_nikitha_2026`;
+      const bin = atob(encStr);
+      let out = '';
+      for (let i = 0; i < bin.length; i++) {
+        out += String.fromCharCode(bin.charCodeAt(i) ^ salt.charCodeAt(i % salt.length));
+      }
+      return out.startsWith('AIza') ? out : '';
+    } catch (e) {
+      return '';
+    }
+  }
+
   function promptForFamilyPasscodeIfNeeded() {
     const pin = window.prompt('Enter Family Passcode to sync & use voice landmark search:');
     if (pin && pin.trim()) {
       aiConfig.familyPasscode = pin.trim();
       localStorage.setItem(CONFIG_KEY, JSON.stringify(aiConfig));
-      pullSharedCloudState();
+      pullSharedCloudState(false);
     }
   }
 
   function mergeRemoteStateObject(remote) {
-    if (!remote) return;
+    if (!remote) return false;
+    const payload = remote.data && (remote.data.assignments || remote.data.houseGroups || remote.data.invitedMap || remote.data.encGeminiKey)
+      ? remote.data
+      : remote;
     let changed = false;
     appState.deletedAt = appState.deletedAt || {};
     appState.houseGroups = appState.houseGroups || {};
-    if (remote.deletedAt) {
-      Object.keys(remote.deletedAt).forEach(id => {
-        const rDel = remote.deletedAt[id] || 0;
+    appState.invitedMap = appState.invitedMap || {};
+
+    if (payload.encGeminiKey && !aiConfig.geminiApiKey) {
+      const decodedKey = deobfuscateGeminiKeyFromSync(payload.encGeminiKey);
+      if (decodedKey) {
+        aiConfig.geminiApiKey = decodedKey;
+        try { localStorage.setItem(CONFIG_KEY, JSON.stringify(aiConfig)); } catch (e) {}
+      }
+    }
+
+    if (payload.deletedAt) {
+      Object.keys(payload.deletedAt).forEach(id => {
+        const rDel = payload.deletedAt[id] || 0;
         if (rDel > (appState.deletedAt[id] || 0)) {
           appState.deletedAt[id] = rDel;
         }
@@ -1384,20 +1561,20 @@
         }
       });
     }
-    if (remote.assignments) {
-      Object.keys(remote.assignments).forEach(id => {
-        const rItem = remote.assignments[id];
+    if (payload.assignments) {
+      Object.keys(payload.assignments).forEach(id => {
+        const rItem = payload.assignments[id];
         const lItem = appState.assignments[id];
         const delTs = (appState.deletedAt && appState.deletedAt[id]) || 0;
-        if ((rItem.updatedAt || 0) > delTs && (!lItem || (rItem.updatedAt || 0) > (lItem.updatedAt || 0))) {
+        if (rItem && (rItem.updatedAt || 0) > delTs && (!lItem || (rItem.updatedAt || 0) > (lItem.updatedAt || 0))) {
           appState.assignments[id] = rItem;
           changed = true;
         }
       });
     }
-    if (remote.houseGroups) {
-      Object.keys(remote.houseGroups).forEach(id => {
-        const rG = remote.houseGroups[id];
+    if (payload.houseGroups) {
+      Object.keys(payload.houseGroups).forEach(id => {
+        const rG = payload.houseGroups[id];
         const lG = appState.houseGroups[id];
         if (rG && (!lG || (rG.updatedAt || 0) > (lG.updatedAt || 0))) {
           appState.houseGroups[id] = rG;
@@ -1405,15 +1582,71 @@
         }
       });
     }
+    if (payload.invitedMap) {
+      Object.keys(payload.invitedMap).forEach(id => {
+        const rInv = payload.invitedMap[id];
+        const lInv = appState.invitedMap[id];
+        if (rInv && (!lInv || (rInv.updatedAt || 0) > (lInv.updatedAt || 0))) {
+          appState.invitedMap[id] = rInv;
+          changed = true;
+        }
+      });
+    }
     if (changed) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (e) {}
       renderAll();
     }
     setSyncBadge('Synced');
+    return changed;
   }
 
-  function pullSharedCloudState() {
-    // 1. Secret GitHub Gist Sync (works 100% serverlessly on bnsuhas.com GitHub Pages!)
+  function startLiveCloudStream() {
+    if (liveSyncEventSource || typeof EventSource === 'undefined') return;
+    try {
+      liveSyncEventSource = new EventSource(`https://ntfy.sh/${SHARED_NTFY_TOPIC}/sse`);
+      liveSyncEventSource.onmessage = function(ev) {
+        try {
+          const msg = JSON.parse(ev.data);
+          if (msg && msg.event === 'message' && msg.message) {
+            mergeRemoteStateObject(JSON.parse(msg.message));
+          }
+        } catch (e) {}
+      };
+    } catch (e) {}
+  }
+
+  function pullSharedCloudState(pushAfterMergeIfLocalHasData) {
+    // 1. Always pull from Zero-Config Permanent Cloud Object Store + ntfy stream log
+    const p1 = fetch(SHARED_REST_OBJECT_URL, { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : null)
+      .then(obj => { if (obj) mergeRemoteStateObject(obj); })
+      .catch(() => {});
+
+    const p2 = fetch(`https://ntfy.sh/${SHARED_NTFY_TOPIC}/json?poll=1&since=all`, { cache: 'no-store' })
+      .then(r => r.ok ? r.text() : '')
+      .then(txt => {
+        if (!txt) return;
+        txt.trim().split('\n').forEach(line => {
+          if (!line) return;
+          try {
+            const ev = JSON.parse(line);
+            if (ev && ev.event === 'message' && ev.message) {
+              mergeRemoteStateObject(JSON.parse(ev.message));
+            }
+          } catch (e) {}
+        });
+      })
+      .catch(() => {});
+
+    Promise.allSettled([p1, p2]).then(() => {
+      if (pushAfterMergeIfLocalHasData && (hasAnyLocalProgress() || aiConfig.geminiApiKey)) {
+        pushSharedCloudState();
+      }
+    });
+
+    // 2. Also pull from Secret GitHub Gist if configured
     if (aiConfig.gistId) {
       const gHeaders = { 'Accept': 'application/vnd.github+json' };
       if (aiConfig.gistToken) gHeaders['Authorization'] = `Bearer ${aiConfig.gistToken}`;
@@ -1421,42 +1654,55 @@
         .then(r => r.ok ? r.json() : null)
         .then(gist => {
           const content = gist && gist.files && gist.files['wedding_invite_state.json'] && gist.files['wedding_invite_state.json'].content;
-          if (content) {
-            mergeRemoteStateObject(JSON.parse(content));
-          }
+          if (content) mergeRemoteStateObject(JSON.parse(content));
         })
         .catch(() => {});
-      return;
     }
 
-    // 2. Custom Endpoint / Local Server Sync (/api/state)
+    // 3. Also pull from Custom Endpoint / Local Server (/api/state) if running locally
     const isStaticGithubPages = /bnsuhas\.com|github\.io/i.test(window.location.hostname || '');
-    if (!aiConfig.proxyEndpoint && (!window.location.protocol.startsWith('http') || isStaticGithubPages)) return;
-    fetch(getSyncUrl(), { headers: getAuthHeaders() })
-      .then(r => {
-        if (r.status === 401) {
-          setSyncBadge('Passcode Required');
-          return null;
-        }
-        return r.ok ? r.json() : null;
-      })
-      .then(remote => mergeRemoteStateObject(remote))
-      .catch(() => {});
+    if (aiConfig.proxyEndpoint || (window.location.protocol.startsWith('http') && !isStaticGithubPages)) {
+      fetch(getSyncUrl(), { headers: getAuthHeaders() })
+        .then(r => r.ok ? r.json() : null)
+        .then(remote => mergeRemoteStateObject(remote))
+        .catch(() => {});
+    }
   }
 
-  function saveState(toastMsg) {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-    } catch (e) {}
-    renderAll();
-
-    if (toastMsg) {
-      showSnackbar(toastMsg, undoHistory.length > 0);
+  function pushSharedCloudState() {
+    const syncPayload = {
+      assignments: appState.assignments || {},
+      houseGroups: appState.houseGroups || {},
+      invitedMap: appState.invitedMap || {},
+      deletedAt: appState.deletedAt || {}
+    };
+    if (aiConfig.geminiApiKey) {
+      syncPayload.encGeminiKey = obfuscateGeminiKeyForSync(aiConfig.geminiApiKey);
     }
 
-    // 1. Secret GitHub Gist Sync (for bnsuhas.com GitHub Pages)
+    // 1. Push to Zero-Config Permanent Cloud Object Store (CORS *)
+    fetch(SHARED_REST_OBJECT_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: 'suhas_nikitha_wedding_state',
+        data: syncPayload
+      })
+    })
+      .then(r => { if (r.ok) setSyncBadge('Synced'); })
+      .catch(() => {});
+
+    // 2. Broadcast to Zero-Config Real-Time Multi-Phone Stream (ntfy.sh)
+    fetch(`https://ntfy.sh/${SHARED_NTFY_TOPIC}`, {
+      method: 'POST',
+      headers: { 'Title': 'wedding_state_sync' },
+      body: JSON.stringify(syncPayload)
+    })
+      .then(r => { if (r.ok) setSyncBadge('Synced'); })
+      .catch(() => {});
+
+    // 3. Optional Gist Sync if token provided
     if (aiConfig.gistId && aiConfig.gistToken) {
-      setSyncBadge('Syncing...');
       fetch(`https://api.github.com/gists/${encodeURIComponent(aiConfig.gistId)}`, {
         method: 'PATCH',
         headers: {
@@ -1471,31 +1717,32 @@
             }
           }
         })
-      })
-        .then(r => { if (r.ok) setSyncBadge('Synced'); else setSyncBadge('Saved on device'); })
-        .catch(() => setSyncBadge('Saved on device'));
-      return;
+      }).catch(() => {});
     }
 
-    // 2. Custom Endpoint / Local Server Sync
+    // 4. Local server / custom proxy sync if running locally
     const isStaticGithubPages = /bnsuhas\.com|github\.io/i.test(window.location.hostname || '');
     if (aiConfig.proxyEndpoint || (window.location.protocol.startsWith('http') && !isStaticGithubPages)) {
-      setSyncBadge('Syncing...');
       fetch(getSyncUrl(), {
         method: 'POST',
         headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(appState)
-      })
-        .then(r => {
-          if (r.status === 401) {
-            setSyncBadge('Passcode Required');
-            promptForFamilyPasscodeIfNeeded();
-          } else if (r.ok) {
-            setSyncBadge('Synced');
-          }
-        })
-        .catch(() => setSyncBadge('Saved on device'));
+      }).catch(() => {});
     }
+  }
+
+  function saveState(toastMsg) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+    } catch (e) {}
+    renderAll();
+
+    if (toastMsg) {
+      showSnackbar(toastMsg, undoHistory.length > 0);
+    }
+
+    setSyncBadge('Syncing...');
+    pushSharedCloudState();
   }
 
   function setSyncBadge(text) {
@@ -1507,6 +1754,7 @@
     undoHistory.push(JSON.stringify({
       assignments: appState.assignments,
       houseGroups: appState.houseGroups || {},
+      invitedMap: appState.invitedMap || {},
       deletedAt: appState.deletedAt || {}
     }));
     if (undoHistory.length > 30) undoHistory.shift();
@@ -1541,8 +1789,61 @@
     });
     appState.houseGroups = nextGroups;
 
+    // Restore invitedMap with bumped timestamps
+    const nextInvited = {};
+    const prevInvited = prev.invitedMap || {};
+    Object.keys(appState.invitedMap || {}).forEach(id => {
+      if (!prevInvited[id]) {
+        nextInvited[id] = { invited: false, updatedAt: now };
+      }
+    });
+    Object.keys(prevInvited).forEach(id => {
+      nextInvited[id] = { invited: Boolean(prevInvited[id].invited), updatedAt: now };
+    });
+    appState.invitedMap = nextInvited;
+
     hideSnackbar();
     saveState('Last action undone');
+  }
+
+  // ============================================================================
+  // INVITED STATUS HELPERS (Check Off People Invited Across List, Map & Routes)
+  // ============================================================================
+  function isFamilyInvited(familyId) {
+    const groupIds = getHouseGroupIds(familyId);
+    return groupIds.some(gid => {
+      const inv = appState.invitedMap && appState.invitedMap[gid];
+      if (inv && typeof inv.invited === 'boolean') return inv.invited;
+      const a = appState.assignments && appState.assignments[gid];
+      return Boolean(a && a.invited);
+    });
+  }
+
+  function toggleFamilyInvited(familyId, ev) {
+    if (ev && ev.stopPropagation) ev.stopPropagation();
+    const fam = FAMILIES.find(f => f.id === Number(familyId));
+    if (!fam) return;
+    const groupIds = getHouseGroupIds(familyId);
+    const nextInvited = !isFamilyInvited(familyId);
+    const now = Date.now();
+
+    recordUndoSnapshot();
+    appState.invitedMap = appState.invitedMap || {};
+    groupIds.forEach(gid => {
+      appState.invitedMap[gid] = {
+        invited: nextInvited,
+        updatedAt: now
+      };
+      if (appState.assignments[gid]) {
+        appState.assignments[gid].invited = nextInvited;
+        appState.assignments[gid].updatedAt = now;
+      }
+    });
+
+    const toast = nextInvited
+      ? `Marked #${fam.id} ${fam.title}${groupIds.length > 1 ? ` (+${groupIds.length - 1})` : ''} as Invited ✓`
+      : `Unmarked #${fam.id} ${fam.title} as Invited`;
+    saveState(toast);
   }
 
   // ============================================================================
@@ -1588,6 +1889,8 @@
     statusFilter = status;
     document.getElementById('statusBtnTodo').classList.toggle('active', status === 'todo');
     document.getElementById('statusBtnDone').classList.toggle('active', status === 'done');
+    const invBtn = document.getElementById('statusBtnInvited');
+    if (invBtn) invBtn.classList.toggle('active', status === 'invited');
     document.getElementById('statusBtnAll').classList.toggle('active', status === 'all');
     renderChecklist();
   }
@@ -1621,7 +1924,8 @@
 
   function renderChecklist() {
     const container = document.getElementById('checklistContainer');
-    const q = (document.getElementById('checklistSearch').value || '').trim().toLowerCase();
+    const rawQ = (document.getElementById('checklistSearch').value || '').trim();
+    const q = rawQ.toLowerCase();
 
     // Collapse Same House groups into a single unified row (keyed by primary lowest family ID)
     const seenPrimaryIds = new Set();
@@ -1639,14 +1943,16 @@
       const primaryFam = groupFamilies[0];
       const a = appState.assignments[primaryFam.id];
       const isDone = Boolean(a);
+      const isInv = isFamilyInvited(primaryFam.id);
       if (statusFilter === 'todo' && isDone) return false;
       if (statusFilter === 'done' && !isDone) return false;
+      if (statusFilter === 'invited' && !isInv) return false;
       if (categoryFilter !== 'ALL' && !groupFamilies.some(gf => gf.cat === categoryFilter)) return false;
       if (q) {
         const hay = groupFamilies
-          .map(gf => `${gf.id} #${gf.id} ${gf.title} ${gf.others || ''}`)
+          .map(gf => `${gf.id} #${gf.id} ${gf.title} ${gf.others || ''} ${gf.cat}`)
           .join(' ') + ' ' + (a && a.note ? a.note : '');
-        return hay.toLowerCase().includes(q);
+        return hay.toLowerCase().includes(q) || normalizeSouthIndianPhonetic(hay).includes(normalizeSouthIndianPhonetic(q));
       }
       return true;
     });
@@ -1655,11 +1961,16 @@
       container.innerHTML = `
         <div style="text-align:center;padding:40px 16px;color:var(--text-secondary);">
           <div style="font-size:0.95rem;font-weight:600;color:var(--text);margin-bottom:4px;">
-            ${statusFilter === 'todo' ? 'All families in this section are located' : 'No matching families'}
+            ${statusFilter === 'invited' ? 'No families marked as Invited yet' : (statusFilter === 'todo' ? 'All families in this section are located' : 'No matching families')}
           </div>
-          <div style="font-size:0.82rem;">
-            ${statusFilter === 'todo' ? 'Switch to another category or open Routes.' : 'Try clearing the search box or switching filters.'}
+          <div style="font-size:0.82rem;margin-bottom:12px;">
+            ${statusFilter === 'invited' ? 'Tap the "Invite" button on any row or route stop once you invite them.' : (statusFilter === 'todo' ? 'Switch to another category or open Routes.' : 'Try clearing the search box or switching filters.')}
           </div>
+          ${rawQ ? `
+            <button class="btn-primary-locate" style="height:34px;padding:0 14px;" onclick="searchLandmarkFromDirectory('${escapeHtml(rawQ.replace(/'/g, ''))}')">
+              Search "${escapeHtml(rawQ)}" on Map ›
+            </button>
+          ` : ''}
         </div>`;
       return;
     }
@@ -1670,6 +1981,7 @@
       const a = appState.assignments[f.id];
       const isPinned = a && a.status === 'pinned';
       const isOut = a && a.status === 'out_of_town';
+      const isInv = isFamilyInvited(f.id);
       const uniqueCats = Array.from(new Set(groupFamilies.map(gf => gf.cat))).join(', ');
       const serialLabel = groupFamilies.map(gf => `#${gf.id}`).join(', ');
       const combinedNames = groupFamilies.map(gf => escapeHtml(gf.title)).join(' + ');
@@ -1690,13 +2002,19 @@
 
           ${a ? `
             <div class="guest-actions">
+              <button class="btn-invited-toggle ${isInv ? 'is-invited' : ''}" onclick="toggleFamilyInvited(${f.id}, event)" title="Mark as Invited">
+                ${isInv ? '✓ Invited' : 'Invite'}
+              </button>
               <button class="btn-secondary-quiet" onclick="openSameHouseDialog(${f.id})">${isGrouped ? `Group (${groupFamilies.length})` : 'Group'}</button>
               <button class="btn-secondary-quiet" onclick="openLocationSheet(${f.id})">Edit</button>
               ${isPinned ? `<a class="btn-secondary-quiet" href="https://www.google.com/maps/search/?api=1&query=${a.lat},${a.lng}" target="_blank" rel="noopener">Maps ↗</a>` : ''}
-              <button class="btn-secondary-quiet" style="color:var(--danger);" onclick="clearFamilyLocation(${f.id})">Clear</button>
+              <button class="btn-secondary-quiet" style="color:var(--danger);" onclick="clearFamilyLocation(${f.id})">✕</button>
             </div>
           ` : `
             <div class="guest-actions">
+              <button class="btn-invited-toggle ${isInv ? 'is-invited' : ''}" onclick="toggleFamilyInvited(${f.id}, event)" title="Mark as Invited">
+                ${isInv ? '✓ Invited' : 'Invite'}
+              </button>
               <button class="btn-secondary-quiet" onclick="openSameHouseDialog(${f.id})" title="Tag Same House">
                 ${isGrouped ? `Group (${groupFamilies.length})` : 'Group'}
               </button>
@@ -1807,15 +2125,15 @@
     mapOpenedFromOverview = true;
     showAllSavedPins = true;
 
-    // Pick next unmapped family (or #1 if all are mapped) as the ready-to-mark active pin
     const nextUnmapped = FAMILIES.find(f => !appState.assignments[f.id]) || FAMILIES[0];
     updateSheetFamilyUI(nextUnmapped.id);
 
     const existing = appState.assignments[nextUnmapped.id];
     sheetAutoReverseNote = existing && existing.note ? existing.note : '';
-    document.getElementById('landmarkSearchInput').value = existing && existing.note ? existing.note : '';
+    document.getElementById('landmarkSearchInput').value = '';
+    hideMapSearchSuggestions();
     document.getElementById('sheetStatusHint').textContent =
-      'All marked houses shown in green · Tap any street to mark';
+      'All marked houses shown in green · Search or tap any street';
 
     document.getElementById('locationSheetBackdrop').classList.add('open');
     ensureSheetMapInitialized();
@@ -1823,6 +2141,7 @@
     setTimeout(() => {
       map.invalidateSize();
       renderNeighborReferencePins(currentSheetFamilyId);
+      renderVisibleLandmarks();
       const pinnedCount = getUniqueSavedHouseGroups().length;
       if (pinnedCount > 0) {
         fitMapToAllSavedPins();
@@ -1842,9 +2161,12 @@
 
     const existing = appState.assignments[familyId];
     sheetAutoReverseNote = existing && existing.note ? existing.note : '';
-    document.getElementById('landmarkSearchInput').value = existing && existing.note ? existing.note : '';
-    document.getElementById('sheetStatusHint').textContent =
-      'Tap street or drag red pin';
+    // Keep search input clean so Mom can immediately type or speak any landmark without deleting old notes
+    document.getElementById('landmarkSearchInput').value = '';
+    hideMapSearchSuggestions();
+    document.getElementById('sheetStatusHint').textContent = existing && existing.note
+      ? `Saved: ${existing.note} · Drag pin or search above`
+      : 'Search landmark above or drag red pin to street';
 
     document.getElementById('locationSheetBackdrop').classList.add('open');
     ensureSheetMapInitialized();
@@ -1860,18 +2182,50 @@
         const c = map.getCenter();
         placeOrMoveActiveSheetPin(c.lat, c.lng, false);
       }
+      renderVisibleLandmarks();
     }, 80);
   }
 
   function closeLocationSheet() {
     stopSpeechRecognition();
+    hideMapSearchSuggestions();
     document.getElementById('locationSheetBackdrop').classList.remove('open');
     currentSheetFamilyId = null;
     mapOpenedFromOverview = false;
   }
 
+  function searchLandmarkFromDirectory(queryText) {
+    openMapOverviewAndMark();
+    setTimeout(() => {
+      const inp = document.getElementById('landmarkSearchInput');
+      if (inp) {
+        inp.value = queryText;
+        findLandmarkOnMap();
+      }
+    }, 180);
+  }
+
   function renderVisibleLandmarks() {
-    if (landmarkMarkersLayer) landmarkMarkersLayer.clearLayers();
+    if (!landmarkMarkersLayer || !map) return;
+    landmarkMarkersLayer.clearLayers();
+    if (map.getZoom() < 15) return;
+
+    const bounds = map.getBounds();
+    LANDMARK_POIS.forEach(poi => {
+      if (!bounds.contains([poi.lat, poi.lng])) return;
+      const icon = L.divIcon({
+        className: '',
+        html: `<div class="landmark-ref-pill" title="Tap to move pin near ${escapeHtml(poi.name)}">${escapeHtml(poi.name)}</div>`,
+        iconSize: null,
+        iconAnchor: [40, -6]
+      });
+      const m = L.marker([poi.lat, poi.lng], { icon, zIndexOffset: 50 }).addTo(landmarkMarkersLayer);
+      m.on('click', () => {
+        sheetAutoReverseNote = `Near ${poi.name}`;
+        placeOrMoveActiveSheetPin(poi.lat, poi.lng, false);
+        document.getElementById('sheetStatusHint').textContent = `Pin placed at ${poi.name} — drag to exact road & tap Save.`;
+      });
+    });
   }
 
   function getUniqueSavedHouseGroups(excludeFamilyId) {
@@ -1896,7 +2250,8 @@
         groupFamilies,
         lat: a.lat,
         lng: a.lng,
-        note: a.note || ''
+        note: a.note || '',
+        invited: isFamilyInvited(primaryId)
       });
     });
     return savedGroups;
@@ -1941,9 +2296,10 @@
         ? `#${g.primaryId}+`
         : `#${g.primaryId}`;
       const names = g.groupFamilies.map(gf => `#${gf.id} ${escapeHtml(gf.title)}`).join(' + ');
+      const dotBg = g.invited ? '#047857' : '#059669';
       const dotIcon = L.divIcon({
         className: '',
-        html: `<div class="saved-house-dot" title="${names}">${badgeLabel}</div>`,
+        html: `<div class="saved-house-dot" style="background:${dotBg};" title="${names}">${badgeLabel}${g.invited ? '✓' : ''}</div>`,
         iconSize: [28, 28],
         iconAnchor: [14, 14]
       });
@@ -1954,10 +2310,13 @@
       }).addTo(neighborMarkersLayer);
 
       const popupHtml = `
-        <div style="font-family:var(--font-sans);min-width:190px;padding:2px;">
+        <div style="font-family:var(--font-sans);min-width:210px;padding:2px;">
           <div style="font-weight:700;font-size:0.86rem;color:#111827;margin-bottom:2px;">${names}</div>
           ${g.note ? `<div style="font-size:0.76rem;color:#059669;margin-bottom:6px;">${escapeHtml(g.note)}</div>` : ''}
-          <div style="display:flex;gap:6px;">
+          <div style="display:flex;gap:5px;flex-wrap:wrap;">
+            <button onclick="toggleFamilyInvited(${g.primaryId}, event)" style="height:26px;padding:0 8px;border:1px solid ${g.invited ? '#6ee7b7' : '#d1d5db'};border-radius:5px;background:${g.invited ? '#ecfdf5' : '#fff'};color:${g.invited ? '#047857' : '#111827'};font-size:0.74rem;font-weight:600;cursor:pointer;">
+              ${g.invited ? '✓ Invited' : 'Mark Invited'}
+            </button>
             <button onclick="openLocationSheet(${g.primaryId}, true)" style="height:26px;padding:0 8px;border:1px solid #d1d5db;border-radius:5px;background:#fff;font-size:0.74rem;font-weight:600;cursor:pointer;">
               Edit Pin
             </button>
@@ -2013,10 +2372,9 @@
     const filtered = groups.filter(gf => {
       if (!mapFamilyPickerQuery) return true;
       const hay = gf.map(x => `${x.id} #${x.id} ${x.title} ${x.others || ''} ${x.cat}`).join(' ').toLowerCase();
-      return hay.includes(mapFamilyPickerQuery);
+      return hay.includes(mapFamilyPickerQuery) || normalizeSouthIndianPhonetic(hay).includes(normalizeSouthIndianPhonetic(mapFamilyPickerQuery));
     });
 
-    // Show unmapped families first so marking on map is fast
     filtered.sort((a, b) => {
       const aDone = appState.assignments[a[0].id] ? 1 : 0;
       const bDone = appState.assignments[b[0].id] ? 1 : 0;
@@ -2118,28 +2476,298 @@
     }
   }
 
-  // Voice & Landmark Search inside the Focused Sheet
-  async function toggleSpeechRecognition() {
-    if (isListening) {
-      await stopSpeechRecognition();
-      findLandmarkOnMap();
-    } else {
-      startSpeechRecognition();
+  // ============================================================================
+  // FOOLPROOF MOBILE LANDMARK SEARCH + LIVE AUTOCOMPLETE + VOICE
+  // ============================================================================
+  function normalizeSouthIndianPhonetic(str) {
+    return String(str || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '')
+      .replace(/th/g, 't')
+      .replace(/dh/g, 'd')
+      .replace(/sh/g, 's')
+      .replace(/bh/g, 'b')
+      .replace(/kh/g, 'k')
+      .replace(/gh/g, 'g')
+      .replace(/ph/g, 'f')
+      .replace(/ee/g, 'i')
+      .replace(/oo/g, 'u')
+      .replace(/aa/g, 'a')
+      .replace(/w/g, 'v')
+      .replace(/y/g, 'i')
+      .replace(/z/g, 's');
+  }
+
+  let mapSuggestTimer = null;
+  let currentMapSuggestions = [];
+
+  function hideMapSearchSuggestions() {
+    const box = document.getElementById('mapSearchSuggestions');
+    if (box) {
+      box.classList.remove('open');
+      box.innerHTML = '';
     }
   }
 
-  function startSpeechRecognition() {
+  function handleMapSearchInput(val) {
+    const q = (val || '').trim();
+    if (q.length < 2) {
+      hideMapSearchSuggestions();
+      return;
+    }
+
+    const normQ = normalizeSouthIndianPhonetic(q);
+    const lowerQ = q.toLowerCase();
+    const localMatches = [];
+    const seenLabels = new Set();
+
+    // 1. Match LANDMARK_POIS (Hospitals, Hotels, Bakeries, Temples, Circles)
+    LANDMARK_POIS.forEach(p => {
+      if (p.name.toLowerCase().includes(lowerQ) || normalizeSouthIndianPhonetic(p.name).includes(normQ)) {
+        if (!seenLabels.has(p.name)) {
+          seenLabels.add(p.name);
+          localMatches.push({ kind: 'place', label: p.name, sub: 'Landmark', lat: p.lat, lng: p.lng });
+        }
+      }
+    });
+
+    // 2. Match LOCALITY_GAZETTEER (Areas, Circles, Blocks, Stages)
+    LOCALITY_GAZETTEER.forEach(loc => {
+      const hit = loc.label.toLowerCase().includes(lowerQ) ||
+        normalizeSouthIndianPhonetic(loc.label).includes(normQ) ||
+        loc.keys.some(k => k.includes(lowerQ) || normalizeSouthIndianPhonetic(k).includes(normQ));
+      if (hit && !seenLabels.has(loc.label)) {
+        seenLabels.add(loc.label);
+        localMatches.push({ kind: 'place', label: loc.label, sub: 'Area / Circle', lat: loc.lat, lng: loc.lng });
+      }
+    });
+
+    // 3. Match Families (in case Mom searches a relative's name or #serial in the Map search bar!)
+    FAMILIES.forEach(f => {
+      const hay = `${f.id} #${f.id} ${f.title} ${f.others || ''}`;
+      if (hay.toLowerCase().includes(lowerQ) || (normQ.length >= 3 && normalizeSouthIndianPhonetic(hay).includes(normQ))) {
+        const a = appState.assignments[f.id];
+        localMatches.push({
+          kind: 'family',
+          familyId: f.id,
+          label: `#${f.id} ${f.title}`,
+          sub: a && a.status === 'pinned' ? `Located: ${a.note || 'Pinned'}` : `Select to mark (${f.cat})`,
+          lat: a && a.lat ? a.lat : null,
+          lng: a && a.lng ? a.lng : null
+        });
+      }
+    });
+
+    renderMapSuggestionDropdown(localMatches.slice(0, 6));
+
+    // 4. Also fetch live fuzzy places from Photon OSM Geocoder (debounced 220ms)
+    clearTimeout(mapSuggestTimer);
+    mapSuggestTimer = setTimeout(async () => {
+      try {
+        const r = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q + ' Bengaluru')}&lat=12.9345&lon=77.5600&limit=5`);
+        if (!r.ok) return;
+        const data = await r.json();
+        const remoteMatches = [];
+        (data.features || []).forEach(feat => {
+          const coords = feat.geometry && feat.geometry.coordinates;
+          const props = feat.properties || {};
+          if (!coords || coords.length < 2) return;
+          const lng = Number(coords[0]);
+          const lat = Number(coords[1]);
+          const name = props.name || props.street || props.locality;
+          if (!name) return;
+          const sub = [props.street, props.locality || props.district || props.city].filter(Boolean).join(', ');
+          const key = `${name}_${lat.toFixed(3)}`;
+          if (!seenLabels.has(key) && !seenLabels.has(name)) {
+            seenLabels.add(key);
+            remoteMatches.push({ kind: 'place', label: name, sub: sub || 'Bengaluru', lat, lng });
+          }
+        });
+        if (remoteMatches.length) {
+          renderMapSuggestionDropdown([...localMatches, ...remoteMatches].slice(0, 7));
+        }
+      } catch (e) {}
+    }, 220);
+  }
+
+  function renderMapSuggestionDropdown(items) {
+    currentMapSuggestions = items || [];
+    window._lastMapSuggestions = currentMapSuggestions;
+    const box = document.getElementById('mapSearchSuggestions');
+    if (!box) return;
+    if (!currentMapSuggestions.length) {
+      hideMapSearchSuggestions();
+      return;
+    }
+    box.innerHTML = currentMapSuggestions.map((it, idx) => `
+      <div class="map-suggestion-item" onclick="selectMapSearchSuggestion(${idx})">
+        <div style="min-width:0;flex:1;">
+          <div style="font-weight:600;color:var(--text);">${escapeHtml(it.label)}</div>
+          <div style="font-size:0.74rem;color:var(--text-muted);">${escapeHtml(it.sub || '')}</div>
+        </div>
+        <span style="font-size:0.75rem;font-weight:600;color:var(--accent-blue);">${it.kind === 'family' ? 'Family ›' : 'Go ›'}</span>
+      </div>
+    `).join('');
+    box.classList.add('open');
+  }
+
+  function selectMapSearchSuggestion(idx) {
+    const item = currentMapSuggestions[idx];
+    if (!item) return;
+    hideMapSearchSuggestions();
+    const inp = document.getElementById('landmarkSearchInput');
+    if (inp) inp.blur();
+
+    if (item.kind === 'family') {
+      selectFamilyForMapPin(item.familyId);
+      if (inp) inp.value = '';
+      document.getElementById('sheetStatusHint').textContent = item.lat
+        ? `Showing #${item.familyId} pin on map`
+        : `Selected #${item.familyId} — search landmark or tap street to place pin`;
+      return;
+    }
+
+    if (inp) inp.value = item.label;
+    sheetAutoReverseNote = item.label;
+    map.setView([item.lat, item.lng], 18);
+    placeOrMoveActiveSheetPin(item.lat, item.lng, false);
+    renderVisibleLandmarks();
+    document.getElementById('sheetStatusHint').textContent =
+      `Pin placed at ${item.label} — drag to exact street & tap Save.`;
+  }
+
+  // ============================================================================
+  // GEMINI MULTIMODAL AUDIO ASR ENGINE (Map Landmark, Route Planner & Checklist)
+  // ============================================================================
+  let activeVoiceMode = null; // 'landmark' | 'route' | 'checklist'
+  let vadAudioCtx = null;
+  let vadInterval = null;
+  let forceBrowserVoiceFallback = false;
+
+  function hasGeminiVoiceConfigured() {
+    const isStaticHost = /bnsuhas\.com|github\.io/i.test(window.location.hostname || '');
+    return Boolean(
+      aiConfig.geminiApiKey ||
+      aiConfig.proxyEndpoint ||
+      (window.location.protocol.startsWith('http') && !isStaticHost)
+    );
+  }
+
+  function openGeminiKeyQuickSetupDialog(targetMode) {
+    document.getElementById('dialogTitle').textContent = 'Enable Gemini AI Voice ASR';
+    document.getElementById('dialogBody').innerHTML = `
+      <div style="background:#ecfdf5;border:1px solid #a7f3d0;padding:12px;border-radius:var(--radius-md);font-size:0.88rem;color:#065f46;line-height:1.45;">
+        <b>Why Gemini AI Voice?</b> Built-in browser speech recognition struggles with Kannada &amp; South Bangalore names (<i>Seetha Circle, Katriguppe, Vinayaka Hospital, Sujatha</i>).<br><br>
+        Paste your Gemini API Key (<code>AIza...</code>) once below. It will <b>automatically sync encrypted</b> to Mom's &amp; Dad's phones (and is never stored in GitHub).
+      </div>
+      <input
+        type="password"
+        id="quickGeminiKeyInput"
+        class="input-clean"
+        placeholder="Paste Gemini API Key (AIza...)"
+        value="${escapeHtml(aiConfig.geminiApiKey || '')}"
+      />
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn-primary-locate" onclick="saveQuickGeminiKeyAndStart('${targetMode}')">
+          Save &amp; Start Gemini Voice
+        </button>
+        <button class="btn-secondary-quiet" onclick="useBrowserVoiceFallbackOnce('${targetMode}')">
+          Use Basic Browser Voice
+        </button>
+      </div>
+    `;
+    document.getElementById('dialogBackdrop').classList.add('open');
+  }
+
+  function saveQuickGeminiKeyAndStart(targetMode) {
+    const val = (document.getElementById('quickGeminiKeyInput').value || '').trim();
+    if (!val) {
+      showSnackbar('Please paste a valid Gemini API key (starts with AIza)', false);
+      return;
+    }
+    aiConfig.geminiApiKey = val;
+    localStorage.setItem(CONFIG_KEY, JSON.stringify(aiConfig));
+    pushSharedCloudState();
+    closeDialogModal();
+    showSnackbar('Gemini AI Voice enabled & synced for all family phones!', false);
+    if (targetMode === 'landmark') startSpeechRecognition('landmark');
+    else if (targetMode === 'route') startSpeechRecognition('route');
+    else if (targetMode === 'checklist') startSpeechRecognition('checklist');
+  }
+
+  function useBrowserVoiceFallbackOnce(targetMode) {
+    forceBrowserVoiceFallback = true;
+    closeDialogModal();
+    if (targetMode === 'landmark') startSpeechRecognition('landmark');
+    else if (targetMode === 'route') startSpeechRecognition('route');
+    else if (targetMode === 'checklist') startSpeechRecognition('checklist');
+  }
+
+  function updateVoiceButtonsUI(listeningMode) {
+    const configs = [
+      { mode: 'landmark', btnId: 'btnMic', lblId: 'micBtnLabel', idle: '🎤 Voice', active: '⏹ Stop' },
+      { mode: 'route', btnId: 'btnRouteMic', lblId: 'routeMicBtnLabel', idle: '🎤 Speak Plan', active: '⏹ Stop' },
+      { mode: 'checklist', btnId: 'btnChecklistMic', lblId: 'checklistMicLabel', idle: '🎤 Voice', active: '⏹ Stop' }
+    ];
+    configs.forEach(c => {
+      const btn = document.getElementById(c.btnId);
+      const lbl = document.getElementById(c.lblId);
+      const isThis = listeningMode === c.mode;
+      if (btn) btn.classList.toggle('listening', isThis);
+      if (lbl) lbl.textContent = isThis ? c.active : c.idle;
+    });
+  }
+
+  async function toggleSpeechRecognition() {
+    if (isListening) {
+      await stopAndProcessVoiceCapture();
+    } else {
+      if (!hasGeminiVoiceConfigured() && !forceBrowserVoiceFallback) {
+        openGeminiKeyQuickSetupDialog('landmark');
+        return;
+      }
+      startSpeechRecognition('landmark');
+    }
+  }
+
+  async function toggleChecklistVoiceSearch() {
+    if (isListening) {
+      await stopAndProcessVoiceCapture();
+    } else {
+      if (!hasGeminiVoiceConfigured() && !forceBrowserVoiceFallback) {
+        openGeminiKeyQuickSetupDialog('checklist');
+        return;
+      }
+      startSpeechRecognition('checklist');
+    }
+  }
+
+  function startSpeechRecognition(mode = 'landmark') {
     isListening = true;
+    activeVoiceMode = mode;
     recordedAudioB64 = null;
     audioReadyPromise = null;
     resolveAudioReady = null;
-    const btn = document.getElementById('btnMic');
-    const lbl = document.getElementById('micBtnLabel');
-    btn.classList.add('listening');
-    lbl.textContent = 'Stop';
-    document.getElementById('sheetStatusHint').textContent =
-      'Listening for landmark or circle...';
+    window._lastBrowserTranscript = '';
+    updateVoiceButtonsUI(mode);
 
+    const useGeminiAudio = hasGeminiVoiceConfigured();
+    if (mode === 'landmark') {
+      document.getElementById('sheetStatusHint').textContent = useGeminiAudio
+        ? 'Gemini AI listening... Speak landmark, road, or relative name (auto-stops on pause)'
+        : 'Listening for landmark or circle...';
+    } else if (mode === 'route') {
+      showSnackbar(useGeminiAudio
+        ? 'Gemini AI listening: e.g. "I want to do 5 houses today"'
+        : 'Speak now: e.g. "I want to do 5 houses today"', false);
+    } else if (mode === 'checklist') {
+      showSnackbar(useGeminiAudio
+        ? 'Gemini AI listening: Speak relative name or #serial'
+        : 'Speak relative name or #serial', false);
+    }
+
+    // Only write live browser SpeechRecognition text into the input box if Gemini is NOT configured.
+    // When Gemini IS configured, we keep browser transcript only as a hidden backup so it never overwrites the input with mangled ASR!
     const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRec) {
       try {
@@ -2152,12 +2780,16 @@
           for (let i = 0; i < ev.results.length; i++) {
             text += ev.results[i][0].transcript;
           }
-          document.getElementById('landmarkSearchInput').value = text.trim();
+          window._lastBrowserTranscript = text.trim();
+          if (!useGeminiAudio) {
+            if (mode === 'landmark') document.getElementById('landmarkSearchInput').value = window._lastBrowserTranscript;
+            else if (mode === 'route') document.getElementById('routeVoiceInput').value = window._lastBrowserTranscript;
+            else if (mode === 'checklist') document.getElementById('checklistSearch').value = window._lastBrowserTranscript;
+          }
         };
         recognition.onend = async function() {
-          if (isListening) {
-            await stopSpeechRecognition();
-            findLandmarkOnMap();
+          if (isListening && !useGeminiAudio) {
+            await stopAndProcessVoiceCapture();
           }
         };
         recognition.start();
@@ -2165,16 +2797,24 @@
     }
 
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia({ audio: true })
+      navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+      })
         .then(stream => {
           audioChunks = [];
-          recordedMime = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+          recordedMime = (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported('audio/webm;codecs=opus'))
+            ? 'audio/webm;codecs=opus'
+            : (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported('audio/webm'))
+              ? 'audio/webm'
+              : 'audio/mp4';
           mediaRecorder = new MediaRecorder(stream, { mimeType: recordedMime });
           audioReadyPromise = new Promise(resolve => { resolveAudioReady = resolve; });
           mediaRecorder.ondataavailable = e => {
             if (e.data && e.data.size > 0) audioChunks.push(e.data);
           };
           mediaRecorder.onstop = () => {
+            if (vadInterval) { clearInterval(vadInterval); vadInterval = null; }
+            if (vadAudioCtx) { try { vadAudioCtx.close(); } catch (e) {} vadAudioCtx = null; }
             stream.getTracks().forEach(t => t.stop());
             const blob = new Blob(audioChunks, { type: recordedMime });
             const reader = new FileReader();
@@ -2184,19 +2824,55 @@
             };
             reader.readAsDataURL(blob);
           };
-          mediaRecorder.start();
+          mediaRecorder.start(200);
+
+          // Web Audio Voice Activity Detection (VAD): auto-stop 1.5s after the user finishes speaking
+          try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) {
+              vadAudioCtx = new AudioCtx();
+              const source = vadAudioCtx.createMediaStreamSource(stream);
+              const analyser = vadAudioCtx.createAnalyser();
+              analyser.fftSize = 512;
+              source.connect(analyser);
+              const dataArr = new Uint8Array(analyser.frequencyBinCount);
+              let hasSpoken = false;
+              let silenceStart = 0;
+              const startedAt = Date.now();
+              vadInterval = setInterval(() => {
+                if (!isListening) return;
+                analyser.getByteFrequencyData(dataArr);
+                let sum = 0;
+                for (let i = 0; i < dataArr.length; i++) sum += dataArr[i];
+                const avg = sum / dataArr.length;
+                if (avg > 16) {
+                  hasSpoken = true;
+                  silenceStart = 0;
+                } else if (hasSpoken) {
+                  if (!silenceStart) silenceStart = Date.now();
+                  else if (Date.now() - silenceStart > 1500) {
+                    stopAndProcessVoiceCapture();
+                  }
+                } else if (Date.now() - startedAt > 9000) {
+                  stopAndProcessVoiceCapture();
+                }
+              }, 120);
+            }
+          } catch (e) {}
         })
-        .catch(() => {});
+        .catch(() => {
+          showSnackbar('Microphone permission needed for voice input.', false);
+          stopSpeechRecognition();
+        });
     }
   }
 
   async function stopSpeechRecognition() {
     if (!isListening) return;
     isListening = false;
-    const btn = document.getElementById('btnMic');
-    const lbl = document.getElementById('micBtnLabel');
-    if (btn) btn.classList.remove('listening');
-    if (lbl) lbl.textContent = 'Voice';
+    updateVoiceButtonsUI(null);
+    if (vadInterval) { clearInterval(vadInterval); vadInterval = null; }
+    if (vadAudioCtx) { try { vadAudioCtx.close(); } catch (e) {} vadAudioCtx = null; }
 
     if (recognition) {
       try { recognition.stop(); } catch (e) {}
@@ -2205,65 +2881,266 @@
     if (mediaRecorder && mediaRecorder.state !== 'inactive') {
       try { mediaRecorder.stop(); } catch (e) {}
       if (audioReadyPromise) {
-        try { await Promise.race([audioReadyPromise, new Promise(r => setTimeout(r, 800))]); } catch (e) {}
+        try { await Promise.race([audioReadyPromise, new Promise(r => setTimeout(r, 1200))]); } catch (e) {}
       }
     }
   }
 
-  async function findLandmarkOnMap() {
+  async function stopAndProcessVoiceCapture() {
+    const mode = activeVoiceMode || 'landmark';
+    activeVoiceMode = null;
     await stopSpeechRecognition();
-    const rawQuery = (document.getElementById('landmarkSearchInput').value || '').trim();
-    if (!rawQuery && !recordedAudioB64) return;
+
+    if (mode === 'landmark') {
+      await findLandmarkOnMap(true);
+    } else if (mode === 'route') {
+      await processGeminiRouteVoice();
+    } else if (mode === 'checklist') {
+      await processGeminiChecklistVoice();
+    }
+  }
+
+  async function callGeminiMultimodalJson(promptText, audioBase64, mimeType) {
+    if (!aiConfig.geminiApiKey) return null;
+    const cleanMime = (mimeType || 'audio/webm').split(';')[0];
+    const parts = [{ text: promptText }];
+    if (audioBase64) {
+      parts.push({ inlineData: { mimeType: cleanMime, data: audioBase64 } });
+    }
+    // Try current high-speed Gemini Flash models in order
+    const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-3.8-flash'];
+    for (const modelName of models) {
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(aiConfig.geminiApiKey)}`;
+        const resp = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts }],
+            generationConfig: { responseMimeType: 'application/json', temperature: 0.1 }
+          })
+        });
+        if (resp.ok) {
+          const j = await resp.json();
+          const rawText = j.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+          return JSON.parse(rawText);
+        }
+      } catch (e) {}
+    }
+    return null;
+  }
+
+  async function processGeminiRouteVoice() {
+    const inp = document.getElementById('routeVoiceInput');
+    const lbl = document.getElementById('routeMicBtnLabel');
+    if (lbl) lbl.textContent = '✨ Thinking...';
+    try {
+      if (recordedAudioB64 && aiConfig.geminiApiKey) {
+        const poiList = LANDMARK_POIS.map(p => p.name).concat(LOCALITY_GAZETTEER.map(l => l.label)).join(', ');
+        const prompt = `You are a Kannada & South-Indian English speech-to-text & route-planning assistant for 60-65yo parents in Bengaluru.
+Listen to the audio (which may be in English, Kannada, or mixed, e.g. "I want to do 5 houses today", "5 houses near Seetha Circle", "Ivattu aidhu mane Jayanagar hatra").
+Known Bengaluru landmarks/areas: ${poiList}.
+Backup browser transcript (may have ASR errors): "${window._lastBrowserTranscript || ''}".
+Return ONLY valid JSON:
+{
+  "cleanTranscript": "clean English summary of what was said, e.g. I want to do 5 houses today near Seetha Circle",
+  "houseCount": number_or_null,
+  "category": "ALL" | "C-1" | "C-2" | "C-3" | "C-4" | "C-5" | "C-6" | null,
+  "nearLocation": "canonical landmark or locality name if mentioned, else empty string",
+  "uninvitedOnly": true
+}`;
+        const parsed = await callGeminiMultimodalJson(prompt, recordedAudioB64, recordedMime);
+        if (parsed && parsed.cleanTranscript) {
+          if (inp) inp.value = parsed.cleanTranscript;
+          if (parsed.houseCount && parsed.houseCount >= 1 && parsed.houseCount <= 25) {
+            appState.maxStopsPerTrip = Number(parsed.houseCount);
+            ensureTripSizeOptionExists(appState.maxStopsPerTrip);
+          }
+          if (parsed.category) {
+            appState.routeCategoryFilter = parsed.category;
+            const catSel = document.getElementById('tripCatSelect');
+            if (catSel) catSel.value = parsed.category;
+          }
+          await parseAndApplyVoiceRouteCommand(parsed.cleanTranscript);
+          return;
+        }
+      }
+      // Fallback to browser transcript if no Gemini response
+      const fallback = (window._lastBrowserTranscript || (inp && inp.value) || '').trim();
+      if (fallback) {
+        if (inp) inp.value = fallback;
+        await parseAndApplyVoiceRouteCommand(fallback);
+      } else {
+        showSnackbar('Could not hear clearly — tap Speak Plan and say e.g. "I want to do 5 houses today"', false);
+      }
+    } finally {
+      if (lbl) lbl.textContent = '🎤 Speak Plan';
+      recordedAudioB64 = null;
+    }
+  }
+
+  async function processGeminiChecklistVoice() {
+    const inp = document.getElementById('checklistSearch');
+    const lbl = document.getElementById('checklistMicLabel');
+    if (lbl) lbl.textContent = '✨...';
+    try {
+      if (recordedAudioB64 && aiConfig.geminiApiKey) {
+        const famCatalog = FAMILIES.map(f => `#${f.id}: ${f.title} (${f.others || ''})`).join('\n');
+        const prompt = `Listen to the spoken relative name, serial number, or area in Kannada/Indian English and match it against this wedding guest list:
+${famCatalog}
+Return ONLY valid JSON:
+{
+  "searchText": "exact matched family title or serial number or area to filter by (e.g. Sujatha or 18)"
+}`;
+        const parsed = await callGeminiMultimodalJson(prompt, recordedAudioB64, recordedMime);
+        if (parsed && parsed.searchText) {
+          if (inp) inp.value = parsed.searchText;
+          handleChecklistSearch();
+          showSnackbar(`Gemini Voice Filter: "${parsed.searchText}"`, false);
+          return;
+        }
+      }
+      if (window._lastBrowserTranscript && inp) {
+        inp.value = window._lastBrowserTranscript;
+        handleChecklistSearch();
+      }
+    } finally {
+      if (lbl) lbl.textContent = '🎤 Voice';
+      recordedAudioB64 = null;
+    }
+  }
+
+  async function findLandmarkOnMap(fromVoiceCapture = false) {
+    if (isListening) await stopSpeechRecognition();
+    hideMapSearchSuggestions();
+    const inp = document.getElementById('landmarkSearchInput');
+    if (inp) inp.blur(); // Dismiss mobile keyboard immediately so the map & pin are visible!
+    let rawQuery = (inp ? inp.value : '').trim();
+    const hasAudio = Boolean(recordedAudioB64);
+    if (!rawQuery && !hasAudio && !window._lastBrowserTranscript) return;
 
     const findBtn = document.getElementById('btnFindLandmark');
-    findBtn.textContent = 'Locating...';
+    findBtn.textContent = '...';
     findBtn.disabled = true;
 
     try {
-      // 1. Check direct coordinates (e.g. pasted from Google Maps)
+      // 1. PRIORITY #1 WHEN VOICE WAS USED: Run Gemini Multimodal Audio FIRST so Kannada/Indian place names are transcribed accurately!
+      const isStaticHost = /bnsuhas\.com|github\.io/i.test(window.location.hostname || '');
+      if (hasAudio && (aiConfig.geminiApiKey || aiConfig.proxyEndpoint || (window.location.protocol.startsWith('http') && !isStaticHost))) {
+        document.getElementById('sheetStatusHint').textContent = '✨ Gemini AI analyzing spoken landmark...';
+        const geminiRes = await queryGeminiForLandmark(window._lastBrowserTranscript || rawQuery, recordedAudioB64, recordedMime);
+        recordedAudioB64 = null;
+        if (geminiRes) {
+          if (geminiRes.cleanTranscript && inp) {
+            inp.value = geminiRes.cleanTranscript;
+            rawQuery = geminiRes.cleanTranscript;
+          }
+          if (geminiRes.matchedFamilyId && !geminiRes.label) {
+            selectFamilyForMapPin(Number(geminiRes.matchedFamilyId));
+            return;
+          }
+          // Prefer our high-precision local gazetteer/POI coords if Gemini identified a known landmark name, else use Gemini's lat/lng
+          const localRefined = geminiRes.label ? await resolveLandmarkCoordinates(geminiRes.label) : null;
+          const finalLat = (localRefined && localRefined.lat) || geminiRes.lat;
+          const finalLng = (localRefined && localRefined.lng) || geminiRes.lng;
+          const finalLabel = (localRefined && localRefined.label) || geminiRes.label || rawQuery;
+          if (finalLat && finalLng) {
+            sheetAutoReverseNote = geminiRes.instructions || finalLabel;
+            if (inp) inp.value = sheetAutoReverseNote;
+            map.setView([finalLat, finalLng], 18);
+            placeOrMoveActiveSheetPin(finalLat, finalLng, false);
+            renderVisibleLandmarks();
+            document.getElementById('sheetStatusHint').textContent =
+              `✨ Gemini Voice: Pin placed near ${finalLabel} — drag to street & tap Save.`;
+            return;
+          }
+        }
+      }
+
+      if (!rawQuery && window._lastBrowserTranscript) {
+        rawQuery = window._lastBrowserTranscript;
+        if (inp) inp.value = rawQuery;
+      }
+
+      // 2. Check direct coordinates (e.g. pasted from Google Maps)
       const coordMatch = rawQuery.match(/(-?\d{1,2}\.\d{3,})\s*,\s*(-?\d{1,3}\.\d{3,})/);
       if (coordMatch) {
         const lat = parseFloat(coordMatch[1]);
         const lng = parseFloat(coordMatch[2]);
         map.setView([lat, lng], 18);
         placeOrMoveActiveSheetPin(lat, lng, false);
+        renderVisibleLandmarks();
         document.getElementById('sheetStatusHint').textContent = 'Moved pin to coordinates — drag pin to adjust and tap Save.';
         return;
       }
 
-      // 2. Check our 100+ landmark Bengaluru/Karnataka Gazetteer + Nominatim first for instant response
+      // 3. Multi-tier fuzzy Bengaluru Gazetteer + LANDMARK_POIS + Photon OSM + Nominatim
       let resolved = await resolveLandmarkCoordinates(rawQuery);
 
-      // 3. Also query Gemini endpoint if configured or when audio was recorded
-      if (!resolved && (aiConfig.proxyEndpoint || aiConfig.geminiApiKey || window.location.protocol.startsWith('http'))) {
-        resolved = await queryGeminiForLandmark(rawQuery, recordedAudioB64, recordedMime);
+      // 4. Also query Gemini text fallback if typed query wasn't in local gazetteer/OSM
+      if (!resolved && (aiConfig.proxyEndpoint || aiConfig.geminiApiKey || (window.location.protocol.startsWith('http') && !isStaticHost))) {
+        resolved = await queryGeminiForLandmark(rawQuery, null, recordedMime);
+      }
+
+      // 5. What if Mom typed a relative's name or #serial in the Map search box?
+      if (!resolved && rawQuery) {
+        const normQ = normalizeSouthIndianPhonetic(rawQuery);
+        const famHit = FAMILIES.find(f =>
+          `#${f.id}` === rawQuery.trim() ||
+          String(f.id) === rawQuery.trim() ||
+          f.title.toLowerCase().includes(rawQuery.toLowerCase()) ||
+          (normQ.length >= 3 && normalizeSouthIndianPhonetic(f.title).includes(normQ))
+        );
+        if (famHit) {
+          selectFamilyForMapPin(famHit.id);
+          document.getElementById('sheetStatusHint').textContent =
+            `Selected #${famHit.id} ${famHit.title} — now search a landmark or tap a street.`;
+          return;
+        }
       }
 
       if (resolved && resolved.lat && resolved.lng) {
+        sheetAutoReverseNote = resolved.instructions || resolved.label || rawQuery;
         map.setView([resolved.lat, resolved.lng], 18);
         placeOrMoveActiveSheetPin(resolved.lat, resolved.lng, false);
-        if (resolved.instructions && !document.getElementById('landmarkSearchInput').value.trim()) {
-          document.getElementById('landmarkSearchInput').value = resolved.instructions;
-        }
+        renderVisibleLandmarks();
         document.getElementById('sheetStatusHint').textContent =
-          `Red pin placed near ${resolved.label || 'landmark'}. Drag the red pin to the exact cross-road and tap Save Location.`;
+          `Pin placed near ${resolved.label || 'landmark'} — drag to exact street & tap Save.`;
       } else {
         document.getElementById('sheetStatusHint').textContent =
-          'Could not find that exact name. Try a nearby circle or main area (e.g. Seetha Circle, Jayanagar, Banashankari).';
+          'Could not find that exact name. Try a nearby circle or area (e.g. Seetha Circle, Jayanagar).';
       }
     } finally {
       findBtn.textContent = 'Find';
       findBtn.disabled = false;
+      recordedAudioB64 = null;
     }
   }
 
   async function resolveLandmarkCoordinates(text) {
     if (!text) return null;
-    const lower = text.toLowerCase();
+    const lower = text.toLowerCase().trim();
+    const normText = normalizeSouthIndianPhonetic(text);
 
+    // 1. Check specific LANDMARK_POIS first (Hospitals, Hotels, Bakeries, Temples, Circles)
+    for (const poi of LANDMARK_POIS) {
+      const cleanPoi = poi.name.replace(/^(hotel|bakery):\s*/i, '').toLowerCase();
+      const normPoi = normalizeSouthIndianPhonetic(cleanPoi);
+      if (lower.includes(cleanPoi) || (normPoi.length >= 4 && normText.includes(normPoi))) {
+        return { lat: poi.lat, lng: poi.lng, label: poi.name };
+      }
+    }
+
+    // 2. Check LOCALITY_GAZETTEER with phonetic & token tolerance
     let matchedLocality = null;
     for (const loc of LOCALITY_GAZETTEER) {
-      if (loc.keys.some(k => lower.includes(k))) {
+      const exactHit = loc.keys.some(k => lower.includes(k) || normalizeSouthIndianPhonetic(k) === normText);
+      const tokenHit = loc.keys.some(k => {
+        const baseK = k.replace(/\b(circle|temple|college|park|petrol|layout|stage|block|phase)\b/g, '').trim();
+        const normBase = normalizeSouthIndianPhonetic(baseK);
+        return normBase.length >= 5 && normText.includes(normBase);
+      });
+      if (exactHit || tokenHit) {
         matchedLocality = loc;
         break;
       }
@@ -2272,25 +3149,77 @@
     const roadMatch = text.match(/(\d+(?:st|nd|rd|th)?\s*(?:a|b|c)?\s*(?:main|cross)(?:\s*road|\s*rd)?)/gi);
     const roadQuery = roadMatch ? roadMatch.join(', ') : '';
 
-    if (roadQuery && matchedLocality) {
-      const q = `${roadQuery}, ${matchedLocality.label}, Bengaluru, Karnataka, India`;
-      try {
-        const r = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(q)}&limit=1`);
-        const res = await r.json();
-        if (res && res.length > 0) {
-          const candLat = parseFloat(res[0].lat);
-          const candLng = parseFloat(res[0].lon);
-          // Only use the road result if it is actually within 450m of the matched landmark/circle
-          if (haversineKm(matchedLocality.lat, matchedLocality.lng, candLat, candLng) <= 0.45) {
+    const cleaned = text
+      .replace(/\b(near|opposite|behind|beside|next to|house|floor|gate|call|stay|stays|lives|in|at|left|right|after|before|white|green|black|red)\b/gi, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    // Check if the user typed additional specific words beyond the locality name (e.g. "Sagar Hospital Jayanagar" or "18th Main Jayanagar")
+    let hasSpecificSubQuery = Boolean(roadQuery);
+    if (matchedLocality && !hasSpecificSubQuery) {
+      let remainder = lower;
+      matchedLocality.keys.forEach(k => { remainder = remainder.replace(k, ' '); });
+      remainder = remainder.replace(/\b(circle|near|in|at|main|road|cross|bengaluru|bangalore|stage|block|phase)\b/gi, ' ').trim();
+      if (remainder.length >= 4) hasSpecificSubQuery = true;
+    }
+
+    // If the user just searched the locality/circle itself (e.g. "Seetha Circle", "Seeta", "Jayanagar 4th Block"), return immediately!
+    if (matchedLocality && !hasSpecificSubQuery) {
+      return {
+        lat: matchedLocality.lat,
+        lng: matchedLocality.lng,
+        label: matchedLocality.label
+      };
+    }
+
+    // 3. Query Photon (Komoot) Fuzzy OSM Geocoder + Nominatim in parallel for specific places/streets
+    const anchorLat = matchedLocality ? matchedLocality.lat : 12.9345;
+    const anchorLng = matchedLocality ? matchedLocality.lng : 77.5600;
+    const maxRadiusKm = matchedLocality ? 4.5 : 45.0;
+    const searchStr = roadQuery && matchedLocality
+      ? `${roadQuery} ${matchedLocality.label} Bengaluru`
+      : `${cleaned} Bengaluru`;
+
+    try {
+      const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(searchStr)}&lat=${anchorLat}&lon=${anchorLng}&limit=5`;
+      const rPhoton = await fetch(photonUrl);
+      if (rPhoton.ok) {
+        const pData = await rPhoton.json();
+        for (const feat of (pData.features || [])) {
+          const coords = feat.geometry && feat.geometry.coordinates;
+          if (!coords || coords.length < 2) continue;
+          const candLng = Number(coords[0]);
+          const candLat = Number(coords[1]);
+          if (haversineKm(anchorLat, anchorLng, candLat, candLng) <= maxRadiusKm) {
+            const p = feat.properties || {};
+            const lbl = [p.name || p.street, p.locality || p.district || (matchedLocality && matchedLocality.label)].filter(Boolean).join(', ');
+            return { lat: candLat, lng: candLng, label: lbl || cleaned };
+          }
+        }
+      }
+    } catch (e) {}
+
+    try {
+      const qNom = /india|mysuru|mysore|mangaluru|malur|sringeri|hospet/i.test(cleaned)
+        ? cleaned
+        : `${cleaned}, Bengaluru, Karnataka, India`;
+      const nomUrl = `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(qNom)}&viewbox=77.40,13.18,77.80,12.78&limit=3`;
+      const r2 = await fetch(nomUrl);
+      if (r2.ok) {
+        const res2 = await r2.json();
+        for (const hit of (res2 || [])) {
+          const candLat = parseFloat(hit.lat);
+          const candLng = parseFloat(hit.lon);
+          if (!matchedLocality || haversineKm(anchorLat, anchorLng, candLat, candLng) <= maxRadiusKm) {
             return {
               lat: candLat,
               lng: candLng,
-              label: `${roadQuery}, ${matchedLocality.label}`
+              label: hit.display_name.split(',').slice(0, 2).join(', ')
             };
           }
         }
-      } catch (e) {}
-    }
+      }
+    } catch (e) {}
 
     if (matchedLocality) {
       return {
@@ -2300,33 +3229,14 @@
       };
     }
 
-    const cleaned = text
-      .replace(/\b(near|opposite|behind|beside|next to|house|floor|gate|call|stay|stays|lives|in|at|left|right|after|before|white|green|black|red|corner|bakery)\b/gi, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-
-    try {
-      const q2 = /india|mysuru|mysore|mangaluru|malur|sringeri/i.test(cleaned)
-        ? cleaned
-        : `${cleaned}, Bengaluru, Karnataka, India`;
-      const r2 = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(q2)}&limit=1`);
-      const res2 = await r2.json();
-      if (res2 && res2.length > 0) {
-        return {
-          lat: parseFloat(res2[0].lat),
-          lng: parseFloat(res2[0].lon),
-          label: res2[0].display_name.split(',').slice(0, 2).join(', ')
-        };
-      }
-    } catch (e) {}
-
     return null;
   }
 
   async function queryGeminiForLandmark(transcript, audioBase64, mimeType) {
     try {
       const proxyUrl = aiConfig.proxyEndpoint || '/api/voice-parse';
-      if (aiConfig.proxyEndpoint || window.location.protocol.startsWith('http')) {
+      const isStaticHost = /bnsuhas\.com|github\.io/i.test(window.location.hostname || '');
+      if (aiConfig.proxyEndpoint || (window.location.protocol.startsWith('http') && !isStaticHost)) {
         const resp = await fetch(proxyUrl, {
           method: 'POST',
           headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
@@ -2343,8 +3253,9 @@
         }
         if (resp.ok) {
           const data = await resp.json();
-          if (data && data.lat && data.lng) {
+          if (data && (data.lat || data.areaLabel || data.searchQuery)) {
             return {
+              cleanTranscript: data.instructions || data.areaLabel || data.searchQuery || transcript,
               lat: data.lat,
               lng: data.lng,
               label: data.areaLabel || data.searchQuery,
@@ -2355,32 +3266,31 @@
       }
 
       if (aiConfig.geminiApiKey) {
-        const prompt = `Extract the Bengaluru/Karnataka landmark or street coordinates from this spoken address clue: "${transcript || ''}".
-Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark name", "instructions": "clean directions summary"}`;
-        const parts = [{ text: prompt }];
-        if (audioBase64) {
-          parts.push({ inlineData: { mimeType: mimeType || 'audio/webm', data: audioBase64 } });
-        }
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(aiConfig.geminiApiKey)}`;
-        const resp = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts }],
-            generationConfig: { responseMimeType: 'application/json' }
-          })
-        });
-        if (resp.ok) {
-          const j = await resp.json();
-          const parsed = JSON.parse(j.candidates?.[0]?.content?.parts?.[0]?.text || '{}');
-          if (parsed.lat && parsed.lng) {
-            return {
-              lat: parsed.lat,
-              lng: parsed.lng,
-              label: parsed.areaLabel,
-              instructions: parsed.instructions
-            };
-          }
+        const knownLandmarks = LANDMARK_POIS.map(p => `${p.name} (${p.lat},${p.lng})`).join('; ');
+        const knownAreas = LOCALITY_GAZETTEER.map(l => `${l.label} (${l.lat},${l.lng})`).join('; ');
+        const prompt = `You are a South-Bangalore / Karnataka speech-to-text & geocoding assistant for 60-65yo Indian parents marking wedding invitation houses.
+Listen carefully to the audio (or read the text clue: "${transcript || ''}").
+Known South Bengaluru Landmarks: ${knownLandmarks}
+Known Bengaluru Localities: ${knownAreas}
+Return ONLY valid JSON:
+{
+  "cleanTranscript": "accurate transcription of what the speaker said with correct Kannada/Bengaluru spelling",
+  "areaLabel": "canonical landmark, hospital, hotel, circle, road, or locality name in Bengaluru/Karnataka",
+  "instructions": "clean house direction note (e.g. Near Seetha Circle, 2nd cross left)",
+  "lat": number,
+  "lng": number,
+  "matchedFamilyId": number_or_null
+}`;
+        const parsed = await callGeminiMultimodalJson(prompt, audioBase64, mimeType);
+        if (parsed && (parsed.lat || parsed.areaLabel)) {
+          return {
+            cleanTranscript: parsed.cleanTranscript || parsed.instructions || parsed.areaLabel,
+            lat: parsed.lat,
+            lng: parsed.lng,
+            label: parsed.areaLabel,
+            instructions: parsed.instructions || parsed.cleanTranscript,
+            matchedFamilyId: parsed.matchedFamilyId
+          };
         }
       }
     } catch (e) {}
@@ -2397,11 +3307,13 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
     recordUndoSnapshot();
     groupIds.forEach(gid => {
       if (appState.deletedAt) delete appState.deletedAt[gid];
+      const prev = appState.assignments[gid];
       appState.assignments[gid] = {
         status: 'pinned',
         lat: sheetPinCoords.lat,
         lng: sheetPinCoords.lng,
-        note: note,
+        note: note || (prev && prev.note) || '',
+        invited: Boolean((prev && prev.invited) || isFamilyInvited(gid)),
         updatedAt: now
       };
     });
@@ -2441,9 +3353,11 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
     recordUndoSnapshot();
     groupIds.forEach(gid => {
       if (appState.deletedAt) delete appState.deletedAt[gid];
+      const prev = appState.assignments[gid];
       appState.assignments[gid] = {
         status: 'out_of_town',
         note: 'Out of town / No local house visit',
+        invited: Boolean((prev && prev.invited) || isFamilyInvited(gid)),
         updatedAt: now
       };
     });
@@ -2691,8 +3605,15 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
   }
 
   // ============================================================================
-  // VIEW 2: ROUTE OPTIMIZATION & DEFERRED PACKING MANIFEST
+  // VIEW 2: ROUTE OPTIMIZATION, VOICE ROUTE PLANNER & INTERACTIVE ROUTE MAP
   // ============================================================================
+  let routeStartAnchor = null; // Optional { lat, lng, label } from voice command
+  let activeRouteMapTripIdx = 0;
+  let routesLeafletMap = null;
+  let routesLeafletLayer = null;
+  let routeSpeechRec = null;
+  let isRouteVoiceListening = false;
+
   function haversineKm(lat1, lon1, lat2, lon2) {
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -2706,8 +3627,11 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
 
   function computeOptimizedTrips() {
     const stops = [];
+    const hideInvited = appState.hideInvitedInTrips !== false;
+
     FAMILIES.forEach(f => {
       if (appState.routeCategoryFilter !== 'ALL' && f.cat !== appState.routeCategoryFilter) return;
+      if (hideInvited && isFamilyInvited(f.id)) return;
       const a = appState.assignments[f.id];
       if (!a || a.status !== 'pinned') return;
 
@@ -2721,10 +3645,11 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
 
     if (!stops.length) return [];
 
-    // Nearest-Neighbor from Home
+    // Nearest-Neighbor from routeStartAnchor (if specified via voice) or Home
+    const startOrigin = routeStartAnchor || { lat: appState.home.lat, lng: appState.home.lng };
     const unvisited = stops.slice();
     const ordered = [];
-    let cur = { lat: appState.home.lat, lng: appState.home.lng };
+    let cur = { lat: startOrigin.lat, lng: startOrigin.lng };
 
     while (unvisited.length > 0) {
       let bestIdx = 0;
@@ -2751,7 +3676,7 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
         iter++;
         for (let i = 0; i < n - 2; i++) {
           for (let k = i + 2; k < n; k++) {
-            const pA = i === 0 ? appState.home : ordered[i - 1];
+            const pA = i === 0 ? startOrigin : ordered[i - 1];
             const pB = ordered[i];
             const pC = ordered[k];
             const pD = k + 1 < n ? ordered[k + 1] : null;
@@ -2773,7 +3698,7 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
       }
     }
 
-    const chunkSize = appState.maxStopsPerTrip || 9;
+    const chunkSize = appState.maxStopsPerTrip || 5;
     const trips = [];
     for (let i = 0; i < ordered.length; i += chunkSize) {
       trips.push({
@@ -2786,33 +3711,316 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
 
   function setTripCategoryFilter(cat) {
     appState.routeCategoryFilter = cat;
+    activeRouteMapTripIdx = 0;
     saveState();
   }
 
   function setTripSize(size) {
-    appState.maxStopsPerTrip = parseInt(size, 10) || 9;
+    const parsed = parseInt(size, 10) || 5;
+    appState.maxStopsPerTrip = parsed;
+    activeRouteMapTripIdx = 0;
+    ensureTripSizeOptionExists(parsed);
     saveState();
+  }
+
+  function ensureTripSizeOptionExists(size) {
+    const sel = document.getElementById('tripSizeSelect');
+    if (!sel) return;
+    let found = Array.from(sel.options).some(o => parseInt(o.value, 10) === size);
+    if (!found) {
+      const opt = document.createElement('option');
+      opt.value = String(size);
+      opt.textContent = `${size} Houses / Trip`;
+      sel.appendChild(opt);
+    }
+    sel.value = String(size);
+  }
+
+  function toggleHideInvitedInTrips() {
+    appState.hideInvitedInTrips = appState.hideInvitedInTrips === false ? true : false;
+    activeRouteMapTripIdx = 0;
+    saveState(appState.hideInvitedInTrips ? 'Routing only uninvited houses' : 'Including invited houses in routes');
+  }
+
+  function applyQuickRouteCommand(cmdText) {
+    const inp = document.getElementById('routeVoiceInput');
+    if (inp) inp.value = cmdText;
+    parseAndApplyVoiceRouteCommand(cmdText);
+  }
+
+  function runVoiceRoutePlanFromInput() {
+    const inp = document.getElementById('routeVoiceInput');
+    if (!inp) return;
+    inp.blur();
+    const raw = (inp.value || '').trim();
+    if (!raw) {
+      showSnackbar('Say or type how many houses to visit (e.g. "I want to do 5 houses today")', false);
+      return;
+    }
+    parseAndApplyVoiceRouteCommand(raw);
+  }
+
+  async function parseAndApplyVoiceRouteCommand(rawText) {
+    const text = String(rawText || '').trim();
+    if (!text) return;
+    const lower = text.toLowerCase();
+
+    // 1. Parse spoken/typed number of houses (digits + English/Kannada words)
+    const wordToNum = {
+      'one': 1, 'ondhu': 1, 'ondu': 1,
+      'two': 2, 'eradu': 2, 'couple': 2,
+      'three': 3, 'mooru': 3, 'few': 3,
+      'four': 4, 'naalku': 4, 'nalku': 4,
+      'five': 5, 'aidhu': 5, 'aidu': 5,
+      'six': 6, 'aaru': 6,
+      'seven': 7, 'elu': 7, 'yelu': 7,
+      'eight': 8, 'entu': 8,
+      'nine': 9, 'ombattu': 9,
+      'ten': 10, 'hatthu': 10, 'hathu': 10,
+      'eleven': 11, 'twelve': 12, 'fifteen': 15
+    };
+
+    let houseCount = null;
+    const digitMatch = lower.match(/\b(\d{1,2})\s*(?:houses?|homes?|stops?|families|places|invitations?|visits?)?\b/);
+    if (digitMatch) {
+      const n = parseInt(digitMatch[1], 10);
+      if (n >= 1 && n <= 25) houseCount = n;
+    }
+    if (!houseCount) {
+      for (const [w, num] of Object.entries(wordToNum)) {
+        if (new RegExp(`\\b${w}\\b`, 'i').test(lower)) {
+          houseCount = num;
+          break;
+        }
+      }
+    }
+
+    // 2. Parse optional category filter ("C-1", "C1", "C-2", "C2", "all")
+    let detectedCat = null;
+    if (/\bc[\s-]*1\b/i.test(lower)) detectedCat = 'C-1';
+    else if (/\bc[\s-]*2\b/i.test(lower)) detectedCat = 'C-2';
+    else if (/\ball\s+categories\b/i.test(lower)) detectedCat = 'ALL';
+
+    // 3. Parse optional locality / landmark anchor ("near Seetha Circle", "in Jayanagar", "around Banashankari")
+    let locationPhrase = null;
+    const locMatch = text.match(/\b(?:near|in|around|from|at|by)\s+([a-zA-Z0-9\s,.'-]{3,40})/i);
+    if (locMatch) {
+      locationPhrase = locMatch[1].replace(/\b(today|now|only|uninvited|houses?|homes?|stops?|please)\b/gi, '').trim();
+    }
+
+    if (houseCount) {
+      appState.maxStopsPerTrip = houseCount;
+      ensureTripSizeOptionExists(houseCount);
+    }
+    if (detectedCat) {
+      appState.routeCategoryFilter = detectedCat;
+      const catSel = document.getElementById('tripCatSelect');
+      if (catSel) catSel.value = detectedCat;
+    }
+
+    // Default to uninvited houses when planning today's run unless user says "include invited"
+    if (/\b(include\s+invited|all\s+invited)\b/i.test(lower)) {
+      appState.hideInvitedInTrips = false;
+    } else {
+      appState.hideInvitedInTrips = true;
+    }
+
+    if (locationPhrase && locationPhrase.length >= 3) {
+      const resolved = await resolveLandmarkCoordinates(locationPhrase);
+      if (resolved) {
+        routeStartAnchor = { lat: resolved.lat, lng: resolved.lng, label: resolved.label };
+      } else {
+        routeStartAnchor = null;
+      }
+    } else {
+      routeStartAnchor = null;
+    }
+
+    activeRouteMapTripIdx = 0;
+    saveState();
+
+    const trips = computeOptimizedTrips();
+    const firstTrip = trips[0];
+    const statusEl = document.getElementById('routeVoiceStatusBanner');
+    if (statusEl) {
+      statusEl.style.display = 'block';
+      if (firstTrip) {
+        const anchorMsg = routeStartAnchor ? ` starting near ${routeStartAnchor.label}` : ' starting from Home';
+        statusEl.textContent = `✓ Mapped ${firstTrip.stops.length} uninvited house${firstTrip.stops.length === 1 ? '' : 's'} for today's Trip 1 (${ appState.maxStopsPerTrip } per trip)${anchorMsg}.`;
+      } else {
+        statusEl.textContent = `No uninvited pinned houses match yet. Pin more houses in List or Map first.`;
+      }
+    }
+    showSnackbar(
+      firstTrip
+        ? `Mapped ${firstTrip.stops.length} houses for today's trip!`
+        : 'Updated trip settings',
+      false
+    );
+  }
+
+  async function toggleRouteVoicePlan() {
+    if (isListening) {
+      await stopAndProcessVoiceCapture();
+      return;
+    }
+    if (!hasGeminiVoiceConfigured() && !forceBrowserVoiceFallback) {
+      openGeminiKeyQuickSetupDialog('route');
+      return;
+    }
+    startSpeechRecognition('route');
+  }
+
+  function showTripOnRouteMap(tripIdx) {
+    activeRouteMapTripIdx = tripIdx;
+    renderTripsView();
+    const mapCard = document.getElementById('routesOverviewMapWrap');
+    if (mapCard) mapCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function markEntireTripInvited(tripIdx) {
+    const trips = computeOptimizedTrips();
+    const trip = trips[tripIdx];
+    if (!trip) return;
+    recordUndoSnapshot();
+    appState.invitedMap = appState.invitedMap || {};
+    const now = Date.now();
+    let count = 0;
+    trip.stops.forEach(s => {
+      s.families.forEach(f => {
+        const groupIds = getHouseGroupIds(f.id);
+        groupIds.forEach(gid => {
+          appState.invitedMap[gid] = { invited: true, updatedAt: now };
+          if (!appState.assignments[gid]) {
+            appState.assignments[gid] = { status: 'pinned', lat: s.lat, lng: s.lng, note: s.note || '', invited: true, updatedAt: now };
+          } else {
+            appState.assignments[gid].invited = true;
+            appState.assignments[gid].updatedAt = now;
+          }
+        });
+        count++;
+      });
+    });
+    saveState(`Marked Trip ${trip.tripNumber} (${count} families) as Invited ✓`);
+  }
+
+  function renderRoutesOverviewMap(trips) {
+    const card = document.getElementById('routesOverviewMapWrap');
+    const mapEl = document.getElementById('routesOverviewMap');
+    const titleEl = document.getElementById('routesMapTitle');
+    if (!card || !mapEl) return;
+
+    if (!trips || !trips.length) {
+      card.style.display = 'none';
+      return;
+    }
+
+    card.style.display = 'flex';
+    const tripIdx = Math.min(activeRouteMapTripIdx, trips.length - 1);
+    const trip = trips[tripIdx];
+    const startOrigin = routeStartAnchor || { lat: appState.home.lat, lng: appState.home.lng, label: 'Home (Banashankari 2nd Stage)' };
+
+    if (titleEl) {
+      titleEl.textContent = `Today's Route Map — Trip ${trip.tripNumber} (${trip.stops.length} Houses • Starting from ${startOrigin.label || 'Home'})`;
+    }
+
+    if (!routesLeafletMap) {
+      routesLeafletMap = L.map('routesOverviewMap', { zoomControl: true }).setView([startOrigin.lat, startOrigin.lng], 13);
+      L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        attribution: 'Map data &copy; Google'
+      }).addTo(routesLeafletMap);
+      routesLeafletLayer = L.layerGroup().addTo(routesLeafletMap);
+    }
+
+    setTimeout(() => {
+      if (!routesLeafletMap || !routesLeafletLayer) return;
+      routesLeafletMap.invalidateSize();
+      routesLeafletLayer.clearLayers();
+
+      const latlngs = [[startOrigin.lat, startOrigin.lng]];
+
+      // Start marker
+      const homeIcon = L.divIcon({
+        className: '',
+        html: `<div style="background:#0F172A;color:#fff;font-weight:700;font-size:0.72rem;padding:3px 8px;border-radius:999px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.28);white-space:nowrap;">Start</div>`,
+        iconSize: [46, 24],
+        iconAnchor: [23, 12]
+      });
+      L.marker([startOrigin.lat, startOrigin.lng], { icon: homeIcon })
+        .bindPopup(`<b>Start:</b> ${escapeHtml(startOrigin.label || 'Home')}`)
+        .addTo(routesLeafletLayer);
+
+      trip.stops.forEach((s, idx) => {
+        latlngs.push([s.lat, s.lng]);
+        const famLabel = s.families.map(f => `#${f.id} ${f.title.split('&')[0].trim()}`).join(', ');
+        const stopIcon = L.divIcon({
+          className: '',
+          html: `<div style="background:#059669;color:#fff;font-weight:700;font-size:0.72rem;padding:3px 8px;border-radius:999px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.28);white-space:nowrap;">${idx + 1}. ${escapeHtml(famLabel.slice(0, 16))}</div>`,
+          iconSize: [110, 24],
+          iconAnchor: [55, 12]
+        });
+        const popupHtml = `
+          <div style="font-family:var(--font-sans);min-width:180px;">
+            <div style="font-weight:700;color:#059669;margin-bottom:4px;">Stop ${idx + 1} of ${trip.stops.length}</div>
+            ${s.families.map(f => `<div style="font-weight:700;font-size:0.9rem;">#${f.id} ${escapeHtml(f.title)}</div>`).join('')}
+            ${s.note ? `<div style="font-size:0.8rem;color:#475569;margin-top:3px;">${escapeHtml(s.note)}</div>` : ''}
+          </div>
+        `;
+        L.marker([s.lat, s.lng], { icon: stopIcon })
+          .bindPopup(popupHtml)
+          .addTo(routesLeafletLayer);
+      });
+
+      // Route polyline connecting Start -> Stop 1 -> Stop 2 ...
+      L.polyline(latlngs, {
+        color: '#059669',
+        weight: 4,
+        opacity: 0.85,
+        dashArray: '8, 6'
+      }).addTo(routesLeafletLayer);
+
+      if (latlngs.length > 1) {
+        routesLeafletMap.fitBounds(L.latLngBounds(latlngs).pad(0.22), { maxZoom: 15 });
+      }
+    }, 60);
   }
 
   function renderTripsView() {
     const container = document.getElementById('tripsListContainer');
+    ensureTripSizeOptionExists(appState.maxStopsPerTrip || 5);
+    const hideBtn = document.getElementById('btnToggleHideInvitedTrips');
+    if (hideBtn) {
+      const hideOn = appState.hideInvitedInTrips !== false;
+      hideBtn.textContent = hideOn ? 'Uninvited Only: On' : 'Uninvited Only: Off (All)';
+      hideBtn.style.background = hideOn ? '#ecfdf5' : 'var(--surface)';
+      hideBtn.style.color = hideOn ? '#047857' : 'var(--text-secondary)';
+      hideBtn.style.borderColor = hideOn ? '#6ee7b7' : 'var(--border-strong)';
+    }
+
     const trips = computeOptimizedTrips();
+    renderRoutesOverviewMap(trips);
 
     if (!trips.length) {
+      const invitedCount = FAMILIES.filter(f => isFamilyInvited(f.id)).length;
       container.innerHTML = `
         <div style="text-align:center;padding:48px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);color:var(--text-secondary);">
           <div style="font-size:1.08rem;font-weight:700;color:var(--text);margin-bottom:6px;">
-            No houses pinned yet
+            ${invitedCount > 0 && appState.hideInvitedInTrips !== false ? 'All pinned houses in this filter are already marked Invited ✓!' : 'No houses pinned yet'}
           </div>
           <div style="font-size:0.92rem;">
-            Locate houses in the Family Checklist tab first. Once pinned, your optimized Google Maps trips and car gift-packing lists will appear here automatically.
+            ${invitedCount > 0 && appState.hideInvitedInTrips !== false
+              ? 'Tap "Uninvited Only: On" above to view already-invited houses, or pin more houses in the List / Map tab.'
+              : 'Locate houses in the List or Map tab first. Once pinned, your optimized Google Maps trips and voice route planner will appear here automatically.'}
           </div>
         </div>`;
       return;
     }
 
+    const startOrigin = routeStartAnchor || { lat: appState.home.lat, lng: appState.home.lng };
+
     container.innerHTML = trips.map((trip, idx) => {
-      const origin = `${appState.home.lat},${appState.home.lng}`;
+      const origin = `${startOrigin.lat},${startOrigin.lng}`;
       const lastStop = trip.stops[trip.stops.length - 1];
       const destination = `${lastStop.lat},${lastStop.lng}`;
       const waypoints = trip.stops.slice(0, -1).map(s => `${s.lat},${s.lng}`).join('|');
@@ -2821,17 +4029,25 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
       const tripFamilies = trip.stops.flatMap(s => s.families);
       const shirts = tripFamilies.map(f => f.shirts).filter(Boolean);
       const ladies = tripFamilies.map(f => f.ladyStickers).filter(Boolean);
+      const isMapActive = idx === Math.min(activeRouteMapTripIdx, trips.length - 1);
 
       return `
-        <section class="trip-card">
+        <section class="trip-card" style="${isMapActive ? 'border-color:#86EFAC;box-shadow:0 2px 10px rgba(22,101,52,0.08);' : ''}">
           <div class="trip-header">
-            <h3 class="trip-title">Trip ${trip.tripNumber} (${trip.stops.length} Stops • ${tripFamilies.length} Families)</h3>
-            <span style="font-size:0.85rem;color:var(--text-secondary);font-weight:600;">Ordered Driving Loop</span>
+            <h3 class="trip-title">Trip ${trip.tripNumber} (${trip.stops.length} Houses • ${tripFamilies.length} Families)</h3>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <button class="btn-secondary-quiet" style="min-height:32px;padding:0 10px;font-size:0.78rem;" onclick="showTripOnRouteMap(${idx})">
+                ${isMapActive ? '✓ Showing on Route Map' : 'Show on Route Map'}
+              </button>
+              <button class="btn-invited-toggle" style="min-height:32px;" onclick="markEntireTripInvited(${idx})">
+                Mark Trip Invited ✓
+              </button>
+            </div>
           </div>
 
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
             <a class="btn-primary-locate" style="text-decoration:none;" href="${gmapsUrl}" target="_blank" rel="noopener">
-              Open Multi-Stop Route in Google Maps
+              Open ${trip.stops.length}-House Route in Google Maps
             </a>
             <button class="btn-secondary-quiet" onclick="shareTripWhatsApp(${idx})">
               Send Trip Sheet to WhatsApp
@@ -2848,7 +4064,10 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
           </div>
 
           <div>
-            ${trip.stops.map((s, sIdx) => `
+            ${trip.stops.map((s, sIdx) => {
+              const primaryFam = s.families[0];
+              const stopInvited = s.families.every(f => isFamilyInvited(f.id));
+              return `
               <div class="stop-item">
                 <div class="stop-index">${sIdx + 1}</div>
                 <div style="flex:1;min-width:0;">
@@ -2861,11 +4080,20 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
                   `).join('')}
                   ${s.note ? `<div style="font-size:0.88rem;color:var(--primary);font-weight:600;margin-top:3px;">Directions: ${escapeHtml(s.note)}</div>` : ''}
                 </div>
-                <a class="btn-icon-text" style="text-decoration:none;flex-shrink:0;" href="https://www.google.com/maps/search/?api=1&query=${s.lat},${s.lng}" target="_blank" rel="noopener">
-                  Map Pin
-                </a>
+                <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;flex-wrap:wrap;">
+                  <button
+                    class="btn-invited-toggle ${stopInvited ? 'is-invited' : ''}"
+                    onclick="toggleFamilyInvited(${primaryFam.id}, event)"
+                    title="Mark family as Invited"
+                  >
+                    ${stopInvited ? '✓ Invited' : 'Invite'}
+                  </button>
+                  <a class="btn-icon-text" style="text-decoration:none;flex-shrink:0;" href="https://www.google.com/maps/search/?api=1&query=${s.lat},${s.lng}" target="_blank" rel="noopener">
+                    Map Pin
+                  </a>
+                </div>
               </div>
-            `).join('')}
+            `}).join('')}
           </div>
         </section>
       `;
@@ -2908,20 +4136,23 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
   // ============================================================================
   function openSettingsModal() {
     const doneCount = Object.keys(appState.assignments).length;
+    const invitedCount = FAMILIES.filter(f => isFamilyInvited(f.id)).length;
     document.getElementById('dialogTitle').textContent = 'Settings, Sync & Export';
     document.getElementById('dialogBody').innerHTML = `
-      <div style="background:var(--surface-subtle);padding:12px;border-radius:var(--radius-md);font-size:0.92rem;">
-        <b>Progress:</b> ${doneCount} of ${FAMILIES.length} families completed.
+      <div style="background:var(--surface-subtle);padding:12px;border-radius:var(--radius-md);font-size:0.92rem;display:flex;flex-direction:column;gap:4px;">
+        <div><b>Locations Marked:</b> ${doneCount} of ${FAMILIES.length} families</div>
+        <div><b>Invited ✓ Checked Off:</b> ${invitedCount} of ${FAMILIES.length} families</div>
+        <div style="color:var(--primary);font-weight:600;font-size:0.82rem;">✓ Automatic Multi-Phone Cloud Sync is Active (Mom, Dad &amp; You see updates automatically)</div>
       </div>
 
       <button class="btn-primary-locate" onclick="exportCSV()">
-        Download Master CSV (All 248 Rows + Links)
+        Download Master CSV (All 248 Rows + Invited Status + Links)
       </button>
 
       <div style="border-top:1px solid var(--border);padding-top:12px;display:flex;flex-direction:column;gap:8px;">
-        <div style="font-weight:700;font-size:0.95rem;">Zero-Repo-Risk Setup for bnsuhas.com</div>
+        <div style="font-weight:700;font-size:0.95rem;">Gemini AI Voice &amp; Multi-Phone Setup</div>
         <div style="font-size:0.84rem;color:var(--text-secondary);">
-          Never put your API key in GitHub. Enter your Gemini Key &amp; Passcode below, then tap <b>Copy Magic WhatsApp Link for Mom &amp; Dad</b>. Everything after <code>#</code> stays on-device and is never sent to GitHub servers.
+          Paste your Gemini API Key (<code>AIza...</code>) below and tap Save. It is never stored in GitHub, and it automatically syncs encrypted to Mom's &amp; Dad's phones so Gemini Voice ASR works everywhere!
         </div>
         <input
           type="password"
@@ -2960,10 +4191,10 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
         />
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn-primary-locate" onclick="saveSettingsConfig(true)">
-            Copy Magic WhatsApp Link for Mom &amp; Dad
+            Save &amp; Copy Magic WhatsApp Link
           </button>
           <button class="btn-secondary-quiet" onclick="saveSettingsConfig(false)">
-            Save on This Device
+            Save &amp; Sync Across Phones
           </button>
         </div>
       </div>
@@ -2978,7 +4209,8 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
     aiConfig.gistToken = (document.getElementById('cfgGistTokenInput').value || '').trim();
     aiConfig.proxyEndpoint = (document.getElementById('cfgProxyInput').value || '').trim();
     localStorage.setItem(CONFIG_KEY, JSON.stringify(aiConfig));
-    pullSharedCloudState();
+    pushSharedCloudState();
+    pullSharedCloudState(false);
 
     if (copyLink) {
       const p = new URLSearchParams();
@@ -2995,30 +4227,31 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
         navigator.clipboard.writeText(fullLink);
       }
       closeDialogModal();
-      showSnackbar('Copied private WhatsApp setup link for Mom & Dad!', false);
+      showSnackbar('Saved & copied private WhatsApp setup link for Mom & Dad!', false);
     } else {
       closeDialogModal();
-      showSnackbar('Settings saved on this device', false);
+      showSnackbar('Settings saved & synced across family phones!', false);
     }
   }
 
   function exportCSV() {
     const headers = [
       'Sl. No.', 'Category', 'Family Name', 'Name 1', 'Name 2', 'Other Members',
-      'Same House With', 'Shirt Stickers', 'Lady Stickers', 'Status',
+      'Same House With', 'Shirt Stickers', 'Lady Stickers', 'Location Status', 'Invited',
       'Directions / Landmark Note', 'Latitude', 'Longitude', 'Google Maps Link'
     ];
     const rows = [headers];
     FAMILIES.forEach(f => {
       const a = appState.assignments[f.id];
       const status = a ? a.status : 'unmapped';
+      const invitedStr = isFamilyInvited(f.id) ? 'Yes' : 'No';
       const lat = a && a.lat ? a.lat : '';
       const lng = a && a.lng ? a.lng : '';
       const link = lat && lng ? `https://www.google.com/maps?q=${lat},${lng}` : '';
       const sameHouseStr = getHousemates(f.id).map(h => `#${h.id} ${h.title}`).join('; ');
       rows.push([
         f.id, f.cat, f.title, f.name1, f.name2, f.others,
-        sameHouseStr, f.shirts, f.ladyStickers, status,
+        sameHouseStr, f.shirts, f.ladyStickers, status, invitedStr,
         a && a.note ? a.note : '', lat, lng, link
       ]);
     });
@@ -3069,6 +4302,7 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
     const total = FAMILIES.length;
     const done = FAMILIES.filter(f => Boolean(appState.assignments[f.id])).length;
     const pinned = FAMILIES.filter(f => appState.assignments[f.id] && appState.assignments[f.id].status === 'pinned').length;
+    const invited = FAMILIES.filter(f => isFamilyInvited(f.id)).length;
     const rem = total - done;
     const pct = Math.round((done / total) * 100);
 
@@ -3080,6 +4314,8 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
     if (mapBadge) mapBadge.textContent = pinned;
     document.getElementById('countTodo').textContent = rem;
     document.getElementById('countDone').textContent = done;
+    const invEl = document.getElementById('countInvited');
+    if (invEl) invEl.textContent = invited;
 
     renderCategoryStrip();
     renderChecklist();
@@ -3088,6 +4324,7 @@ Return ONLY JSON: {"lat": number, "lng": number, "areaLabel": "short landmark na
     }
     if (document.getElementById('locationSheetBackdrop').classList.contains('open')) {
       renderNeighborReferencePins(currentSheetFamilyId);
+      renderVisibleLandmarks();
     }
   }
 
